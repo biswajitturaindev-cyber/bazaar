@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Laravel\Sanctum\HasApiTokens;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -44,4 +45,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
+    // Optional (if sponsor system)
+    // public function sponsoredBusinesses()
+    // {
+    //     return $this->hasMany(Business::class, 'sponsor_id');
+    // }
 }

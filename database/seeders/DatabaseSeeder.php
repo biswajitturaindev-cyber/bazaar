@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\HsnSeeder;
+use Illuminate\Support\Facades\Hash;
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -19,9 +21,13 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             HsnSeeder::class
             );
-        User::factory()->create([
+
+        // Create Test User
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => Hash::make('123456'), // 🔥 IMPORTANT
+
         ]);
     }
 }

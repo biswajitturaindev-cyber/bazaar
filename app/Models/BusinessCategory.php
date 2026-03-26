@@ -19,4 +19,9 @@ class BusinessCategory extends Model
         return $this->hasMany(BusinessSubCategory::class);
     }
 
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
 }
