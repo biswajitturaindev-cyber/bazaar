@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('image')->nullable();
             $table->text('description')->nullable();
-            $table->decimal('commission', 5, 2)->default(0);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

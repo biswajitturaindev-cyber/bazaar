@@ -50,6 +50,7 @@ class BusinessSubCategoryController extends Controller
                     ->where(fn ($q) => $q->where('business_category_id', $request->business_category_id)),
             ],
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'commission' => 'nullable|numeric|min:0',
             'status' => 'required|in:0,1',
         ]);
 
@@ -74,6 +75,7 @@ class BusinessSubCategoryController extends Controller
             'business_category_id' => $data['business_category_id'],
             'name' => $data['name'],
             'status' => $data['status'],
+            'commission'=> $data['commission'] ?? 0,
             'image' => $imageName
         ]);
 
@@ -103,15 +105,9 @@ class BusinessSubCategoryController extends Controller
 
         $data = $request->validate([
             'business_category_id' => 'required|exists:business_categories,id',
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('business_sub_categories')
-                    ->where(fn ($q) => $q->where('business_category_id', $request->business_category_id))
-                    ->ignore($id),
-            ],
+            'name' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'commission' => 'nullable|numeric|min:0',
             'status' => 'required|in:0,1',
         ]);
 
@@ -141,6 +137,7 @@ class BusinessSubCategoryController extends Controller
             'business_category_id' => $data['business_category_id'],
             'name' => $data['name'],
             'status' => $data['status'],
+            'commission'=> $data['commission'] ?? 0,
             'image' => $imageName
         ]);
 

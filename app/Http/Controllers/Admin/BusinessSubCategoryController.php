@@ -47,6 +47,7 @@ class BusinessSubCategoryController extends Controller
             'business_category_id' => 'required|exists:business_categories,id',
             'name' => 'required|string|max:255|unique:business_sub_categories,name,NULL,id,business_category_id,' . $request->business_category_id,
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'commission' => 'nullable|numeric|min:0',
             'status' => 'required|in:0,1',
         ]);
 
@@ -71,6 +72,7 @@ class BusinessSubCategoryController extends Controller
             'business_category_id' => $data['business_category_id'],
             'name' => $data['name'],
             'status' => $data['status'],
+            'commission'=> $data['commission'] ?? 0,
             'image' => $imageName
         ]);
 
@@ -103,6 +105,7 @@ class BusinessSubCategoryController extends Controller
                     ->ignore($id),
             ],
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'commission' => 'nullable|numeric|min:0',
             'status' => 'required|in:0,1',
         ]);
 
@@ -132,6 +135,7 @@ class BusinessSubCategoryController extends Controller
             'business_category_id' => $data['business_category_id'],
             'name' => $data['name'],
             'status' => $data['status'],
+            'commission'=> $data['commission'] ?? 0,
             'image' => $imageName
         ]);
 

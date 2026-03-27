@@ -59,6 +59,15 @@ class AuthController extends Controller
                 'status' => 1
             ]);
 
+            // Generate Vendor ID
+            $randomNumber = ($user->id * 7919) % 100000000;
+            $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
+
+            // Save Vendor ID
+            $user->update([
+                'vendor_id' => $vendorId
+            ]);
+
             // Create Business
             $business = Business::create([
                 'user_id' => $user->id,

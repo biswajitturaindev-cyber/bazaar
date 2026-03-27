@@ -20,9 +20,8 @@ return new class extends Migration
                 ->index();
 
             $table->string('name')->index();
-
             $table->string('image')->nullable();
-
+            $table->decimal('commission', 5, 2)->default(0);
             $table->boolean('status')->default(1)->index();
 
             // Composite index (VERY IMPORTANT)

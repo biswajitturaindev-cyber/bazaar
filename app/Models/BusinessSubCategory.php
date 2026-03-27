@@ -12,6 +12,7 @@ class BusinessSubCategory extends Model
         'business_category_id',
         'name',
         'image',
+        'commission',
         'status',
     ];
 

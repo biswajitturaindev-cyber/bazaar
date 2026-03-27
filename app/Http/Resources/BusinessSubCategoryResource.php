@@ -15,6 +15,7 @@ class BusinessSubCategoryResource extends JsonResource
                 ? asset('storage/business_sub_category/' . $this->image)
                 : null,
             'status' => $this->status,
+            'commission' => $this->commission,
             'status_label' => $this->status == 1 ? 'Active' : 'Inactive',
             // Parent Category Info
             'category' => [

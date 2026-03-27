@@ -44,7 +44,6 @@ class ProductController extends Controller
             'category_name' => 'required|string|min:3|max:100',
             'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
-            'commission' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
         ]);
 
@@ -72,7 +71,6 @@ class ProductController extends Controller
             'name' => $data['category_name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
-            'commission' => $data['commission'] ?? 0,
             'image' => $imageName
         ]);
 
@@ -103,7 +101,6 @@ class ProductController extends Controller
             'category_name' => 'required|string|min:3|max:100|unique:categories,name,' . $id,
             'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
-            'commission' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
         ]);
 
@@ -143,7 +140,6 @@ class ProductController extends Controller
             'name' => $data['category_name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
-            'commission' => $data['commission'] ?? 0
         ]);
 
         // Response

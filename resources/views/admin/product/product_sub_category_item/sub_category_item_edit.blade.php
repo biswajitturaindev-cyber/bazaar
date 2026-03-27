@@ -1,11 +1,11 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Add Product Sub Category
+    Edit Product Sub Sub Category
 @endsection
 
 @section('breadcrumb')
-    Category / Edit Sub Sub Category
+    Edit Product Sub Sub Category
 @endsection
 
 @section('content')
@@ -140,7 +140,7 @@
 
                             <!-- Preview -->
                             @if ($item->image)
-                                <img src="{{ asset('storage/subcategory/' . $item->image) }}"
+                                <img src="{{ asset('storage/subcategoryitem/' . $item->image) }}"
                                     style="width:80px;height:80px;object-fit:cover;margin-top:10px;border-radius:6px;">
                             @endif
                         </div>

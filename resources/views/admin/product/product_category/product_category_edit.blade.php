@@ -49,15 +49,6 @@
                     </div>
 
                     <div>
-                        <label class="block mb-2 font-medium">Commission</label>
-                        <input type="text" name="commission" maxlength="50" id="commission" value="{{ $category->commission }}"
-                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                            placeholder="Enter Commission">
-                        <p id="commission_error" class="text-red-500 text-sm mt-1 hidden"></p>
-                        <p id="commission_success" class="text-green-600 text-sm mt-1 hidden"></p>
-                    </div>
-
-                    <div>
                         <label class="block mb-2 font-medium">Image</label>
                         <input type="file" name="image" id="image"
                             class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
@@ -76,6 +67,9 @@
                         <p id="image_error" class="text-red-500 text-sm mt-1 hidden"></p>
                         <p id="image_success" class="text-green-600 text-sm mt-1 hidden"></p>
                     </div>
+
+
+
 
 
                     <!-- Status -->

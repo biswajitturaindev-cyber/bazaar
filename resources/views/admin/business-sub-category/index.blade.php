@@ -30,6 +30,7 @@
                             <th class="px-3 py-2">Category Name</th>
                             <th class="px-3 py-2">Sub Category Name</th>
                             <th class="px-3 py-2">Sub Category Image</th>
+                            <th class="px-3 py-2">Commission</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">Action</th>
                         </tr>
@@ -61,6 +62,10 @@
                                     @else
                                         <span class="text-gray-400">No Image</span>
                                     @endif
+                                </td>
+
+                                <td class="px-3 py-2">
+                                    {{ $subCategory->commission ?: '-' }}
                                 </td>
 
                                 {{-- Status --}}

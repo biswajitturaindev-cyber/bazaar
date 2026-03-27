@@ -23,7 +23,7 @@
 
             <div class="p-5">
 
-                @if ($errors->any())
+                {{-- @if ($errors->any())
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                         <ul>
                             @foreach ($errors->all() as $error)
@@ -31,7 +31,7 @@
                             @endforeach
                         </ul>
                     </div>
-                @endif
+                @endif --}}
 
                 <form action="{{ route('admin.product.sub.category.item.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf

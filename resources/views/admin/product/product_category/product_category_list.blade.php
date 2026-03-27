@@ -30,7 +30,6 @@
                             <th class="px-3 py-2">Category Name</th>
                             <th class="px-3 py-2">Category Image</th>
                             <th class="px-3 py-2">Description</th>
-                            <th class="px-3 py-2">Commission</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">Action</th>
                         </tr>
@@ -55,9 +54,7 @@
                                 <td class="px-3 py-2">
                                     {{ $category->description ?: '-' }}
                                 </td>
-                                <td class="px-3 py-2">
-                                    {{ $category->commission ?: '-' }}
-                                </td>
+
                                 <td class="px-3 py-2">
                                     <span
                                         class="px-2 py-1 text-xs font-semibold rounded
