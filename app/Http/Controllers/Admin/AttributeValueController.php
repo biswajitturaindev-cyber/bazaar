@@ -96,7 +96,7 @@ class AttributeValueController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
-        // Prevent duplicate (ignore current record)
+        // Prevent duplicate (ignore current)
         $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
             ->where('value', $data['value'])
             ->where('id', '!=', $id)
@@ -108,16 +108,18 @@ class AttributeValueController extends Controller
             ]);
         }
 
-        // Update
-        $value->update([
-            'attribute_id' => $data['attribute_id'],
-            'value' => $data['value'],
-            'color_code' => $data['color_code'],
-            'status' => $data['status'],
-        ]);
+        // Detect attribute type
+        $attribute = Attribute::find($data['attribute_id']);
 
-        return redirect()->route('attribute-values.index')
-            ->with('success', 'Attribute value updated successfully');
+        // If NOT color → remove color_code
+        if (!str_contains(strtolower($attribute->name), 'color')) {
+            $data['color_code'] = null;
+        }
+
+        // Update
+        $value->update($data);
+
+        return redirect()->route('attribute-values.index')->with('success', 'Attribute value updated successfully');
     }
 
     /**
