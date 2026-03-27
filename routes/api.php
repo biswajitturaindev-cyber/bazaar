@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BusinessCategoryMappingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -62,4 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('sub-category-items', SubCategoryItemController::class);
     Route::get('/subcategoryitemsdropdown', [SubCategoryItemController::class, 'dropdown']);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Business Category Mappings
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('business-category-mappings', BusinessCategoryMappingController::class);
 });

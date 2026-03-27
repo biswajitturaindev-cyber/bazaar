@@ -14,4 +14,9 @@ class Category extends Model
         'status',
         'image'
     ];
+
+    public function mappings()
+    {
+        return $this->hasMany(BusinessCategoryMapping::class);
+    }
 }

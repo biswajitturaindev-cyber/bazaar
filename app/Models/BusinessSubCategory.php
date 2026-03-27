@@ -25,4 +25,10 @@ class BusinessSubCategory extends Model
     {
         return $this->hasMany(Business::class);
     }
+
+    public function mappings()
+    {
+        return $this->hasMany(BusinessCategoryMapping::class);
+    }
+
 }

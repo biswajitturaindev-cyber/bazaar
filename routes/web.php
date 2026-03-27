@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributeValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BusinessCategoryController;
+use App\Http\Controllers\Admin\BusinessCategoryMappingController;
 use App\Http\Controllers\Admin\BusinessSubCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 
@@ -86,6 +89,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/products/{id}', [ProductController::class, 'viewProductDetails'])->name('products.view');
         //end product
 
+        /*
+        |--------------------------------------------------------------------------
+        | Business Category Mapping
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('business-category-mapping', BusinessCategoryMappingController::class);
+        Route::get('get-subcategories/{id}', [BusinessCategoryMappingController::class, 'getSubCategories'])->name('get.subcategories');
 
         //Ajax
 
@@ -101,6 +111,15 @@ Route::prefix('admin')->group(function () {
         Route::post('/admin/product/delete-image', [ProductController::class, 'productDeleteImage'])->name('admin.product.delete.image');
 
         //End Ajax
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attributes & Attributes Values
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('attributes', AttributeController::class);
+        Route::resource('attribute-values', AttributeValueController::class);
 
 
     });
