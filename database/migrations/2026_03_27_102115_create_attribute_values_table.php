@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('attribute_values', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attribute_id')
-              ->constrained()
-              ->cascadeOnDelete();
-
+            $table->foreignId('attribute_id')->constrained()->cascadeOnDelete();
             $table->string('value');
+            $table->string('color_code')->nullable();
             $table->boolean('status')->default(1);
             $table->timestamps();
+            $table->unique(['attribute_id', 'value']);
         });
     }
 

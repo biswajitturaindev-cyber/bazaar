@@ -65,16 +65,16 @@
                 <div class="w-10 h-10 shrink-0 bg-slate-600 rounded-md flex justify-center items-center">
                     <i class="ri-price-tag-3-line transition-transform menu-text"></i>
                 </div>
-                <span class="capitalize menu-text">Attribute and Attribute Variation Section</span>
+                <span class="capitalize menu-text">Attributes Section</span>
             </div>
             <i class="ri-arrow-right-s-line transition-transform dropdown-arrow menu-text"></i>
         </a>
         <ul
             class="list-none w-5/6 mx-auto space-y-2 overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out dropdown-content block">
-            <li><a href="{{ route('business-category-mapping.index') }}"
-                    class="text-slate-400 text-sm hover:text-white">- Attribute Variation</a></li>
-            <li><a href="{{ route('admin.product.category.list') }}" class="text-slate-400 text-sm hover:text-white">-
-                    Attribute Variation List</a></li>
+            <li><a href="{{ route('attributes.index') }}"
+                    class="text-slate-400 text-sm hover:text-white">- Attributes List</a></li>
+            <li><a href="{{ route('attribute-values.index') }}" class="text-slate-400 text-sm hover:text-white">-
+                    Attribute Values List</a></li>
         </ul>
     </div>
 

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
+            $table->enum('type', ['text', 'color'])->default('text');
             $table->string('name');
             $table->boolean('status')->default(1);
             $table->timestamps();

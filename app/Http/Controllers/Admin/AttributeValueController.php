@@ -38,10 +38,10 @@ class AttributeValueController extends Controller
         $data = $request->validate([
             'attribute_id' => 'required|exists:attributes,id',
             'value' => 'required|string|max:255',
+            'color_code' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
-        // Prevent duplicate value per attribute
         $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
             ->where('value', $data['value'])
             ->exists();
@@ -52,7 +52,12 @@ class AttributeValueController extends Controller
             ]);
         }
 
-        AttributeValue::create($data);
+        AttributeValue::create([
+            'attribute_id' => $data['attribute_id'],
+            'value' => $data['value'],
+            'color_code' => $data['color_code'],
+            'status' => $data['status'],
+        ]);
 
         return redirect()->route('attribute-values.index')
             ->with('success', 'Attribute value created successfully');
@@ -80,17 +85,18 @@ class AttributeValueController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $value = AttributeValue::findOrFail($id);
 
         $data = $request->validate([
             'attribute_id' => 'required|exists:attributes,id',
             'value' => 'required|string|max:255',
+            'color_code' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
-        // Prevent duplicate except current
+        // Prevent duplicate (ignore current record)
         $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
             ->where('value', $data['value'])
             ->where('id', '!=', $id)
@@ -102,7 +108,13 @@ class AttributeValueController extends Controller
             ]);
         }
 
-        $value->update($data);
+        // Update
+        $value->update([
+            'attribute_id' => $data['attribute_id'],
+            'value' => $data['value'],
+            'color_code' => $data['color_code'],
+            'status' => $data['status'],
+        ]);
 
         return redirect()->route('attribute-values.index')
             ->with('success', 'Attribute value updated successfully');
