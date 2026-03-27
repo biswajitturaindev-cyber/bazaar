@@ -18,9 +18,16 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'vendor_id',
         'name',
         'email',
         'password',
+        'mobile',
+        'dob',
+        'gender',
+        'wallet1',
+        'wallet2',
+        'wallet3'
     ];
 
     /**
@@ -46,9 +53,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function businesses()
+    public function business()
     {
-        return $this->hasMany(Business::class);
+        return $this->hasOne(Business::class);
     }
 
     // Optional (if sponsor system)
