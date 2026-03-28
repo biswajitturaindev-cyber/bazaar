@@ -77,6 +77,7 @@ class ProductController extends Controller
 
                 // attributes array
                 'attributes' => 'nullable|array',
+
                 'attributes.*.attribute_id' => 'required|exists:attributes,id',
                 'attributes.*.attribute_value_id' => 'required|exists:attribute_values,id',
 
@@ -89,13 +90,19 @@ class ProductController extends Controller
             $product = Product::create($data);
 
             // 3. SAVE ATTRIBUTES
-            if ($request->has('attributes')) {
-                foreach ($request->attributes as $attr) {
-                    ProductAttributeValue::create([
-                        'product_id' => $product->id,
-                        'attribute_id' => $attr['attribute_id'],
-                        'attribute_value_id' => $attr['attribute_value_id'],
-                    ]);
+            if ($request->has('attributes') && $request->has('attribute_value_id')) {
+
+                foreach ($request->attributes as $index => $attributeId) {
+
+                    $valueId = $request->attribute_value_id[$index] ?? null;
+
+                    if ($valueId) {
+                        ProductAttributeValue::create([
+                            'product_id' => $product->id,
+                            'attribute_id' => $attributeId,
+                            'attribute_value_id' => $valueId,
+                        ]);
+                    }
                 }
             }
 
