@@ -129,5 +129,8 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('hsns', HsnController::class);
 
+
+
+
     });
 });

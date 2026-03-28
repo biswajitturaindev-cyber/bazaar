@@ -57,6 +57,13 @@ class Product extends Model
         return $this->belongsTo(Hsn::class);
     }
 
+    // Attributes Relation
+    public function attributes()
+    {
+        return $this->hasMany(ProductAttributeValue::class);
+    }
+
+
     // Product Images
     public function images()
     {

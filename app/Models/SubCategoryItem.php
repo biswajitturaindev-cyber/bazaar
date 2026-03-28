@@ -17,15 +17,20 @@ class SubCategoryItem extends Model
         'image'
     ];
 
-    // ✅ Relationship: Category
+    // Relationship: Category
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // ✅ Relationship: Sub Category
+    // Relationship: Sub Category
     public function subCategory()
     {
         return $this->belongsTo(SubCategory::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'sub_sub_category_id');
     }
 }

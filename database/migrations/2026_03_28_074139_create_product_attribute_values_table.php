@@ -19,7 +19,10 @@ return new class extends Migration
             $table->foreignId('attribute_value_id')->index()->constrained()->cascadeOnDelete();
 
             // Prevent duplicate combinations
-            $table->unique(['product_id', 'attribute_id', 'attribute_value_id']);
+            $table->unique(
+                ['product_id', 'attribute_id', 'attribute_value_id'],
+                'prod_attr_val_unique'
+            );
             $table->timestamps();
         });
     }
