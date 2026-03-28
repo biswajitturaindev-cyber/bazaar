@@ -7,6 +7,9 @@ use App\Models\AttributeValue;
 use App\Models\Attribute;
 use Illuminate\Http\Request;
 use App\Http\Resources\AttributeValueResource;
+use Exception;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AttributeValueController extends Controller
 {
@@ -15,12 +18,23 @@ class AttributeValueController extends Controller
      */
     public function index()
     {
-        $data = AttributeValue::with('attribute')->latest()->get();
+        try {
+            $data = AttributeValue::with('attribute')->latest()->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => AttributeValueResource::collection($data)
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Attribute values fetched successfully',
+                'data' => AttributeValueResource::collection($data)
+            ], 200);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production
+            ], 500);
+        }
     }
 
     /**
@@ -28,38 +42,64 @@ class AttributeValueController extends Controller
      */
     public function store(Request $request)
     {
-       $data = $request->validate([
-            'attribute_id' => 'required|exists:attributes,id',
-            'value' => 'required|string|max:255',
-            'color_code' => 'nullable|string',
-            'status' => 'required|in:0,1',
-        ]);
+        try {
+            $data = $request->validate([
+                'attribute_id' => 'required|exists:attributes,id',
+                'value' => 'required|string|max:255',
+                'color_code' => 'nullable|string',
+                'status' => 'required|in:0,1',
+            ]);
 
-        // duplicate check
-        $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
-            ->where('value', $data['value'])
-            ->exists();
+            // duplicate check
+            $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
+                ->where('value', $data['value'])
+                ->exists();
 
-        if ($exists) {
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Value already exists'
+                ], 422);
+            }
+
+            // remove color if not color attribute
+            $attribute = Attribute::findOrFail($data['attribute_id']);
+
+            if (!str_contains(strtolower($attribute->name), 'color')) {
+                $data['color_code'] = null;
+            }
+
+            $value = AttributeValue::create($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Created',
+                'data' => new AttributeValueResource($value)
+            ], 201);
+
+        } catch (ValidationException $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Value already exists'
+                'message' => 'Validation Error',
+                'errors' => $e->errors()
             ], 422);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Attribute Not Found'
+            ], 404);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production
+            ], 500);
         }
-
-        // remove color if not color attribute
-        $attribute = Attribute::find($data['attribute_id']);
-        if (!str_contains(strtolower($attribute->name), 'color')) {
-            $data['color_code'] = null;
-        }
-
-        $value = AttributeValue::create($data);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Created',
-            'data' => new AttributeValueResource($value)
-        ]);
     }
 
     /**
@@ -67,8 +107,30 @@ class AttributeValueController extends Controller
      */
     public function show(string $id)
     {
-        $value = AttributeValue::with('attribute')->findOrFail($id);
-        return new AttributeValueResource($value);
+        try {
+            $value = AttributeValue::with('attribute')->findOrFail($id);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Attribute value fetched successfully',
+                'data' => new AttributeValueResource($value)
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Attribute Value Not Found'
+            ], 404);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production
+            ], 500);
+        }
     }
 
     /**
@@ -76,39 +138,71 @@ class AttributeValueController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $value = AttributeValue::findOrFail($id);
+        try {
+            $value = AttributeValue::findOrFail($id);
 
-        $data = $request->validate([
-            'attribute_id' => 'required|exists:attributes,id',
-            'value' => 'required|string|max:255',
-            'color_code' => 'nullable|string',
-            'status' => 'required|in:0,1',
-        ]);
+            $data = $request->validate([
+                'attribute_id' => 'required|exists:attributes,id',
+                'value' => 'required|string|max:255',
+                'color_code' => 'nullable|string',
+                'status' => 'required|in:0,1',
+            ]);
 
-        $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
-            ->where('value', $data['value'])
-            ->where('id', '!=', $id)
-            ->exists();
+            // normalize value (avoid case duplicates)
+            $data['value'] = strtolower(trim($data['value']));
 
-        if ($exists) {
+            // duplicate check (excluding current record)
+            $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
+                ->where('value', $data['value'])
+                ->where('id', '!=', $id)
+                ->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Value already exists'
+                ], 422);
+            }
+
+            // ensure attribute exists
+            $attribute = Attribute::findOrFail($data['attribute_id']);
+
+            // remove color_code if not a color attribute
+            if (!str_contains(strtolower($attribute->name), 'color')) {
+                $data['color_code'] = null;
+            }
+
+            $value->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Updated',
+                'data' => new AttributeValueResource($value)
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Value already exists'
+                'message' => 'Attribute Value or Attribute Not Found'
+            ], 404);
+
+        } catch (ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Error',
+                'errors' => $e->errors()
             ], 422);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production
+            ], 500);
         }
-
-        $attribute = Attribute::find($data['attribute_id']);
-        if (!str_contains(strtolower($attribute->name), 'color')) {
-            $data['color_code'] = null;
-        }
-
-        $value->update($data);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Updated',
-            'data' => new AttributeValueResource($value)
-        ]);
     }
 
     /**
@@ -116,12 +210,29 @@ class AttributeValueController extends Controller
      */
     public function destroy(string $id)
     {
-        $value = AttributeValue::findOrFail($id);
-        $value->delete();
+        try {
+            $value = AttributeValue::findOrFail($id);
+            $value->delete();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Deleted'
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Attribute Value Deleted Successfully'
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Attribute Value Not Found'
+            ], 404);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production
+            ], 500);
+        }
     }
 }

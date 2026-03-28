@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hsn', function (Blueprint $table) {
+        Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->string('hsnCode', 20);
-            $table->string('description')->nullable();
-            $table->decimal('cGst', 5, 2)->default(0);
-            $table->decimal('sGst', 5, 2)->default(0);
-            $table->decimal('iGst', 5, 2)->default(0);
-            $table->boolean('isActive')->default(1);
+            $table->foreignId('product_id')->index()->constrained()->cascadeOnDelete();
+            $table->string('image_path');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hsn');
+        Schema::dropIfExists('product_images');
     }
 };

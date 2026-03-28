@@ -3,22 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hsn extends Model
 {
-    protected $table = 'hsn';
-
+    use SoftDeletes;
     protected $fillable = [
-        'hsnCode',
+        'hsn_code',
         'description',
-        'cGst',
-        'sGst',
-        'iGst',
-        'isActive'
+        'cgst',
+        'sgst',
+        'igst',
+        'status',
     ];
 
-    public function getHsnDisplayAttribute()
-    {
-        return $this->hsnCode . ' - ' . $this->description;
-    }
+    protected $casts = [
+        'status' => 'boolean',
+        'cgst' => 'decimal:2',
+        'sgst' => 'decimal:2',
+        'igst' => 'decimal:2',
+    ];
 }

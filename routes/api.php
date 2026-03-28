@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BusinessCategoryController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
 
@@ -79,4 +80,13 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::apiResource('attributes', AttributeController::class);
     Route::apiResource('attribute-values', AttributeValueController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | HSN MASTER
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('hsns', HsnController::class);
+
+
 });

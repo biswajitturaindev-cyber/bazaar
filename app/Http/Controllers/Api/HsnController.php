@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attribute;
+use App\Models\Hsn;
 use Illuminate\Http\Request;
-use App\Http\Resources\AttributeResource;
-use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use Exception;
+use App\Http\Resources\HsnResource;
 
-class AttributeController extends Controller
+class HsnController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,22 +17,22 @@ class AttributeController extends Controller
     public function index()
     {
         try {
-            $data = Attribute::with('values')->latest()->get();
+            $data = Hsn::latest()->get();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Attribute list fetched successfully',
-                'data' => AttributeResource::collection($data)
+                'message' => 'HSN list fetched successfully',
+                'data' => HsnResource::collection($data)
             ], 200);
 
         } catch (Exception $e) {
-
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error' => $e->getMessage()
             ], 500);
         }
+
     }
 
     /**
@@ -43,16 +42,20 @@ class AttributeController extends Controller
     {
         try {
             $data = $request->validate([
-                'name' => 'required|unique:attributes,name',
-                'status' => 'required|in:0,1',
+                'hsn_code' => 'required|string|max:20|unique:hsns,hsn_code,NULL,id,deleted_at,NULL',
+                'description' => 'nullable|string',
+                'cgst' => 'required|numeric|min:0',
+                'sgst' => 'required|numeric|min:0',
+                'igst' => 'required|numeric|min:0',
+                'status' => 'required|boolean',
             ]);
 
-            $attribute = Attribute::create($data);
+            $hsn = Hsn::create($data);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Attribute created',
-                'data' => new AttributeResource($attribute)
+                'message' => 'HSN created successfully',
+                'data' => new HsnResource($hsn)
             ], 201);
 
         } catch (ValidationException $e) {
@@ -68,7 +71,7 @@ class AttributeController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -76,30 +79,20 @@ class AttributeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Hsn $hsn)
     {
         try {
-            $attribute = Attribute::with('values')->findOrFail($id);
-
             return response()->json([
                 'status' => true,
-                'message' => 'Attribute fetched successfully',
-                'data' => new AttributeResource($attribute)
+                'message' => 'HSN fetched successfully',
+                'data' => new HsnResource($hsn)
             ], 200);
 
-        } catch (ModelNotFoundException $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
-            ], 404);
-
         } catch (Exception $e) {
-
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -107,30 +100,25 @@ class AttributeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Hsn $hsn)
     {
         try {
-            $attribute = Attribute::findOrFail($id);
-
             $data = $request->validate([
-                'name' => 'required|unique:attributes,name,' . $id,
-                'status' => 'required|in:0,1',
+                'hsn_code' => 'required|string|max:20|unique:hsns,hsn_code,' . $hsn->id . ',id,deleted_at,NULL',
+                'description' => 'nullable|string',
+                'cgst' => 'required|numeric|min:0',
+                'sgst' => 'required|numeric|min:0',
+                'igst' => 'required|numeric|min:0',
+                'status' => 'required|boolean',
             ]);
 
-            $attribute->update($data);
+            $hsn->update($data);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Updated',
-                'data' => new AttributeResource($attribute)
+                'message' => 'HSN updated successfully',
+                'data' => new HsnResource($hsn)
             ], 200);
-
-        } catch (ModelNotFoundException $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
-            ], 404);
 
         } catch (ValidationException $e) {
 
@@ -145,7 +133,7 @@ class AttributeController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -153,30 +141,22 @@ class AttributeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Hsn $hsn)
     {
         try {
-            $attribute = Attribute::findOrFail($id);
-            $attribute->delete();
+            $hsn->delete();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Attribute Deleted Successfully'
+                'message' => 'HSN deleted successfully'
             ], 200);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
-            ], 404);
 
         } catch (Exception $e) {
 
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // optional (remove in production)
+                'error' => $e->getMessage()
             ], 500);
         }
     }
