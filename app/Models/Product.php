@@ -70,12 +70,6 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
-    // Product Attribute Values
-    public function attributeValues()
-    {
-        return $this->hasMany(ProductAttributeValue::class);
-    }
-
     // Optional Accessor (Final Price)
     public function getFinalPriceAttribute()
     {

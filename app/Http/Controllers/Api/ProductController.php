@@ -10,6 +10,7 @@ use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -30,8 +31,8 @@ class ProductController extends Controller
                 'subSubCategory',
                 'hsn',
                 'images',
-                'attributeValues.attribute',
-                'attributeValues.value'
+                'attributes.attribute',
+                'attributes.value'
             ])->latest()->get();
 
             return response()->json([
@@ -53,11 +54,11 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+
         DB::beginTransaction();
 
         try {
-
-            // 1. VALIDATION
+            // VALIDATION
             $data = $request->validate([
                 'category_id' => 'required|exists:categories,id',
                 'sub_category_id' => 'nullable|exists:sub_categories,id',
@@ -75,61 +76,72 @@ class ProductController extends Controller
 
                 'status' => 'required|boolean',
 
-                // attributes array
+                // attributes
                 'attributes' => 'nullable|array',
-
                 'attributes.*.attribute_id' => 'required|exists:attributes,id',
                 'attributes.*.attribute_value_id' => 'required|exists:attribute_values,id',
 
                 // images
                 'images' => 'nullable|array',
-                'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000000',
+                'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000',
             ]);
 
-            // 2. CREATE PRODUCT
+            // CREATE PRODUCT
             $product = Product::create($data);
 
-            // 3. SAVE ATTRIBUTES
-            if ($request->has('attributes') && $request->has('attribute_value_id')) {
-
-                foreach ($request->attributes as $index => $attributeId) {
-
-                    $valueId = $request->attribute_value_id[$index] ?? null;
-
-                    if ($valueId) {
-                        ProductAttributeValue::create([
-                            'product_id' => $product->id,
-                            'attribute_id' => $attributeId,
-                            'attribute_value_id' => $valueId,
-                        ]);
-                    }
+            // SAVE ATTRIBUTES
+            if (!empty($request['attributes'])) {
+                foreach ($request['attributes'] as $attr) {
+                    ProductAttributeValue::create([
+                        'product_id' => $product->id,
+                        'attribute_id' => $attr['attribute_id'],
+                        'attribute_value_id' => $attr['attribute_value_id'],
+                    ]);
                 }
             }
 
-            // 4. SAVE IMAGES (RESIZE + OPTIMIZE)
+            // MULTIPLE IMAGE UPLOAD
             if ($request->hasFile('images')) {
 
                 $manager = new ImageManager(new Driver());
 
                 foreach ($request->file('images') as $file) {
 
-                    // unique image name
-                    $imageName = time() . '_' . uniqid() . '.' . $file->extension();
+                    $filename = time() . '_' . uniqid();
 
-                    // resize (crop to square 300x300)
-                    $image = $manager->read($file->getRealPath())
-                        ->cover(300, 300);
+                    // LARGE (600x600)
+                    $large = $manager->read($file)->cover(600, 600);
+                    $largeWebp = compressToTargetSize($large, 30);
 
-                    // save to storage
                     Storage::disk('public')->put(
-                        'products/' . $imageName,
-                        (string) $image->encodeByExtension($file->extension())
+                        "products/large/{$filename}.webp",
+                        $largeWebp
                     );
 
-                    // save in DB
+                    // MEDIUM (300x300)
+                    $medium = $manager->read($file)->cover(150, 150);
+                    $mediumWebp = compressToTargetSize($medium, 25);
+
+                    Storage::disk('public')->put(
+                        "products/medium/{$filename}.webp",
+                        $mediumWebp
+                    );
+
+                    // SMALL 40x40
+                    $small = $manager->read($file)->cover(40, 40);
+                    $smallWebp = compressToTargetSize($small, 15);
+
+                    Storage::disk('public')->put(
+                        "products/small/{$filename}.webp",
+                        $smallWebp
+                    );
+
+                    // SAVE DB
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'image_path' => 'products/' . $imageName,
+                        'image_large' => "products/large/{$filename}.webp",
+                        'image_medium' => "products/medium/{$filename}.webp",
+                        'image_small' => "products/small/{$filename}.webp",
                     ]);
                 }
             }
@@ -139,17 +151,8 @@ class ProductController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Product created successfully',
-                'data' => new ProductResource($product->load('attributes', 'images'))
+                'data' => new ProductResource($product->load('images','attributes.attribute','attributes.value'))
             ], 201);
-
-        } catch (ValidationException $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'status' => false,
-                'errors' => $e->errors()
-            ], 422);
 
         } catch (\Exception $e) {
 
@@ -157,8 +160,7 @@ class ProductController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Error',
-                'error' => $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -166,25 +168,34 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($id)
     {
         try {
-            $product->load([
+
+            $product = Product::with([
                 'category',
                 'subCategory',
                 'subSubCategory',
                 'hsn',
                 'images',
-                'attributeValues.attribute',
-                'attributeValues.value'
-            ]);
+                'attributes.attribute',
+                'attributes.value'
+            ])->findOrFail($id);
 
             return response()->json([
                 'status' => true,
                 'data' => new ProductResource($product)
-            ]);
+            ], 200);
 
-        } catch (Exception $e) {
+        } catch (ModelNotFoundException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
                 'message' => 'Error',
@@ -198,16 +209,133 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        DB::beginTransaction();
+
         try {
-            $product->update($request->all());
+            // VALIDATION
+            $data = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'sub_category_id' => 'nullable|exists:sub_categories,id',
+                'sub_sub_category_id' => 'nullable|exists:sub_category_items,id',
+
+                'name' => 'required|string',
+                'description' => 'nullable|string',
+
+                'hsn_id' => 'nullable|exists:hsns,id',
+                'gst_percent' => 'required|numeric',
+
+                'mrp' => 'required|numeric',
+                'selling_price' => 'nullable|numeric',
+                'discount' => 'nullable|numeric',
+
+                'status' => 'required|boolean',
+
+                // attributes
+                'attributes' => 'nullable|array',
+                'attributes.*.attribute_id' => 'required|exists:attributes,id',
+                'attributes.*.attribute_value_id' => 'required|exists:attribute_values,id',
+
+                // images (new uploads)
+                'images' => 'nullable|array',
+                'images.*' => 'file|image|mimes:jpg,jpeg,png,webp|max:10000',
+            ]);
+
+            // ===========================
+            // UPDATE PRODUCT
+            // ===========================
+            $product->update($data);
+
+            // ===========================
+            // UPDATE ATTRIBUTES
+            // (Delete old → Insert new)
+            // ===========================
+            if ($request->has('attributes')) {
+
+                // delete old
+                $product->attributes()->delete();
+
+                foreach ($request->attributes as $attr) {
+
+                    if (
+                        empty($attr['attribute_id']) ||
+                        empty($attr['attribute_value_id'])
+                    ) continue;
+
+                    ProductAttributeValue::create([
+                        'product_id' => $product->id,
+                        'attribute_id' => $attr['attribute_id'],
+                        'attribute_value_id' => $attr['attribute_value_id'],
+                    ]);
+                }
+            }
+
+            // ===========================
+            // ADD NEW IMAGES (optional)
+            // ===========================
+            if ($request->hasFile('images')) {
+
+                $manager = new ImageManager(new Driver());
+
+                foreach ($request->file('images') as $file) {
+
+                    if (!$file || !$file->isValid()) continue;
+
+                    $filename = time() . '_' . uniqid();
+
+                    // LARGE
+                    $large = $manager->read($file)->cover(600, 600);
+                    $largeWebp = compressToTargetSize($large, 30);
+
+                    Storage::disk('public')->put(
+                        "products/large/{$filename}.webp",
+                        $largeWebp
+                    );
+
+                    // MEDIUM
+                    $medium = $manager->read($file)->cover(150, 150);
+                    $mediumWebp = compressToTargetSize($medium, 25);
+
+                    Storage::disk('public')->put(
+                        "products/medium/{$filename}.webp",
+                        $mediumWebp
+                    );
+
+                    // SMALL
+                    $small = $manager->read($file)->cover(40, 40);
+                    $smallWebp = compressToTargetSize($small, 15);
+
+                    Storage::disk('public')->put(
+                        "products/small/{$filename}.webp",
+                        $smallWebp
+                    );
+
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'image_large' => "products/large/{$filename}.webp",
+                        'image_medium' => "products/medium/{$filename}.webp",
+                        'image_small' => "products/small/{$filename}.webp",
+                    ]);
+                }
+            }
+
+            DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Updated',
-                'data' => new ProductResource($product)
+                'message' => 'Product updated successfully',
+                'data' => new ProductResource(
+                    $product->load([
+                        'images',
+                        'attributes.attribute',
+                        'attributes.value'
+                    ])
+                )
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
             return response()->json([
                 'status' => false,
                 'message' => 'Error',

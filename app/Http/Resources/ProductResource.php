@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -38,20 +33,34 @@ class ProductResource extends JsonResource
             // Status
             'status' => $this->status,
 
-            // Images
-            'images' => $this->images->map(function ($img) {
-                return $img->image_path
-                    ? asset('storage/' . $img->image_path)
-                    : null;
-            }),
+            // IMAGES
+            'images' => $this->whenLoaded('images', function () {
+                return $this->images->map(function ($img) {
+                    return [
+                        'large' => $img->image_large
+                            ? asset('storage/' . $img->image_large)
+                            : null,
 
-            // Attributes
-            'attributes' => $this->attributeValues->map(function ($attr) {
-                return [
-                    'attribute' => $attr->attribute->name ?? null,
-                    'value' => $attr->value->value ?? null,
-                ];
-            }),
+                        'medium' => $img->image_medium
+                            ? asset('storage/' . $img->image_medium)
+                            : null,
+
+                        'small' => $img->image_small
+                            ? asset('storage/' . $img->image_small)
+                            : null,
+                    ];
+                });
+            }, []),
+
+            // ATTRIBUTES
+            'attributes' => $this->whenLoaded('attributes', function () {
+                return $this->attributes->map(function ($attr) {
+                    return [
+                        'attribute' => $attr->attribute->name ?? null,
+                        'value' => $attr->value->value ?? null,
+                    ];
+                });
+            }, []),
 
             'created_at' => $this->created_at,
         ];

@@ -8,7 +8,9 @@ class ProductImage extends Model
 {
     protected $fillable = [
         'product_id',
-        'image_path',
+        'image_large',
+        'image_medium',
+        'image_small'
     ];
 
     // 🔗 Relationship
