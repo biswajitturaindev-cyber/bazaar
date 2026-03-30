@@ -182,4 +182,29 @@ class SubCategoryItemController extends Controller
             'message' => 'Item deleted successfully'
         ]);
     }
+
+    /**
+     * GET /api/sub-categorie-items-dropdown
+     */
+    public function dropdown($category_id = null, $sub_category_id = null)
+    {
+        $query = SubCategoryItem::where('status', 1);
+
+        if (!is_null($category_id)) {
+            $query->where('category_id', $category_id);
+        }
+
+        if (!is_null($sub_category_id)) {
+            $query->where('sub_category_id', $sub_category_id);
+        }
+
+        $items = $query->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $items
+        ]);
+    }
 }

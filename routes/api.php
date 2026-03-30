@@ -57,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('sub-categories', SubCategoryController::class);
-    Route::get('/subcategoriesdropdown', [SubCategoryController::class, 'dropdown']);
+    Route::get('/subcategoriesdropdown/{category_id?}', [SubCategoryController::class, 'dropdown']);
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('sub-category-items', SubCategoryItemController::class);
-    Route::get('/subcategoryitemsdropdown', [SubCategoryItemController::class, 'dropdown']);
+    Route::get('/subcategoryitemsdropdown/{category_id?}/{sub_category_id?}', [SubCategoryItemController::class, 'dropdown']);
 
     /*
     |--------------------------------------------------------------------------

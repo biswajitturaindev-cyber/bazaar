@@ -111,10 +111,16 @@ class SubCategoryController extends Controller
     /**
      * GET /api/sub-categories-dropdown
      */
-    public function dropdown()
+    public function dropdown($category_id = null)
     {
-        $subcategories = SubCategory::where('status', 1)
-            ->select('id', 'name')
+        $query = SubCategory::where('status', 1);
+
+        // Apply filter only if category_id is passed
+        if (!is_null($category_id)) {
+            $query->where('category_id', $category_id);
+        }
+
+        $subcategories = $query->select('id', 'name')
             ->orderBy('name')
             ->get();
 
