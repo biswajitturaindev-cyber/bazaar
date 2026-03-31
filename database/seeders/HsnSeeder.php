@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class HsnSeeder extends Seeder
 {
@@ -12,7 +14,18 @@ class HsnSeeder extends Seeder
      */
     public function run(): void
     {
-        $sql = File::get(database_path('seeders/hsn.sql'));
-        DB::unprepared($sql);
+        try {
+            $path = database_path('seeders/hsns.sql');
+
+            if (!File::exists($path)) {
+                throw new \Exception('SQL file not found');
+            }
+
+            $sql = File::get($path);
+            DB::unprepared($sql);
+
+        } catch (\Exception $e) {
+            dd('Seeder Error: ' . $e->getMessage());
+        }
     }
 }

@@ -170,4 +170,5 @@ class HsnController extends Controller
             // ->with('error', $e->getMessage());
         }
     }
+
 }

@@ -19,14 +19,14 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call(
             AdminSeeder::class,
-            HsnSeeder::class
+            HsnSeeder::class,
             );
 
         // Create Test User
         User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => Hash::make('123456'), // 🔥 IMPORTANT
+            'password' => Hash::make('123456'), // IMPORTANT
 
         ]);
     }

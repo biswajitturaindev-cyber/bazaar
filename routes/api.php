@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Users + Business+  Master
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('users', UserController::class);
+    Route::get('/users/gst/check', [UserController::class, 'checkGst']);
 
     /*
     |--------------------------------------------------------------------------
@@ -88,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('hsns', HsnController::class);
+    Route::get('/hsndropdown', [HsnController::class, 'dropdown']);
 
     /*
     |--------------------------------------------------------------------------

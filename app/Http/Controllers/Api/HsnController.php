@@ -160,4 +160,40 @@ class HsnController extends Controller
             ], 500);
         }
     }
+    /**
+     * HSN Dropdown
+     */
+    public function dropdown(Request $request)
+    {
+        try {
+            $query = Hsn::where('status', 1);
+
+            // Search by hsn_code OR description
+            if ($request->search) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('hsn_code', 'like', '%' . $request->search . '%')
+                    ->orWhere('description', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            $hsns = $query->select('id', 'hsn_code', 'description')
+                ->orderBy('hsn_code', 'asc')
+                ->limit(50) // important for performance
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'HSN list fetched successfully',
+                'data' => $hsns
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

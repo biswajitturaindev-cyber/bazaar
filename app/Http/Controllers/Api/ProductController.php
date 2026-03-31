@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductImage;
 use App\Http\Resources\ProductResource;
+use App\Models\Business;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -58,17 +59,22 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            // VALIDATION
-            $data = $request->validate([
+            // STEP 1: Check GST existence FIRST
+            $hasGst = Business::where('user_id', $request->user_id)
+                ->whereNotNull('gst_number')
+                ->where('gst_number', '!=', '')
+                ->exists();
+
+            // STEP 2: Dynamic validation rules
+            $rules = [
+                'user_id' => 'required|exists:users,id',
+
                 'category_id' => 'required|exists:categories,id',
                 'sub_category_id' => 'nullable|exists:sub_categories,id',
                 'sub_sub_category_id' => 'nullable|exists:sub_category_items,id',
 
                 'name' => 'required|string',
                 'description' => 'nullable|string',
-
-                'hsn_id' => 'nullable|exists:hsns,id',
-                'gst_percent' => 'required|numeric',
 
                 'mrp' => 'required|numeric',
                 'selling_price' => 'nullable|numeric',
@@ -84,7 +90,19 @@ class ProductController extends Controller
                 // images
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000',
-            ]);
+            ];
+
+            // CONDITIONAL VALIDATION
+            if ($hasGst) {
+                $rules['hsn_id'] = 'required|exists:hsns,id';
+                $rules['gst_percent'] = 'required';
+            } else {
+                $rules['hsn_id'] = 'nullable';
+                $rules['gst_percent'] = 'nullable';
+            }
+
+            // Validate
+            $data = $request->validate($rules);
 
             // CREATE PRODUCT
             $product = Product::create($data);
@@ -212,38 +230,51 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            // VALIDATION
-            $data = $request->validate([
-                'category_id' => 'required|exists:categories,id',
+            $hasGst = Business::where('user_id', $request->user_id)
+                ->whereNotNull('gst_number')
+                ->where('gst_number', '!=', '')
+                ->exists();
+
+            // STEP 2: Dynamic validation
+            $rules = [
+                'category_id' => 'sometimes|exists:categories,id',
                 'sub_category_id' => 'nullable|exists:sub_categories,id',
                 'sub_sub_category_id' => 'nullable|exists:sub_category_items,id',
 
-                'name' => 'required|string',
+                'name' => 'sometimes|string',
                 'description' => 'nullable|string',
 
-                'hsn_id' => 'nullable|exists:hsns,id',
-                'gst_percent' => 'required|numeric',
-
-                'mrp' => 'required|numeric',
+                'mrp' => 'sometimes|numeric',
                 'selling_price' => 'nullable|numeric',
                 'discount' => 'nullable|numeric',
 
-                'status' => 'required|boolean',
+                'status' => 'sometimes|boolean',
 
                 // attributes
                 'attributes' => 'nullable|array',
                 'attributes.*.attribute_id' => 'required|exists:attributes,id',
                 'attributes.*.attribute_value_id' => 'required|exists:attribute_values,id',
 
-                // images (new uploads)
+                // images
                 'images' => 'nullable|array',
                 'images.*' => 'file|image|mimes:jpg,jpeg,png,webp|max:10000',
-            ]);
+            ];
 
-            // ===========================
+            // CONDITIONAL GST VALIDATION
+            if ($hasGst) {
+                $rules['hsn_id'] = 'required|exists:hsns,id';
+                $rules['gst_percent'] = 'required';
+            } else {
+                $rules['hsn_id'] = 'nullable';
+                $rules['gst_percent'] = 'nullable';
+            }
+
+            // Validate
+            $data = $request->validate($rules);
+
             // UPDATE PRODUCT
-            // ===========================
             $product->update($data);
+
 
             // ===========================
             // UPDATE ATTRIBUTES

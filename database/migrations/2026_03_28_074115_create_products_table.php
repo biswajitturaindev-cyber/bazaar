@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            // Users
+            $table->foreignId('user_id')->index()->constrained()->restrictOnDelete();
 
             // Category
             $table->foreignId('category_id')->index()->constrained()->cascadeOnDelete();
