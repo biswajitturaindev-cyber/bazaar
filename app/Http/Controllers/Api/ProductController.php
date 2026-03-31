@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
@@ -347,22 +347,79 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
         try {
+            $product = Product::find($id);
+
+            if (!$product) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+
             $product->delete();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Deleted'
+                'message' => 'Product deleted successfully'
             ]);
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Error',
+                'message' => 'Something went wrong',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function deleteProductImage($id)
+    {
+        try {
+            // Find image
+            $image = ProductImage::find($id);
+
+            if (!$image) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Image not found'
+                ], 404);
+            }
+
+            // Delete files from storage
+            if ($image->image_large && File::exists(public_path($image->image_large))) {
+                File::delete(public_path($image->image_large));
+            }
+
+            if ($image->image_medium && File::exists(public_path($image->image_medium))) {
+                File::delete(public_path($image->image_medium));
+            }
+
+            if ($image->image_small && File::exists(public_path($image->image_small))) {
+                File::delete(public_path($image->image_small));
+            }
+
+            // Delete DB record
+            $image->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Image deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 }

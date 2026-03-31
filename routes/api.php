@@ -95,6 +95,6 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('products', ProductController::class);
-
+    Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
 
 });

@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
             'images' => $this->whenLoaded('images', function () {
                 return $this->images->map(function ($img) {
                     return [
+                        'id' => $img->id,
                         'large' => $img->image_large
                             ? asset('storage/' . $img->image_large)
                             : null,

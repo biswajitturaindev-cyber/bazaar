@@ -20,7 +20,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // ✅ Validation
+        // Validation
         $data = $request->validate([
             // User
             'name' => 'required|string',
@@ -141,55 +141,76 @@ class AuthController extends Controller
     }
 
     /**
-     * 🔐 Login User
+     * Login User
      */
     public function login(Request $request)
     {
-        // Validate
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+        try {
 
-        // Find user
-        $user = User::where('email', $request->email)->first();
-
-        // Invalid credentials
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid email or password'
-            ], 401);
-        }
-
-        // Check active status
-        if ($user->status != 1) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Account inactive'
-            ], 403);
-        }
-
-        // Token
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        // Load relations
-            $user->load([
-               'business.category',
-               'business.subCategory',
-               'business.address',
-               'business.contact',
-               'business.agreement'
+            // Validate request
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
             ]);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Login successful',
-            'token' => $token,
-            'user' => new UserResource($user)
-        ]);
-    }
+            // Find user
+            $user = User::where('email', $validated['email'])->first();
 
+            // Invalid credentials
+            if (!$user || !Hash::check($validated['password'], $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid email or password'
+                ], 401);
+            }
+
+            // Check active status
+            if ($user->status != 1) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Account inactive'
+                ], 403);
+            }
+
+            // Create token
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            // Load relations
+            $user->load([
+                'business.category',
+                'business.subCategory',
+                'business.address',
+                'business.contact',
+                'business.agreement'
+            ]);
+
+            // Success response
+            return response()->json([
+                'status' => true,
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => new UserResource($user)
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            // Validation errors
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            // General errors
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production if needed
+            ], 500);
+        }
+    }
     /**
      * 👤 Profile
      */

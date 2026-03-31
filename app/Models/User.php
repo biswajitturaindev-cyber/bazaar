@@ -25,6 +25,7 @@ class User extends Authenticatable
         'mobile',
         'dob',
         'gender',
+        'status',
         'wallet1',
         'wallet2',
         'wallet3'
