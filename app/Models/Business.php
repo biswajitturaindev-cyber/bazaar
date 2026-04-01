@@ -59,4 +59,21 @@ class Business extends Model
     {
         return $this->hasOne(BusinessAgreement::class);
     }
+
+    // One business one bank detail
+    public function bankDetail()
+    {
+        return $this->hasOne(BankDetail::class, 'business_id');
+    }
+
+    // One business one kyc detail
+    public function kycDetail()
+    {
+        return $this->hasOne(KycDetail::class, 'business_id');
+    }
+
+    public function operationalDetail()
+    {
+        return $this->hasOne(StoreOperationalDetail::class, 'business_id');
+    }
 }

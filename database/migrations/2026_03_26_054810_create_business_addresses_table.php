@@ -30,6 +30,10 @@ return new class extends Migration
             $table->string('landmark')->nullable();
             $table->text('google_map_location')->nullable();
 
+            // Store Location (Lat / Long)
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+
             $table->timestamps();
 
             // Composite index for location queries

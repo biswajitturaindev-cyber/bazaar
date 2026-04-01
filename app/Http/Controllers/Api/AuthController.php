@@ -48,7 +48,7 @@ class AuthController extends Controller
             // Hash password
             $data['password'] = Hash::make($data['password']);
 
-            //👤 Create User
+            // Create User
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -92,6 +92,8 @@ class AuthController extends Controller
                 'pincode' => $request->pincode,
                 'landmark' => $request->landmark,
                 'google_map_location' => $request->google_map_location,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
             ]);
 
             // Contact
@@ -119,7 +121,10 @@ class AuthController extends Controller
                'business.subCategory',
                'business.address',
                'business.contact',
-               'business.agreement'
+               'business.agreement',
+               'business.bankDetail',
+               'business.kycDetail',
+               'business.operationalDetail'
             ]);
 
             return response()->json([
@@ -181,7 +186,10 @@ class AuthController extends Controller
                 'business.subCategory',
                 'business.address',
                 'business.contact',
-                'business.agreement'
+                'business.agreement',
+                'business.bankDetail',
+                'business.kycDetail',
+                'business.operationalDetail'
             ]);
 
             // Success response
@@ -212,7 +220,7 @@ class AuthController extends Controller
         }
     }
     /**
-     * 👤 Profile
+     *  Profile
      */
     public function profile(Request $request)
     {

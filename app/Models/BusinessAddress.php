@@ -15,6 +15,8 @@ class BusinessAddress extends Model
         'pincode',
         'landmark',
         'google_map_location',
+        'latitude',
+        'longitude'
     ];
 
     public function business()

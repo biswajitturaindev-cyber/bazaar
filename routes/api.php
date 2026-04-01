@@ -6,11 +6,14 @@ use App\Http\Controllers\Api\BusinessCategoryMappingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BankDetailController;
 use App\Http\Controllers\Api\BusinessCategoryController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HsnController;
+use App\Http\Controllers\Api\KycDetailController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
 use App\Http\Controllers\Api\UserController;
@@ -38,11 +41,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Users + Business+  Master
+    | Users+ Business+  Master
     |--------------------------------------------------------------------------
     */
     Route::apiResource('users', UserController::class);
     Route::get('/users/gst/check', [UserController::class, 'checkGst']);
+    Route::apiResource('bank-details', BankDetailController::class);
+    Route::apiResource('kyc-details', KycDetailController::class);
+    Route::apiResource('store-operational', StoreOperationalController::class);
 
     /*
     |--------------------------------------------------------------------------
@@ -106,5 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::apiResource('products', ProductController::class);
     Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
+
+
 
 });

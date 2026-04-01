@@ -17,10 +17,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-        $this->call(
+        $this->call([
             AdminSeeder::class,
             HsnSeeder::class,
-            );
+            BusinessCategorySeeder::class,
+            ]);
 
         // Create Test User
         User::create([
