@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BusinessCategoryController;
 use App\Http\Controllers\Admin\BusinessCategoryMappingController;
 use App\Http\Controllers\Admin\BusinessSubCategoryController;
 use App\Http\Controllers\Admin\HsnController;
+use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
 
 
@@ -129,7 +130,12 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('hsns', HsnController::class);
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | Package Master
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('packages', PackageController::class);
 
 
     });

@@ -64,4 +64,15 @@ class User extends Authenticatable
     // {
     //     return $this->hasMany(Business::class, 'sponsor_id');
     // }
+
+    public function vendorPackages()
+    {
+        return $this->hasMany(VendorPackage::class);
+    }
+
+    public function activePackage()
+    {
+        return $this->hasOne(VendorPackage::class)
+                    ->latestOfMany();
+    }
 }

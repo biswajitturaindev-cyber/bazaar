@@ -96,7 +96,37 @@
         </ul>
     </div>
 
+    <div>
+        <a href="#"
+            class="dropdown-btn flex justify-between items-center text-slate-200 hover:text-orange-400 group">
+            <div class="flex gap-3 items-center">
+                <div class="w-10 h-10 shrink-0 bg-slate-600 rounded-md flex justify-center items-center">
+                    <i class="ri-vip-crown-line menu-icon all-items-icon"></i>
+                </div>
+                <span class="capitalize menu-text">Package Master</span>
+            </div>
+            <i class="ri-arrow-right-s-line transition-transform dropdown-arrow menu-text"></i>
+        </a>
 
+        <ul
+            class="list-none w-5/6 mx-auto space-y-2 overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out dropdown-content block">
+
+            <li>
+                <a href="{{ route('packages.index') }}"
+                class="text-slate-400 text-sm hover:text-white">
+                - Package List
+                </a>
+            </li>
+
+            <li>
+                <a href="{{ route('packages.create') }}"
+                class="text-slate-400 text-sm hover:text-white">
+                - Add Package
+                </a>
+            </li>
+
+        </ul>
+    </div>
 
 
     <div>
