@@ -26,6 +26,7 @@ class StoreOperationalResource extends JsonResource
             'serviceable_pincode' => $this->serviceable_pincode,
 
             'status' => $this->status,
+            'status_label' => $this->status == 1 ? 'Active' : 'Inactive',
             'is_open_now' => $this->isOpenNow(),
 
             'created_at' => $this->created_at?->toDateTimeString(),
