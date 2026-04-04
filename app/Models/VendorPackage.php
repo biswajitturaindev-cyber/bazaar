@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Vinkla\Hashids\Facades\Hashids;
 
 class VendorPackage extends Model
 {
@@ -14,6 +15,13 @@ class VendorPackage extends Model
         'start_date',
         'end_date'
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     /**
      * Vendor (User)

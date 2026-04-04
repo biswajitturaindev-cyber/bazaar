@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Http\Resources\CategoryResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class CategoryController extends Controller
 {
@@ -102,7 +103,19 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Decode and overwrite $id
+        $decoded = Hashids::decode($id);
+
+        if (empty($decoded)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid ID'
+            ], 400);
+        }
+
+        $id = $decoded[0]; // important
         $category = Category::findOrFail($id);
+
 
         $data = $request->validate([
             'name' => 'required|string|max:255',

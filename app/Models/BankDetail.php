@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BankDetail extends Model
 {
@@ -15,6 +16,13 @@ class BankDetail extends Model
         'upi_id',
         'cancelled_cheque',
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     // Relationship with Business
     public function business()

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BusinessResource extends JsonResource
 {
@@ -15,15 +16,15 @@ class BusinessResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
             'business_name' => $this->business_name,
             'category' => [
-                'id' => $this->business_category_id,
+                'id' => Hashids::encode($this->business_category_id),
                 'name' => $this->category?->name,
             ],
 
             'sub_category' => [
-                'id' => $this->business_sub_category_id,
+                'id' => Hashids::encode($this->business_sub_category_id),
                 'name' => $this->subCategory?->name,
             ],
             'years_in_business' => $this->years_in_business,

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BankDetailResource extends JsonResource
 {
@@ -16,7 +17,7 @@ class BankDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'business_id' => $this->business_id,
+            'business_id' => Hashids::encode($this->business_id),
             'account_holder_name' => $this->account_holder_name,
             'bank_name' => $this->bank_name,
             'account_number' => $this->account_number,

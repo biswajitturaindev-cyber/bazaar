@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Vinkla\Hashids\Facades\Hashids;
 
 class KycDetailController extends Controller
 {
@@ -48,6 +49,22 @@ class KycDetailController extends Controller
     public function store(Request $request)
     {
         try {
+
+            // Decode business_id FIRST
+            $decoded = Hashids::decode($request->business_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business ID'
+                ], 400);
+            }
+
+            $request->merge([
+                'business_id' => $decoded[0] // replace with real ID
+            ]);
+
+
             $data = $request->validate([
                 'business_id'     => 'required|exists:businesses,id|unique:kyc_details,business_id',
                 'owner_photo'     => 'required|file',
@@ -88,6 +105,19 @@ class KycDetailController extends Controller
     public function show(string $id)
     {
         try {
+
+            // Decode and replace $id itself
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite $id
+
             $kyc = KycDetail::findOrFail($id);
             return new KycDetailResource($kyc);
 
@@ -106,6 +136,18 @@ class KycDetailController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+            // Decode and overwrite $id
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // important
+
             $kyc = KycDetail::findOrFail($id);
 
             $data = $request->validate([

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class KycDetailResource extends JsonResource
 {
@@ -16,7 +17,7 @@ class KycDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'business_id' => $this->business_id,
+            'business_id' => Hashids::encode($this->business_id),
 
             'owner_photo' => $this->fileUrl($this->owner_photo),
             'shop_photo' => $this->fileUrl($this->shop_photo),

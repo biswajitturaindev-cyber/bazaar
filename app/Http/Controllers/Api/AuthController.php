@@ -62,7 +62,7 @@ class AuthController extends Controller
             // Generate Vendor ID
             $randomNumber = ($user->id * 7919) % 100000000;
             $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
-
+            //dd($vendorId);
             // Save Vendor ID
             $user->update([
                 'vendor_id' => $vendorId

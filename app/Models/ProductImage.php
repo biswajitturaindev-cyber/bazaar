@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class ProductImage extends Model
 {
@@ -12,6 +13,13 @@ class ProductImage extends Model
         'image_medium',
         'image_small'
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     // 🔗 Relationship
     public function product()

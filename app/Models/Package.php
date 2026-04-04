@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Package extends Model
 {
@@ -13,6 +14,13 @@ class Package extends Model
         'product_limit',
         'status'
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     /**
      * One package → many vendor packages
@@ -35,6 +43,8 @@ class Package extends Model
             'id',         // local key on packages
             'user_id'     // local key on vendor_packages
         );
+
+
     }
 
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class StoreOperationalDetail extends Model
 {
@@ -21,6 +22,14 @@ class StoreOperationalDetail extends Model
     protected $casts = [
         'status' => 'boolean',
     ];
+
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     public function business()
     {

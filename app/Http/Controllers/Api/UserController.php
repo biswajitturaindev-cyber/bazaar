@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
 
 class UserController extends Controller
 {
@@ -51,15 +52,72 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // public function checkGst(Request $request)
+    // {
+    //     try {
+    //         // Validate
+    //         $request->validate([
+    //             'user_id' => 'required|integer'
+    //         ]);
+
+    //         // Directly check GST existence (optimized query)
+    //         $exists = Business::where('user_id', $request->user_id)
+    //             ->whereNotNull('gst_number')
+    //             ->where('gst_number', '!=', '')
+    //             ->exists();
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'exists' => $exists,
+    //             'message' => $exists
+    //                 ? 'GST already registered'
+    //                 : 'GST not registered'
+    //         ]);
+
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Validation error',
+    //             'errors' => $e->errors()
+    //         ], 422);
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Something went wrong',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function checkGst(Request $request)
     {
         try {
-            // Validate
-            $request->validate([
-                'user_id' => 'required|integer'
+
+            // Decode user_id FIRST
+            $decoded = Hashids::decode($request->user_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid user ID'
+                ], 400);
+            }
+
+            // Replace with real ID
+            $request->merge([
+                'user_id' => $decoded[0]
             ]);
 
-            // Directly check GST existence (optimized query)
+            // Now validate
+            $request->validate([
+                'user_id' => 'required|integer|exists:users,id'
+            ]);
+
+            // Query
             $exists = Business::where('user_id', $request->user_id)
                 ->whereNotNull('gst_number')
                 ->where('gst_number', '!=', '')
@@ -90,5 +148,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+
 
 }

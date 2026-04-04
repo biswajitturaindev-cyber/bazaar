@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class KycDetail extends Model
 {
@@ -16,6 +17,13 @@ class KycDetail extends Model
         'fssai_license',
         'address_proof',
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     // Relationship with Business
     public function business()

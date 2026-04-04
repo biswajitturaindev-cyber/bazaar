@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Category extends Model
 {
@@ -14,6 +15,14 @@ class Category extends Model
         'status',
         'image'
     ];
+
+    // protected $appends = ['id'];
+
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
+
 
     public function mappings()
     {

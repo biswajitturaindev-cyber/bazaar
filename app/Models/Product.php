@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Product extends Model
 {
@@ -32,7 +33,12 @@ class Product extends Model
         'gst_percent' => 'decimal:2',
     ];
 
-    // Relationships
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     // Main Category
     public function category()

@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Http\Resources\SubCategoryItemResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class SubCategoryItemController extends Controller
 {
@@ -50,49 +51,94 @@ class SubCategoryItemController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'category_id'      => 'required|exists:categories,id',
-            'sub_category_id'  => 'required|exists:sub_categories,id',
-            'name'             => 'required|string|max:255|unique:sub_category_items,name',
-            'description'      => 'nullable',
-            'status'           => 'required|in:0,1',
-            'image'            => 'required|image|mimes:jpg,jpeg,png,webp'
-        ]);
+        try {
 
-        $imageName = null;
+            // Decode category_id
+            $decodedCategory = Hashids::decode($request->category_id);
 
-        if ($request->hasFile('image')) {
+            if (empty($decodedCategory)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid category ID'
+                ], 400);
+            }
 
-            $file = $request->file('image');
-            $imageName = time() . '.' . $file->extension();
+            // Decode sub_category_id
+            $decodedSubCategory = Hashids::decode($request->sub_category_id);
 
-            $manager = new ImageManager(new Driver());
+            if (empty($decodedSubCategory)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid sub category ID'
+                ], 400);
+            }
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300);
+            // Replace with real IDs
+            $request->merge([
+                'category_id' => $decodedCategory[0],
+                'sub_category_id' => $decodedSubCategory[0]
+            ]);
 
-            Storage::disk('public')->put(
-                'subcategoryitem/' . $imageName,
-                (string) $image->encodeByExtension($file->extension())
-            );
+            // Validation
+            $data = $request->validate([
+                'category_id'      => 'required|exists:categories,id',
+                'sub_category_id'  => 'required|exists:sub_categories,id',
+                'name'             => 'required|string|max:255|unique:sub_category_items,name',
+                'description'      => 'nullable',
+                'status'           => 'required|in:0,1',
+                'image'            => 'required|image|mimes:jpg,jpeg,png,webp'
+            ]);
+
+            $imageName = null;
+
+            if ($request->hasFile('image')) {
+
+                $file = $request->file('image');
+                $imageName = time() . '.' . $file->extension();
+
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300);
+
+                Storage::disk('public')->put(
+                    'subcategoryitem/' . $imageName,
+                    (string) $image->encodeByExtension($file->extension())
+                );
+            }
+
+            $item = SubCategoryItem::create([
+                'category_id'     => $data['category_id'],
+                'sub_category_id' => $data['sub_category_id'],
+                'name'            => $data['name'],
+                'description'     => $data['description'] ?? null,
+                'status'          => $data['status'],
+                'image'           => $imageName
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Sub Category Item created',
+                'data' => new SubCategoryItemResource($item)
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $item = SubCategoryItem::create([
-            'category_id'     => $data['category_id'],
-            'sub_category_id' => $data['sub_category_id'],
-            'name'            => $data['name'],
-            'description'     => $data['description'] ?? null,
-            'status'          => $data['status'],
-            'image'           => $imageName
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Sub Category Item created',
-            'data' => new SubCategoryItemResource($item)
-        ], 201);
     }
-
     /**
      * GET /api/sub-category-items/{id}
      */
@@ -111,57 +157,114 @@ class SubCategoryItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $item = SubCategoryItem::findOrFail($id);
+        try {
+            // Decode item ID
+            $decodedId = Hashids::decode($id);
 
-        $data = $request->validate([
-            'category_id'      => 'required|exists:categories,id',
-            'sub_category_id'  => 'required|exists:sub_categories,id',
-
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('sub_category_items')
-                    ->where(fn ($q) => $q->where('sub_category_id', $request->sub_category_id))
-                    ->ignore($id),
-            ],
-
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'description' => 'nullable|string',
-            'status'      => 'required|in:0,1',
-        ]);
-
-        $imageName = $item->image;
-
-        if ($request->hasFile('image')) {
-
-            if ($item->image && Storage::disk('public')->exists('subcategoryitem/' . $item->image)) {
-                Storage::disk('public')->delete('subcategoryitem/' . $item->image);
+            if (empty($decodedId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid item ID'
+                ], 400);
             }
 
-            $file = $request->file('image');
-            $imageName = time() . '.' . $file->extension();
+            $id = $decodedId[0]; // overwrite
 
-            $manager = new ImageManager(new Driver());
+            $item = SubCategoryItem::findOrFail($id);
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300);
+            // Decode category_id
+            $decodedCategory = Hashids::decode($request->category_id);
 
-            Storage::disk('public')->put(
-                'subcategoryitem/' . $imageName,
-                (string) $image->encodeByExtension($file->extension())
-            );
+            if (empty($decodedCategory)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid category ID'
+                ], 400);
+            }
 
-            $data['image'] = $imageName;
+            // Decode sub_category_id
+            $decodedSub = Hashids::decode($request->sub_category_id);
+
+            if (empty($decodedSub)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid sub category ID'
+                ], 400);
+            }
+
+            // Replace with real IDs
+            $request->merge([
+                'category_id' => $decodedCategory[0],
+                'sub_category_id' => $decodedSub[0]
+            ]);
+
+            // Validation
+            $data = $request->validate([
+                'category_id'      => 'required|exists:categories,id',
+                'sub_category_id'  => 'required|exists:sub_categories,id',
+
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('sub_category_items')
+                        ->where(fn ($q) => $q->where('sub_category_id', $request->sub_category_id))
+                        ->ignore($id),
+                ],
+
+                'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'description' => 'nullable|string',
+                'status'      => 'required|in:0,1',
+            ]);
+
+            $imageName = $item->image;
+
+            if ($request->hasFile('image')) {
+
+                if ($item->image && Storage::disk('public')->exists('subcategoryitem/' . $item->image)) {
+                    Storage::disk('public')->delete('subcategoryitem/' . $item->image);
+                }
+
+                $file = $request->file('image');
+                $imageName = time() . '.' . $file->extension();
+
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300);
+
+                Storage::disk('public')->put(
+                    'subcategoryitem/' . $imageName,
+                    (string) $image->encodeByExtension($file->extension())
+                );
+
+                $data['image'] = $imageName;
+            }
+
+            $item->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Sub Category Item updated successfully',
+                'data' => new SubCategoryItemResource($item)
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update item',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $item->update($data);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Sub Category Item updated successfully',
-            'data' => new SubCategoryItemResource($item)
-        ]);
     }
 
     /**
@@ -188,23 +291,64 @@ class SubCategoryItemController extends Controller
      */
     public function dropdown($category_id = null, $sub_category_id = null)
     {
-        $query = SubCategoryItem::where('status', 1);
+        try {
 
-        if (!is_null($category_id)) {
-            $query->where('category_id', $category_id);
+            $query = SubCategoryItem::where('status', 1);
+
+            // Decode category_id
+            if (!is_null($category_id)) {
+
+                $decodedCategory = Hashids::decode($category_id);
+
+                if (empty($decodedCategory)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Invalid category ID'
+                    ], 400);
+                }
+
+                $category_id = $decodedCategory[0]; // overwrite
+
+                $query->where('category_id', $category_id);
+            }
+
+            // Decode sub_category_id
+            if (!is_null($sub_category_id)) {
+
+                $decodedSub = Hashids::decode($sub_category_id);
+
+                if (empty($decodedSub)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Invalid sub category ID'
+                    ], 400);
+                }
+
+                $sub_category_id = $decodedSub[0]; // overwrite
+
+                $query->where('sub_category_id', $sub_category_id);
+            }
+
+            // Get & encode ID for response
+            $items = $query->orderBy('name')->get()->map(function ($item) {
+                return [
+                    'id' => Hashids::encode($item->id),
+                    'name' => $item->name
+                ];
+            });
+
+            return response()->json([
+                'status' => true,
+                'data' => $items
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch items',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        if (!is_null($sub_category_id)) {
-            $query->where('sub_category_id', $sub_category_id);
-        }
-
-        $items = $query->select('id', 'name')
-            ->orderBy('name')
-            ->get();
-
-        return response()->json([
-            'status' => true,
-            'data' => $items
-        ]);
     }
 }

@@ -4,25 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\MasterProducts;
+use Vinkla\Hashids\Facades\Hashids;
+
 class SubCategory extends Model
 {
     protected $fillable = [
         'category_id',
-        // 'parent_id',
         'name',
         'description',
         'status'
     ];
-
-    // public function parent()
-    // {
-    //     return $this->belongsTo(SubCategory::class,'parent_id');
-    // }
-
-    // public function children()
-    // {
-    //     return $this->hasMany(SubCategory::class,'parent_id');
-    // }
 
     public function category()
     {

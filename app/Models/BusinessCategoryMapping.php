@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BusinessCategoryMapping extends Model
 {
@@ -12,6 +13,14 @@ class BusinessCategoryMapping extends Model
         'category_id',
         'status',
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
+
 
     // Business Category
     public function businessCategory()

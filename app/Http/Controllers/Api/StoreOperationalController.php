@@ -7,6 +7,7 @@ use App\Http\Resources\StoreOperationalResource;
 use App\Models\StoreOperationalDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Vinkla\Hashids\Facades\Hashids;
 
 class StoreOperationalController extends Controller
 {
@@ -46,6 +47,19 @@ class StoreOperationalController extends Controller
         DB::beginTransaction();
 
         try {
+            // Decode business_id FIRST
+            $decoded = Hashids::decode($request->business_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business ID'
+                ], 400);
+            }
+
+            $request->merge([
+                'business_id' => $decoded[0] // replace with real ID
+            ]);
 
             // Validation
             $validated = $request->validate([
@@ -108,6 +122,19 @@ class StoreOperationalController extends Controller
      */
     public function show(string $id)
     {
+        // Decode and replace $id itself
+        $decoded = Hashids::decode($id);
+
+        if (empty($decoded)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid ID'
+            ], 400);
+        }
+
+        $id = $decoded[0]; // overwrite $id
+
+
         $store = StoreOperationalDetail::find($id);
 
         if (!$store) {
@@ -136,6 +163,19 @@ class StoreOperationalController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Decode and overwrite $id
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // important
+
             // Find record
             $store = StoreOperationalDetail::find($id);
 

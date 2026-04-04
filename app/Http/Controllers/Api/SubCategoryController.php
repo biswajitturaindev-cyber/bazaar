@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\SubCategory;
 use Illuminate\Validation\Rule;
 use App\Http\Resources\SubCategoryResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class SubCategoryController extends Controller
 {
@@ -36,20 +37,55 @@ class SubCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255|unique:sub_categories,name',
-            'description' => 'nullable|string',
-            'status' => 'required|in:0,1'
-        ]);
+        try {
 
-        $sub = SubCategory::create($data);
+            // Decode category_id first
+            $decoded = Hashids::decode($request->category_id);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'SubCategory created',
-            'data' => new SubCategoryResource($sub)
-        ], 201);
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid category ID'
+                ], 400);
+            }
+
+            // Replace with real ID
+            $request->merge([
+                'category_id' => $decoded[0]
+            ]);
+
+            // Now validation works
+            $data = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'name' => 'required|string|max:255|unique:sub_categories,name',
+                'description' => 'nullable|string',
+                'status' => 'required|in:0,1'
+            ]);
+
+            $sub = SubCategory::create($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'SubCategory created',
+                'data' => new SubCategoryResource($sub)
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -57,12 +93,34 @@ class SubCategoryController extends Controller
      */
     public function show(string $id)
     {
-        $sub = SubCategory::findOrFail($id);
+        try {
 
-        return response()->json([
-            'status' => true,
-            'data' => new SubCategoryResource($sub)
-        ]);
+            // Decode and overwrite $id
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // important
+
+            $sub = SubCategory::findOrFail($id);
+
+            return response()->json([
+                'status' => true,
+                'data' => new SubCategoryResource($sub)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'SubCategory not found',
+                'error' => $e->getMessage()
+            ], 404);
+        }
     }
 
     /**
@@ -70,29 +128,65 @@ class SubCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $sub = SubCategory::findOrFail($id);
+        try {
 
-        $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            // Decode ID (SubCategory)
+            $decodedId = Hashids::decode($id);
 
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('sub_categories', 'name')->ignore($id)
-            ],
+            if (empty($decodedId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid SubCategory ID'
+                ], 400);
+            }
 
-            'description' => 'nullable|string',
-            'status' => 'required|in:0,1'
-        ]);
+            $id = $decodedId[0]; // overwrite
 
-        $sub->update($data);
+            $sub = SubCategory::findOrFail($id);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'SubCategory updated',
-            'data' => new SubCategoryResource($sub)
-        ]);
+            // Decode category_id
+            $decodedCategory = Hashids::decode($request->category_id);
+
+            if (empty($decodedCategory)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid category ID'
+                ], 400);
+            }
+
+            $request->merge([
+                'category_id' => $decodedCategory[0]
+            ]);
+
+            // Validation (now works)
+            $data = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('sub_categories', 'name')->ignore($id)
+                ],
+                'description' => 'nullable|string',
+                'status' => 'required|in:0,1'
+            ]);
+
+            $sub->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'SubCategory updated',
+                'data' => new SubCategoryResource($sub)
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update SubCategory',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -113,20 +207,43 @@ class SubCategoryController extends Controller
      */
     public function dropdown($category_id = null)
     {
-        $query = SubCategory::where('status', 1);
+        try {
 
-        // Apply filter only if category_id is passed
-        if (!is_null($category_id)) {
-            $query->where('category_id', $category_id);
+            $query = SubCategory::where('status', 1);
+
+            // Decode if category_id is passed
+            if (!is_null($category_id)) {
+
+                $decoded = Hashids::decode($category_id);
+
+                if (empty($decoded)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Invalid category ID'
+                    ], 400);
+                }
+
+                $category_id = $decoded[0]; // overwrite
+
+                $query->where('category_id', $category_id);
+            }
+
+            $subcategories = $query->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $subcategories
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch subcategories',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $subcategories = $query->select('id', 'name')
-            ->orderBy('name')
-            ->get();
-
-        return response()->json([
-            'status' => true,
-            'data' => $subcategories
-        ]);
     }
 }

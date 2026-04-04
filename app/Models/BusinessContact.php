@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BusinessContact extends Model
 {
@@ -13,6 +14,13 @@ class BusinessContact extends Model
         'agree_terms',
         'confirm_info',
     ];
+
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
 
     public function business()
     {

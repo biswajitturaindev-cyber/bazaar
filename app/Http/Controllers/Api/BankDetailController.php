@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BankDetailController extends Controller
 {
@@ -38,6 +39,21 @@ class BankDetailController extends Controller
     public function store(Request $request)
     {
         try {
+            // Decode business_id FIRST
+            $decoded = Hashids::decode($request->business_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business ID'
+                ], 400);
+            }
+
+            $request->merge([
+                'business_id' => $decoded[0] // replace with real ID
+            ]);
+
+
             $data = $request->validate([
                 'business_id' => 'required|exists:businesses,id|unique:bank_details,business_id',
                 'account_holder_name' => 'required',
@@ -100,6 +116,18 @@ class BankDetailController extends Controller
     public function show(string $id)
     {
         try {
+            // Decode and replace $id itself
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite $id
+
             $bank = BankDetail::findOrFail($id);
             return new BankDetailResource($bank);
 
@@ -118,6 +146,18 @@ class BankDetailController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+            // Decode and overwrite $id
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // important
+
             $bank = BankDetail::findOrFail($id);
 
             $data = $request->validate([

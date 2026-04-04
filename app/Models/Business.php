@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Business extends Model
 {
@@ -18,6 +19,14 @@ class Business extends Model
         'fssai_license',
         'registration_number',
     ];
+
+
+    // protected $appends = ['id'];
+
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     // Owner
     public function user()

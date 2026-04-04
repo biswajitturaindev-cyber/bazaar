@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Http\Resources\BusinessSubCategoryResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BusinessSubCategoryController extends Controller
 {
@@ -40,50 +41,85 @@ class BusinessSubCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'business_category_id' => 'required|exists:business_categories,id',
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('business_sub_categories')
-                    ->where(fn ($q) => $q->where('business_category_id', $request->business_category_id)),
-            ],
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
-            'commission' => 'nullable|numeric|min:0',
-            'status' => 'required|in:0,1',
-        ]);
+        try {
+            // Decode business_category_id
+            $decoded = Hashids::decode($request->business_category_id);
 
-        $imageName = null;
+            if (empty($decoded)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid business category ID'
+                ], 400);
+            }
 
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . '.' . $file->extension();
+            // Replace with real ID
+            $request->merge([
+                'business_category_id' => $decoded[0]
+            ]);
 
-            $manager = new ImageManager(new Driver());
+            // Validation (now works)
+            $data = $request->validate([
+                'business_category_id' => 'required|exists:business_categories,id',
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('business_sub_categories')
+                        ->where(fn ($q) => $q->where('business_category_id', $request->business_category_id)),
+                ],
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+                'commission' => 'nullable|numeric|min:0',
+                'status' => 'required|in:0,1',
+            ]);
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300);
+            $imageName = null;
 
-            Storage::disk('public')->put(
-                'business_sub_category/' . $imageName,
-                (string) $image->encodeByExtension($file->extension())
-            );
+            if ($request->hasFile('image')) {
+
+                $file = $request->file('image');
+                $imageName = time() . '.' . $file->extension();
+
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300);
+
+                Storage::disk('public')->put(
+                    'business_sub_category/' . $imageName,
+                    (string) $image->encodeByExtension($file->extension())
+                );
+            }
+
+            $subcategory = BusinessSubCategory::create([
+                'business_category_id' => $data['business_category_id'],
+                'name' => $data['name'],
+                'status' => $data['status'],
+                'commission' => $data['commission'] ?? 0,
+                'image' => $imageName
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sub Category Created Successfully',
+                'data' => new BusinessSubCategoryResource($subcategory->load('category'))
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $subcategory = BusinessSubCategory::create([
-            'business_category_id' => $data['business_category_id'],
-            'name' => $data['name'],
-            'status' => $data['status'],
-            'commission'=> $data['commission'] ?? 0,
-            'image' => $imageName
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category Created Successfully',
-            'data' => new BusinessSubCategoryResource($subcategory->load('category'))
-        ], 201);
     }
 
     /**
@@ -91,9 +127,39 @@ class BusinessSubCategoryController extends Controller
      */
     public function show($id)
     {
-        $subcategory = BusinessSubCategory::with('category')->findOrFail($id);
+        try {
 
-        return new BusinessSubCategoryResource($subcategory);
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid sub category ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite
+
+            $subcategory = BusinessSubCategory::with('category')->findOrFail($id);
+
+            return new BusinessSubCategoryResource($subcategory);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub Category not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -101,51 +167,98 @@ class BusinessSubCategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $subcategory = BusinessSubCategory::findOrFail($id);
+        try {
 
-        $data = $request->validate([
-            'business_category_id' => 'required|exists:business_categories,id',
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
-            'commission' => 'nullable|numeric|min:0',
-            'status' => 'required|in:0,1',
-        ]);
+            // Decode subcategory ID
+            $decodedId = Hashids::decode($id);
 
-        $imageName = $subcategory->image;
-
-        if ($request->hasFile('image')) {
-
-            if ($subcategory->image && Storage::disk('public')->exists('business_sub_category/'.$subcategory->image)) {
-                Storage::disk('public')->delete('business_sub_category/'.$subcategory->image);
+            if (empty($decodedId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid sub category ID'
+                ], 400);
             }
 
-            $file = $request->file('image');
-            $imageName = time() . '.' . $file->extension();
+            $id = $decodedId[0]; // overwrite
 
-            $manager = new ImageManager(new Driver());
+            $subcategory = BusinessSubCategory::findOrFail($id);
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300);
+            // Decode business_category_id
+            $decodedCategory = Hashids::decode($request->business_category_id);
 
-            Storage::disk('public')->put(
-                'business_sub_category/' . $imageName,
-                (string) $image->encodeByExtension($file->extension())
-            );
+            if (empty($decodedCategory)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid business category ID'
+                ], 400);
+            }
+
+            // Replace with real ID
+            $request->merge([
+                'business_category_id' => $decodedCategory[0]
+            ]);
+
+            // Validation
+            $data = $request->validate([
+                'business_category_id' => 'required|exists:business_categories,id',
+                'name' => 'required|string|max:255',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
+                'commission' => 'nullable|numeric|min:0',
+                'status' => 'required|in:0,1',
+            ]);
+
+            $imageName = $subcategory->image;
+
+            if ($request->hasFile('image')) {
+
+                if ($subcategory->image && Storage::disk('public')->exists('business_sub_category/'.$subcategory->image)) {
+                    Storage::disk('public')->delete('business_sub_category/'.$subcategory->image);
+                }
+
+                $file = $request->file('image');
+                $imageName = time() . '.' . $file->extension();
+
+                $manager = new ImageManager(new Driver());
+
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300);
+
+                Storage::disk('public')->put(
+                    'business_sub_category/' . $imageName,
+                    (string) $image->encodeByExtension($file->extension())
+                );
+            }
+
+            $subcategory->update([
+                'business_category_id' => $data['business_category_id'],
+                'name' => $data['name'],
+                'status' => $data['status'],
+                'commission'=> $data['commission'] ?? 0,
+                'image' => $imageName
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sub Category Updated Successfully',
+                'data' => new BusinessSubCategoryResource($subcategory->load('category'))
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $subcategory->update([
-            'business_category_id' => $data['business_category_id'],
-            'name' => $data['name'],
-            'status' => $data['status'],
-            'commission'=> $data['commission'] ?? 0,
-            'image' => $imageName
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category Updated Successfully',
-            'data' => new BusinessSubCategoryResource($subcategory->load('category'))
-        ]);
     }
 
     /**
@@ -153,17 +266,48 @@ class BusinessSubCategoryController extends Controller
      */
     public function destroy($id)
     {
-        $subcategory = BusinessSubCategory::findOrFail($id);
+        try {
 
-        if ($subcategory->image && Storage::disk('public')->exists('business_sub_category/'.$subcategory->image)) {
-            Storage::disk('public')->delete('business_sub_category/'.$subcategory->image);
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid sub category ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite
+
+            $subcategory = BusinessSubCategory::findOrFail($id);
+
+            // 🗑 Delete image if exists
+            if ($subcategory->image && Storage::disk('public')->exists('business_sub_category/'.$subcategory->image)) {
+                Storage::disk('public')->delete('business_sub_category/'.$subcategory->image);
+            }
+
+            $subcategory->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sub Category Deleted Successfully'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub Category not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $subcategory->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sub Category Deleted Successfully'
-        ]);
     }
 }

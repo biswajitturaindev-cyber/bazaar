@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Vinkla\Hashids\Facades\Hashids;
 
 class ProductAttributeValue extends Model
 {
@@ -13,6 +14,13 @@ class ProductAttributeValue extends Model
     ];
 
     // Relationships
+    protected $appends = ['id'];
+
+    public function getIdAttribute()
+    {
+        return Hashids::encode($this->attributes['id']);
+    }
+
 
     // Product
     public function product()

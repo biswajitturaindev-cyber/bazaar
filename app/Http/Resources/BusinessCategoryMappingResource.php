@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class BusinessCategoryMappingResource extends JsonResource
 {
@@ -15,17 +16,17 @@ class BusinessCategoryMappingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
             'business_category' => [
-                'id' => $this->businessCategory?->id,
+                'id' => Hashids::encode($this->businessCategory?->id),
                 'name' => $this->businessCategory?->name,
             ],
             'business_sub_category' => [
-                'id' => $this->businessSubCategory?->id,
+                'id' => Hashids::encode($this->businessSubCategory?->id),
                 'name' => $this->businessSubCategory?->name,
             ],
             'product_category' => [
-                'id' => $this->category?->id,
+                'id' => Hashids::encode($this->category?->id),
                 'name' => $this->category?->name,
             ],
             'status' => $this->status,

@@ -17,6 +17,7 @@ class SubCategoryItem extends Model
         'image'
     ];
 
+
     // Relationship: Category
     public function category()
     {
