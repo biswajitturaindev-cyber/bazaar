@@ -10,6 +10,7 @@ use App\Http\Resources\AttributeValueResource;
 use Exception;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Vinkla\Hashids\Facades\Hashids;
 
 class AttributeValueController extends Controller
 {
@@ -43,28 +44,42 @@ class AttributeValueController extends Controller
     public function store(Request $request)
     {
         try {
+
             $data = $request->validate([
-                'attribute_id' => 'required|exists:attributes,id',
-                'value' => 'required|string|max:255',
-                'color_code' => 'nullable|string',
-                'status' => 'required|in:0,1',
+                'attribute_id' => 'required',
+                'value'        => 'required|string|max:255',
+                'color_code'   => 'nullable|string',
+                'status'       => 'required|in:0,1',
             ]);
 
-            // duplicate check
+            // Decode attribute_id
+            $decoded = Hashids::decode($data['attribute_id']);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid Attribute ID'
+                ], 400);
+            }
+
+            $data['attribute_id'] = $decoded[0];
+
+            // Check attribute exists
+            $attribute = Attribute::findOrFail($data['attribute_id']);
+
+            // Duplicate check
             $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
                 ->where('value', $data['value'])
                 ->exists();
 
             if ($exists) {
                 return response()->json([
-                    'status' => false,
+                    'status'  => false,
                     'message' => 'Value already exists'
                 ], 422);
             }
 
-            // remove color if not color attribute
-            $attribute = Attribute::findOrFail($data['attribute_id']);
-
+            // Remove color_code if not color attribute
             if (!str_contains(strtolower($attribute->name), 'color')) {
                 $data['color_code'] = null;
             }
@@ -72,32 +87,32 @@ class AttributeValueController extends Controller
             $value = AttributeValue::create($data);
 
             return response()->json([
-                'status' => true,
-                'message' => 'Created',
-                'data' => new AttributeValueResource($value)
+                'status'  => true,
+                'message' => 'Attribute value created successfully',
+                'data'    => new AttributeValueResource($value)
             ], 201);
 
         } catch (ValidationException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Validation Error',
-                'errors' => $e->errors()
+                'status'  => false,
+                'message' => 'Validation error',
+                'errors'  => $e->errors()
             ], 422);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
+                'status'  => false,
+                'message' => 'Attribute not found'
             ], 404);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -108,27 +123,40 @@ class AttributeValueController extends Controller
     public function show(string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
             $value = AttributeValue::with('attribute')->findOrFail($id);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Attribute value fetched successfully',
-                'data' => new AttributeValueResource($value)
+                'data'    => new AttributeValueResource($value)
             ], 200);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Value Not Found'
+                'status'  => false,
+                'message' => 'Attribute value not found'
             ], 404);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -139,19 +167,44 @@ class AttributeValueController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
             $value = AttributeValue::findOrFail($id);
 
             $data = $request->validate([
-                'attribute_id' => 'required|exists:attributes,id',
-                'value' => 'required|string|max:255',
-                'color_code' => 'nullable|string',
-                'status' => 'required|in:0,1',
+                'attribute_id' => 'required',
+                'value'        => 'required|string|max:255',
+                'color_code'   => 'nullable|string',
+                'status'       => 'required|in:0,1',
             ]);
 
-            // normalize value (avoid case duplicates)
+            // Decode attribute_id
+            $decodedAttr = Hashids::decode($data['attribute_id']);
+
+            if (empty($decodedAttr)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid Attribute ID'
+                ], 400);
+            }
+
+            $data['attribute_id'] = $decodedAttr[0];
+
+            // Normalize value (avoid case duplicates)
             $data['value'] = strtolower(trim($data['value']));
 
-            // duplicate check (excluding current record)
+            // Duplicate check (excluding current record)
             $exists = AttributeValue::where('attribute_id', $data['attribute_id'])
                 ->where('value', $data['value'])
                 ->where('id', '!=', $id)
@@ -159,15 +212,15 @@ class AttributeValueController extends Controller
 
             if ($exists) {
                 return response()->json([
-                    'status' => false,
+                    'status'  => false,
                     'message' => 'Value already exists'
                 ], 422);
             }
 
-            // ensure attribute exists
+            // Ensure attribute exists
             $attribute = Attribute::findOrFail($data['attribute_id']);
 
-            // remove color_code if not a color attribute
+            // Remove color_code if not color attribute
             if (!str_contains(strtolower($attribute->name), 'color')) {
                 $data['color_code'] = null;
             }
@@ -175,32 +228,32 @@ class AttributeValueController extends Controller
             $value->update($data);
 
             return response()->json([
-                'status' => true,
-                'message' => 'Updated',
-                'data' => new AttributeValueResource($value)
+                'status'  => true,
+                'message' => 'Attribute value updated successfully',
+                'data'    => new AttributeValueResource($value)
             ], 200);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Value or Attribute Not Found'
+                'status'  => false,
+                'message' => 'Attribute value or attribute not found'
             ], 404);
 
         } catch (ValidationException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Validation Error',
-                'errors' => $e->errors()
+                'status'  => false,
+                'message' => 'Validation error',
+                'errors'  => $e->errors()
             ], 422);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -211,27 +264,40 @@ class AttributeValueController extends Controller
     public function destroy(string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
             $value = AttributeValue::findOrFail($id);
             $value->delete();
 
             return response()->json([
-                'status' => true,
-                'message' => 'Attribute Value Deleted Successfully'
+                'status'  => true,
+                'message' => 'Attribute value deleted successfully'
             ], 200);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Value Not Found'
+                'status'  => false,
+                'message' => 'Attribute value not found'
             ], 404);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class HsnResource extends JsonResource
 {
@@ -15,7 +16,7 @@ class HsnResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
             'hsn_code' => $this->hsn_code,
             'description' => $this->description,
             'cgst' => $this->cgst,

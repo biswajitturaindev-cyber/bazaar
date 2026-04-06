@@ -4,20 +4,20 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Vinkla\Hashids\Facades\Hashids;
 
 class ProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
 
             'name' => $this->name,
             'description' => $this->description,
 
             // User
-            'user_id' => $this->user_id,
+            'user_id' => Hashids::encode($this->user_id),
 
             // Category
             'category' => $this->category?->name,
@@ -41,7 +41,7 @@ class ProductResource extends JsonResource
             'images' => $this->whenLoaded('images', function () {
                 return $this->images->map(function ($img) {
                     return [
-                        'id' => $img->id,
+                        'id' => Hashids::encode($img->id),
                         'large' => $img->image_large
                             ? asset('storage/' . $img->image_large)
                             : null,

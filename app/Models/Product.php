@@ -33,12 +33,12 @@ class Product extends Model
         'gst_percent' => 'decimal:2',
     ];
 
-    protected $appends = ['id'];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     // Main Category
     public function category()

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class AttributeResource extends JsonResource
 {
@@ -15,7 +16,7 @@ class AttributeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
             'name' => $this->name,
             'status' => $this->status,
             'status_label' => $this->status ? 'Active' : 'Inactive',

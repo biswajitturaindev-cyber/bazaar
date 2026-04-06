@@ -9,12 +9,12 @@ class Attribute extends Model
 {
     protected $fillable = ['name', 'status'];
 
-    protected $appends = ['id'];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     public function values()
     {

@@ -7,6 +7,7 @@ use App\Models\Attribute;
 use Illuminate\Http\Request;
 use App\Http\Resources\AttributeResource;
 use Exception;
+use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 
@@ -79,28 +80,35 @@ class AttributeController extends Controller
     public function show(string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
+            // Fetch attribute with values
             $attribute = Attribute::with('values')->findOrFail($id);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Attribute fetched successfully',
-                'data' => new AttributeResource($attribute)
+                'data'    => new AttributeResource($attribute)
             ], 200);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
+                'status'  => false,
+                'message' => 'Attribute not found',
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 404);
-
-        } catch (Exception $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
-            ], 500);
         }
     }
 
@@ -110,42 +118,55 @@ class AttributeController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
             $attribute = Attribute::findOrFail($id);
 
             $data = $request->validate([
-                'name' => 'required|unique:attributes,name,' . $id,
+                'name'   => 'required|unique:attributes,name,' . $id,
                 'status' => 'required|in:0,1',
             ]);
 
             $attribute->update($data);
 
             return response()->json([
-                'status' => true,
-                'message' => 'Updated',
-                'data' => new AttributeResource($attribute)
+                'status'  => true,
+                'message' => 'Attribute updated successfully',
+                'data'    => new AttributeResource($attribute)
             ], 200);
 
         } catch (ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
+                'status'  => false,
+                'message' => 'Attribute not found'
             ], 404);
 
         } catch (ValidationException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Validation Error',
-                'errors' => $e->errors()
+                'status'  => false,
+                'message' => 'Validation error',
+                'errors'  => $e->errors()
             ], 422);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -153,30 +174,43 @@ class AttributeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $id)
     {
         try {
+
+            // Decode ID
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid ID'
+                ], 400);
+            }
+
+            $id = $decoded[0]; // overwrite ID
+
             $attribute = Attribute::findOrFail($id);
             $attribute->delete();
 
             return response()->json([
-                'status' => true,
-                'message' => 'Attribute Deleted Successfully'
+                'status'  => true,
+                'message' => 'Attribute deleted successfully'
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Attribute Not Found'
+                'status'  => false,
+                'message' => 'Attribute not found'
             ], 404);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             return response()->json([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // optional (remove in production)
+                'error'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
