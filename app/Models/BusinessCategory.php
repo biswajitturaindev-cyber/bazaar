@@ -15,6 +15,16 @@ class BusinessCategory extends Model
         'status',
     ];
 
+    public function categories()
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'business_category_mappings',
+            'business_category_id',
+            'category_id'
+        );
+    }
+
     public function subCategories()
     {
         return $this->hasMany(BusinessSubCategory::class);

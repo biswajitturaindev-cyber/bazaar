@@ -23,6 +23,7 @@ class HsnResource extends JsonResource
             'sgst' => $this->sgst,
             'igst' => $this->igst,
             'status' => $this->status,
+            'status_label' => $this->status ? 'Active' : 'Inactive',
             'created_at' => $this->created_at,
         ];
     }

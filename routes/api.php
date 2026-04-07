@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::apiResource('users', UserController::class);
     Route::get('/users/gst/check', [UserController::class, 'checkGst']);
+    Route::get('/users/category/dropdown', [UserController::class, 'CategoryDropdown']);
     Route::apiResource('bank-details', BankDetailController::class);
     Route::apiResource('kyc-details', KycDetailController::class);
     Route::apiResource('store-operational', StoreOperationalController::class);

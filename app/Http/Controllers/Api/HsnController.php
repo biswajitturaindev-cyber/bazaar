@@ -168,7 +168,7 @@ class HsnController extends Controller
         try {
             $query = Hsn::where('status', 1);
 
-            // Search by hsn_code OR description
+            // Search filter
             if ($request->search) {
                 $query->where(function ($q) use ($request) {
                     $q->where('hsn_code', 'like', '%' . $request->search . '%')
@@ -176,15 +176,16 @@ class HsnController extends Controller
                 });
             }
 
-            $hsns = $query->select('id', 'hsn_code', 'description')
+            $hsns = $query->select('id', 'hsn_code', 'description', 'cgst', 'sgst', 'igst', 'status')
                 ->orderBy('hsn_code', 'asc')
-                ->limit(50) // important for performance
+                ->limit(50)
                 ->get();
 
+            // USE RESOURCE HERE
             return response()->json([
                 'status' => true,
                 'message' => 'HSN list fetched successfully',
-                'data' => $hsns
+                'data' => HsnResource::collection($hsns)
             ]);
 
         } catch (\Exception $e) {

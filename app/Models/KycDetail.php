@@ -10,12 +10,19 @@ class KycDetail extends Model
     protected $fillable = [
         'business_id',
         'owner_photo',
+        'owner_photo_status',
         'shop_photo',
+        'shop_photo_status',
         'pan_card',
+        'pan_card_status',
         'gst_certificate',
+        'gst_certificate_status',
         'trade_license',
+        'trade_license_status',
         'fssai_license',
+        'fssai_license_status',
         'address_proof',
+        'address_proof_status'
     ];
 
     protected $appends = ['id'];

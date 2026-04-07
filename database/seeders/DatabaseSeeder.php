@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             HsnSeeder::class,
             BusinessCategorySeeder::class,
+            CategorySeeder::class,
+            SubCategorySeeder::class,
+            AttributeSeeder::class,
+            AttributeValueSeeder::class
             ]);
 
         // Create Test User

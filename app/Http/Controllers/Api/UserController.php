@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
 use App\Models\Business;
+use App\Models\BusinessCategory;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -92,7 +94,9 @@ class UserController extends Controller
     //     }
     // }
 
-
+    /**
+     * Update the specified resource in storage.
+     */
     public function checkGst(Request $request)
     {
         try {
@@ -149,6 +153,60 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Get Category Dropdown as per Businss Category
+     */
+    public function CategoryDropdown(Request $request)
+    {
+        try {
+            // Decode ID
+            $decoded = Hashids::decode($request->business_category_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business category ID'
+                ], 400);
+            }
+
+            $businessCategoryId = $decoded[0];
+
+            // Validation
+            $request->merge(['business_category_id' => $businessCategoryId]);
+
+            $request->validate([
+                'business_category_id' => 'required|exists:business_categories,id'
+            ]);
+
+            // Fetch categories
+            $categories = BusinessCategory::findOrFail($businessCategoryId)
+                ->categories()
+                ->select('categories.id', 'categories.name')
+                ->get();
+
+            // RETURN WITH RESOURCE
+            return response()->json([
+                'status' => true,
+                'data' => CategoryResource::collection($categories)
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 
 }

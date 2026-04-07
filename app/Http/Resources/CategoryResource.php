@@ -10,8 +10,20 @@ class CategoryResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+
+        $encodedId = Hashids::encode($this->id);
+
+        // Dropdown mode
+        if ($request->get('type') === 'dropdown') {
+            return [
+                'id' => $encodedId,
+                'name' => $this->name,
+            ];
+        }
+
+        // Full response
         return [
-            'id' => Hashids::encode($this->id),
+            'id' => $encodedId,
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status,
@@ -20,7 +32,7 @@ class CategoryResource extends JsonResource
             'image' => $this->image
                 ? asset('storage/category/' . $this->image)
                 : null,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'created_at' => optional($this->created_at)->format('Y-m-d H:i:s'),
         ];
     }
 }

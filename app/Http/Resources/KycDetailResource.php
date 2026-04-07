@@ -8,31 +8,46 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class KycDetailResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
             'business_id' => Hashids::encode($this->business_id),
 
-            'owner_photo' => $this->fileUrl($this->owner_photo),
-            'shop_photo' => $this->fileUrl($this->shop_photo),
-            'pan_card' => $this->fileUrl($this->pan_card),
-            'gst_certificate' => $this->fileUrl($this->gst_certificate),
-            'trade_license' => $this->fileUrl($this->trade_license),
-            'fssai_license' => $this->fileUrl($this->fssai_license),
-            'address_proof' => $this->fileUrl($this->address_proof),
+            // Documents with status
+            'owner_photo' => $this->document($this->owner_photo, $this->owner_photo_status),
+            'shop_photo' => $this->document($this->shop_photo, $this->shop_photo_status),
+            'pan_card' => $this->document($this->pan_card, $this->pan_card_status),
+            'gst_certificate' => $this->document($this->gst_certificate, $this->gst_certificate_status),
+            'trade_license' => $this->document($this->trade_license, $this->trade_license_status),
+            'fssai_license' => $this->document($this->fssai_license, $this->fssai_license_status),
+            'address_proof' => $this->document($this->address_proof, $this->address_proof_status),
 
-            'created_at' => $this->created_at,
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }
 
-    private function fileUrl($path)
+    /**
+     *  Format document with status
+     */
+    private function document($path, $status)
     {
-        return $path ? asset('storage/' . $path) : null;
+        return [
+            'url' => $path ? asset('storage/' . $path) : null,
+            'status' => $status,
+            'status_label' => $this->statusLabel($status),
+        ];
+    }
+
+    /**
+     * Status Label Helper
+     */
+    private function statusLabel($status)
+    {
+        return match ($status) {
+            1 => 'Approved',
+            2 => 'Rejected',
+            0 => 'Pending',
+        };
     }
 }
