@@ -50,7 +50,7 @@ class KycDetailController extends Controller
     {
         try {
 
-            // Decode business_id FIRST
+            // Decode business_id
             $decoded = Hashids::decode($request->business_id);
 
             if (empty($decoded)) {
@@ -61,27 +61,55 @@ class KycDetailController extends Controller
             }
 
             $request->merge([
-                'business_id' => $decoded[0] // replace with real ID
+                'business_id' => $decoded[0]
             ]);
 
-
+            // Validation
             $data = $request->validate([
-                'business_id'     => 'required|exists:businesses,id|unique:kyc_details,business_id',
-                'owner_photo'     => 'required|file',
-                'shop_photo'      => 'required|file',
-                'pan_card'        => 'required|file',
+                'business_id' => 'required|exists:businesses,id|unique:kyc_details,business_id',
+
+                'owner_photo' => 'required|file',
+                'shop_photo'  => 'required|file',
+                'pan_card'    => 'required|file',
+
                 'gst_certificate' => 'nullable|file',
                 'trade_license'   => 'nullable|file',
                 'fssai_license'   => 'nullable|file',
                 'address_proof'   => 'nullable|file',
+
+                // statuses
+                'owner_photo_status'     => 'nullable|in:0,1,2',
+                'shop_photo_status'      => 'nullable|in:0,1,2',
+                'pan_card_status'        => 'nullable|in:0,1,2',
+                'gst_certificate_status' => 'nullable|in:0,1,2',
+                'trade_license_status'   => 'nullable|in:0,1,2',
+                'fssai_license_status'   => 'nullable|in:0,1,2',
+                'address_proof_status'   => 'nullable|in:0,1,2',
             ]);
 
+            // Upload files
             foreach ($data as $key => $value) {
                 if ($request->hasFile($key)) {
                     $data[$key] = $this->uploadFile($request->file($key));
                 }
             }
 
+            // Default status fix
+            $statusFields = [
+                'owner_photo_status',
+                'shop_photo_status',
+                'pan_card_status',
+                'gst_certificate_status',
+                'trade_license_status',
+                'fssai_license_status',
+                'address_proof_status'
+            ];
+
+            foreach ($statusFields as $field) {
+                $data[$field] = $data[$field] ?? 0;
+            }
+
+            // Save
             $kyc = KycDetail::create($data);
 
             return response()->json([
@@ -90,7 +118,7 @@ class KycDetailController extends Controller
                 'data' => new KycDetailResource($kyc)
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to create KYC',
@@ -136,7 +164,6 @@ class KycDetailController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            // Decode and overwrite $id
             $decoded = Hashids::decode($id);
 
             if (empty($decoded)) {
@@ -146,7 +173,7 @@ class KycDetailController extends Controller
                 ], 400);
             }
 
-            $id = $decoded[0]; // important
+            $id = $decoded[0];
 
             $kyc = KycDetail::findOrFail($id);
 
@@ -158,18 +185,45 @@ class KycDetailController extends Controller
                 'trade_license' => 'nullable|file',
                 'fssai_license' => 'nullable|file',
                 'address_proof' => 'nullable|file',
+
+                // statuses
+                'owner_photo_status' => 'nullable|in:0,1,2',
+                'shop_photo_status' => 'nullable|in:0,1,2',
+                'pan_card_status' => 'nullable|in:0,1,2',
+                'gst_certificate_status' => 'nullable|in:0,1,2',
+                'trade_license_status' => 'nullable|in:0,1,2',
+                'fssai_license_status' => 'nullable|in:0,1,2',
+                'address_proof_status' => 'nullable|in:0,1,2',
             ]);
 
+            $statusMap = [
+                'owner_photo' => 'owner_photo_status',
+                'shop_photo' => 'shop_photo_status',
+                'pan_card' => 'pan_card_status',
+                'gst_certificate' => 'gst_certificate_status',
+                'trade_license' => 'trade_license_status',
+                'fssai_license' => 'fssai_license_status',
+                'address_proof' => 'address_proof_status',
+            ];
 
             foreach ($this->fileFields as $field) {
 
                 if ($request->hasFile($field)) {
 
-                    // delete old file safely
                     $this->deleteOldFile($kyc->{$field});
-
-                    // upload new file
                     $data[$field] = $this->uploadFile($request->file($field));
+
+                    $statusField = $statusMap[$field];
+
+                    // use request value OR default 0
+                    $data[$statusField] = $request->input($statusField, 0);
+                }
+            }
+
+            // prevent null
+            foreach ($statusMap as $file => $statusField) {
+                if (!isset($data[$statusField])) {
+                    $data[$statusField] = $kyc->$statusField ?? 0;
                 }
             }
 
@@ -181,7 +235,7 @@ class KycDetailController extends Controller
                 'data' => new KycDetailResource($kyc)
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to update KYC',

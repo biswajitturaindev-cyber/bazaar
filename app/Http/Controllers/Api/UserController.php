@@ -182,6 +182,7 @@ class UserController extends Controller
             $categories = BusinessCategory::findOrFail($businessCategoryId)
                 ->categories()
                 ->select('categories.id', 'categories.name')
+                ->distinct()
                 ->get();
 
             // RETURN WITH RESOURCE

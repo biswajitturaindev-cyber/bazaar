@@ -32,6 +32,8 @@ class KycDetailResource extends JsonResource
      */
     private function document($path, $status)
     {
+        $status = (int) $status;
+
         return [
             'url' => $path ? asset('storage/' . $path) : null,
             'status' => $status,
@@ -44,10 +46,10 @@ class KycDetailResource extends JsonResource
      */
     private function statusLabel($status)
     {
-        return match ($status) {
+        return match ((int) $status) {
             1 => 'Approved',
             2 => 'Rejected',
-            0 => 'Pending',
+            default => 'Pending',
         };
     }
 }

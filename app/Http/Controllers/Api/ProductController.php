@@ -357,6 +357,18 @@ class ProductController extends Controller
     {
         try {
 
+            $decodedUser = Hashids::decode($id);
+
+            if (empty($decodedUser)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid User ID'
+                ], 400);
+            }
+
+            $id = $decodedUser[0];
+
+
             $product = Product::with([
                 'category',
                 'subCategory',

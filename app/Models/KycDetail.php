@@ -25,12 +25,21 @@ class KycDetail extends Model
         'address_proof_status'
     ];
 
-    protected $appends = ['id'];
+    protected $casts = [
+        'owner_photo_status' => 'integer',
+        'shop_photo_status' => 'integer',
+        'pan_card_status' => 'integer',
+        'gst_certificate_status' => 'integer',
+        'trade_license_status' => 'integer',
+        'fssai_license_status' => 'integer',
+        'address_proof_status' => 'integer',
+    ];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     // Relationship with Business
     public function business()

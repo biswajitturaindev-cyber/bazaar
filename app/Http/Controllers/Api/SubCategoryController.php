@@ -223,14 +223,21 @@ class SubCategoryController extends Controller
                     ], 400);
                 }
 
-                $category_id = $decoded[0]; // overwrite
+                $category_id = $decoded[0];
 
                 $query->where('category_id', $category_id);
             }
 
-            $subcategories = $query->select('id', 'name')
+            $subcategories = $query
+                ->selectRaw('id, name as value') // key change
                 ->orderBy('name')
-                ->get();
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => Hashids::encode($item->id), // encode id
+                        'value' => $item->value,
+                    ];
+                });
 
             return response()->json([
                 'status' => true,
