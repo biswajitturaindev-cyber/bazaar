@@ -14,26 +14,60 @@ class AttributeValueSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
-            'Size' => ['Half', 'Full'],
-            'Spice Level' => ['Mild', 'Medium', 'Spicy'],
-            'Sweetness' => ['Low', 'Normal', 'High'],
-            'Temperature' => ['Hot', 'Cold'],
-        ];
 
-        foreach ($data as $attributeName => $values) {
+        AttributeValue::insert([
+            // Size Values
+            [
+                'attribute_id' => 1,
+                'value' => 'Small',
+                'color_code' => null,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'attribute_id' => 1,
+                'value' => 'Medium',
+                'color_code' => null,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'attribute_id' => 1,
+                'value' => 'Large',
+                'color_code' => null,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
-            $attribute = Attribute::where('name', $attributeName)->first();
+            // Color Values
+            [
+                'attribute_id' => 2,
+                'value' => 'Red',
+                'color_code' => '#FF0000',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'attribute_id' => 2,
+                'value' => 'Blue',
+                'color_code' => '#0000FF',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'attribute_id' => 2,
+                'value' => 'Green',
+                'color_code' => '#00FF00',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
-            if ($attribute) {
-                foreach ($values as $val) {
-                    AttributeValue::create([
-                        'attribute_id' => $attribute->id,
-                        'value' => $val,
-                        'status' => 1,
-                    ]);
-                }
-            }
-        }
     }
 }

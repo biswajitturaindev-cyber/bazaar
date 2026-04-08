@@ -8,18 +8,19 @@ use Vinkla\Hashids\Facades\Hashids;
 class ProductImage extends Model
 {
     protected $fillable = [
+        'business_category_id',
         'product_id',
         'image_large',
         'image_medium',
         'image_small'
     ];
 
-    protected $appends = ['id'];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     // 🔗 Relationship
     public function product()

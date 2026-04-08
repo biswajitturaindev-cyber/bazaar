@@ -28,10 +28,24 @@ class UserResource extends JsonResource
             'wallet2' => $this->wallet2,
             'wallet3' => $this->wallet3,
 
-            // Relationship
+            'kyc_status' => $this->statusLabel($this->kyc_status),
+
             'business' => new BusinessResource(
-               $this->whenLoaded('business')
+                $this->whenLoaded('business')
             ),
         ];
+    }
+
+    /**
+     * Status Label Helper
+     */
+    private function statusLabel($status)
+    {
+        return match ((int) $status) {
+            1 => 'approved',
+            2 => 'pending',
+            3 => 'cancel',
+            default => 'not submitted',
+        };
     }
 }

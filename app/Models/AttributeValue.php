@@ -7,15 +7,14 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class AttributeValue extends Model
 {
-    protected $fillable = ['attribute_id', 'value', 'color_code', 'status'];
+    protected $fillable = [
+        'attribute_id',
+        'value',
+        'color_code',
+        'status'
+    ];
 
-    // protected $appends = ['id'];
-
-    // public function getIdAttribute()
-    // {
-    //     return Hashids::encode($this->attributes['id']);
-    // }
-
+    // Value → Attribute
     public function attribute()
     {
         return $this->belongsTo(Attribute::class);

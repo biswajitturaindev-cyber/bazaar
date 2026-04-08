@@ -154,18 +154,18 @@ class AuthController extends Controller
 
             // Validate request
             $validated = $request->validate([
-                'email' => 'required|email',
+                'vendor_id' => 'required',
                 'password' => 'required'
             ]);
 
             // Find user
-            $user = User::where('email', $validated['email'])->first();
+            $user = User::where('vendor_id', $validated['vendor_id'])->first();
 
             // Invalid credentials
             if (!$user || !Hash::check($validated['password'], $user->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Invalid vendor id or password'
                 ], 401);
             }
 
@@ -188,7 +188,7 @@ class AuthController extends Controller
                 'business.contact',
                 'business.agreement',
                 //'business.bankDetail',
-                //'business.kycDetail',
+                'business.kycDetail',
                 //'business.operationalDetail'
             ]);
 
