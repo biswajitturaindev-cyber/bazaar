@@ -8,6 +8,8 @@ use App\Models\ProductAttributeValue;
 use App\Models\ProductImage;
 use App\Http\Resources\ProductResource;
 use App\Models\Business;
+use App\Models\BusinessCategory;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -56,23 +58,35 @@ class ProductController extends Controller
      */
     // public function store(Request $request)
     // {
-
     //     DB::beginTransaction();
 
     //     try {
-    //         // STEP 1: Check GST existence FIRST
-    //         $hasGst = Business::where('user_id', $request->user_id)
+
+    //         // Decode user_id first
+    //         $decodedUser = Hashids::decode($request->user_id);
+
+    //         if (empty($decodedUser)) {
+    //             return response()->json([
+    //                 'status'  => false,
+    //                 'message' => 'Invalid User ID'
+    //             ], 400);
+    //         }
+
+    //         $userId = $decodedUser[0];
+
+    //         // STEP 1: Check GST existence
+    //         $hasGst = Business::where('user_id', $userId)
     //             ->whereNotNull('gst_number')
     //             ->where('gst_number', '!=', '')
     //             ->exists();
 
-    //         // STEP 2: Dynamic validation rules
+    //         // STEP 2: Validation rules
     //         $rules = [
-    //             'user_id' => 'required|exists:users,id',
+    //             'user_id' => 'required',
 
-    //             'category_id' => 'required|exists:categories,id',
-    //             'sub_category_id' => 'nullable|exists:sub_categories,id',
-    //             'sub_sub_category_id' => 'nullable|exists:sub_category_items,id',
+    //             'category_id' => 'required',
+    //             'sub_category_id' => 'nullable',
+    //             'sub_sub_category_id' => 'nullable',
 
     //             'name' => 'required|string',
     //             'description' => 'nullable|string',
@@ -85,25 +99,38 @@ class ProductController extends Controller
 
     //             // attributes
     //             'attributes' => 'nullable|array',
-    //             'attributes.*.attribute_id' => 'required|exists:attributes,id',
-    //             'attributes.*.attribute_value_id' => 'required|exists:attribute_values,id',
+    //             'attributes.*.attribute_id' => 'required',
+    //             'attributes.*.attribute_value_id' => 'required',
 
     //             // images
     //             'images' => 'nullable|array',
     //             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000',
     //         ];
 
-    //         // CONDITIONAL VALIDATION
+    //         // Conditional GST validation
     //         if ($hasGst) {
-    //             $rules['hsn_id'] = 'required|exists:hsns,id';
+    //             $rules['hsn_id'] = 'required';
     //             $rules['gst_percent'] = 'required';
-    //         } else {
-    //             $rules['hsn_id'] = 'nullable';
-    //             $rules['gst_percent'] = 'nullable';
     //         }
 
-    //         // Validate
     //         $data = $request->validate($rules);
+
+    //         // Decode all IDs
+    //         $data['user_id'] = $userId;
+    //         $data['category_id'] = decodeIdOrFail($data['category_id'], 'Invalid Category ID');
+
+    //         if (!empty($data['sub_category_id'])) {
+    //             $data['sub_category_id'] = decodeIdOrFail($data['sub_category_id'], 'Invalid Sub Category ID');
+    //         }
+
+
+    //         if (!empty($data['sub_sub_category_id'])) {
+    //             $data['sub_sub_category_id'] = decodeIdOrFail($data['sub_sub_category_id'], 'Invalid Sub Sub Category ID');
+    //         }
+
+    //         if (!empty($data['hsn_id'])) {
+    //             $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
+    //         }
 
     //         // CREATE PRODUCT
     //         $product = Product::create($data);
@@ -111,15 +138,19 @@ class ProductController extends Controller
     //         // SAVE ATTRIBUTES
     //         if (!empty($request['attributes'])) {
     //             foreach ($request['attributes'] as $attr) {
+
+    //                 $attributeId = decodeIdOrFail($attr['attribute_id'], 'Invalid Attribute ID');
+    //                 $valueId = decodeIdOrFail($attr['attribute_value_id'], 'Invalid Attribute Value ID');
+
     //                 ProductAttributeValue::create([
     //                     'product_id' => $product->id,
-    //                     'attribute_id' => $attr['attribute_id'],
-    //                     'attribute_value_id' => $attr['attribute_value_id'],
+    //                     'attribute_id' => $attributeId,
+    //                     'attribute_value_id' => $valueId,
     //                 ]);
     //             }
     //         }
 
-    //         // MULTIPLE IMAGE UPLOAD
+    //         // IMAGE UPLOAD
     //         if ($request->hasFile('images')) {
 
     //             $manager = new ImageManager(new Driver());
@@ -128,34 +159,27 @@ class ProductController extends Controller
 
     //                 $filename = time() . '_' . uniqid();
 
-    //                 // LARGE (600x600)
+    //                 // LARGE
     //                 $large = $manager->read($file)->cover(600, 600);
-    //                 $largeWebp = compressToTargetSize($large, 30);
-
     //                 Storage::disk('public')->put(
     //                     "products/large/{$filename}.webp",
-    //                     $largeWebp
+    //                     compressToTargetSize($large, 30)
     //                 );
 
-    //                 // MEDIUM (300x300)
+    //                 // MEDIUM
     //                 $medium = $manager->read($file)->cover(150, 150);
-    //                 $mediumWebp = compressToTargetSize($medium, 25);
-
     //                 Storage::disk('public')->put(
     //                     "products/medium/{$filename}.webp",
-    //                     $mediumWebp
+    //                     compressToTargetSize($medium, 25)
     //                 );
 
-    //                 // SMALL 40x40
+    //                 // SMALL
     //                 $small = $manager->read($file)->cover(40, 40);
-    //                 $smallWebp = compressToTargetSize($small, 15);
-
     //                 Storage::disk('public')->put(
     //                     "products/small/{$filename}.webp",
-    //                     $smallWebp
+    //                     compressToTargetSize($small, 15)
     //                 );
 
-    //                 // SAVE DB
     //                 ProductImage::create([
     //                     'product_id' => $product->id,
     //                     'image_large' => "products/large/{$filename}.webp",
@@ -168,18 +192,31 @@ class ProductController extends Controller
     //         DB::commit();
 
     //         return response()->json([
-    //             'status' => true,
+    //             'status'  => true,
     //             'message' => 'Product created successfully',
-    //             'data' => new ProductResource($product->load('images','attributes.attribute','attributes.value'))
+    //             'data'    => new ProductResource(
+    //                 $product->load('images','attributes.attribute','attributes.value')
+    //             )
     //         ], 201);
+
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'message' => 'Validation error',
+    //             'errors'  => $e->errors()
+    //         ], 422);
 
     //     } catch (\Exception $e) {
 
     //         DB::rollBack();
 
     //         return response()->json([
-    //             'status' => false,
-    //             'message' => $e->getMessage()
+    //             'status'  => false,
+    //             'message' => 'Something went wrong',
+    //             'error'   => config('app.debug') ? $e->getMessage() : null
     //         ], 500);
     //     }
     // }
@@ -188,98 +225,88 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-
         try {
-
-            // Decode user_id first
-            $decodedUser = Hashids::decode($request->user_id);
-
-            if (empty($decodedUser)) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Invalid User ID'
-                ], 400);
-            }
-
-            $userId = $decodedUser[0];
-
-            // STEP 1: Check GST existence
-            $hasGst = Business::where('user_id', $userId)
-                ->whereNotNull('gst_number')
-                ->where('gst_number', '!=', '')
-                ->exists();
-
-            // STEP 2: Validation rules
+            // Validation
             $rules = [
-                'user_id' => 'required',
-
+                'business_id' => 'required',
                 'category_id' => 'required',
                 'sub_category_id' => 'nullable',
-                'sub_sub_category_id' => 'nullable',
 
+                'sku' => 'required|string',
                 'name' => 'required|string',
                 'description' => 'nullable|string',
 
                 'mrp' => 'required|numeric',
+                'cost_price' => 'nullable|numeric',
                 'selling_price' => 'nullable|numeric',
                 'discount' => 'nullable|numeric',
 
-                'status' => 'required|boolean',
+                'stock' => 'nullable|integer',
+                'manufacture_date' => 'nullable|date',
+                'expiry_date' => 'nullable|date',
 
-                // attributes
-                'attributes' => 'nullable|array',
-                'attributes.*.attribute_id' => 'required',
-                'attributes.*.attribute_value_id' => 'required',
+                'status' => 'required|integer',
 
-                // images
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000',
             ];
 
-            // Conditional GST validation
-            if ($hasGst) {
-                $rules['hsn_id'] = 'required';
-                $rules['gst_percent'] = 'required';
-            }
-
             $data = $request->validate($rules);
 
-            // Decode all IDs
-            $data['user_id'] = $userId;
+            // Decode IDs
+            $data['business_id'] = decodeIdOrFail($data['business_id'], 'Invalid Business ID');
             $data['category_id'] = decodeIdOrFail($data['category_id'], 'Invalid Category ID');
 
             if (!empty($data['sub_category_id'])) {
                 $data['sub_category_id'] = decodeIdOrFail($data['sub_category_id'], 'Invalid Sub Category ID');
             }
 
+            // Get Business (Secure)
+            $business = Business::findOrFail($data['business_id']);
 
-            if (!empty($data['sub_sub_category_id'])) {
-                $data['sub_sub_category_id'] = decodeIdOrFail($data['sub_sub_category_id'], 'Invalid Sub Sub Category ID');
+            $tableMap = [
+                1 => 'product_food_beverages',
+                2 => 'product_construction_hardware',
+                3 => 'product_home_livings',
+                4 => 'product_fashion_lifestyles',
+                5 => 'product_automobiles',
+                //6 => 'product_education_stationery',
+                7 => 'product_agricultures',
+                8 => 'product_retail_general',
+                9 => 'product_healths',
+                //10 => 'product_sports_others',
+            ];
+
+            $categoryId = $business->business_category_id;
+
+            if (!isset($tableMap[$categoryId])) {
+                throw new \Exception('Invalid business category mapping');
             }
 
-            if (!empty($data['hsn_id'])) {
-                $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
-            }
+            $tableName = $tableMap[$categoryId];
 
-            // CREATE PRODUCT
-            $product = Product::create($data);
+            // Insert Product
+            $productId = DB::table($tableName)->insertGetId([
+                'business_id' => $business->id,
+                'business_sub_category_id' => $business->business_sub_category_id,
+                'category_id' => $data['category_id'],
+                'sub_category_id' => $data['sub_category_id'] ?? null,
+                'sku' => $data['sku'],
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'mrp' => $data['mrp'],
+                'cost_price' => $data['cost_price'] ?? null,
+                'selling_price' => $data['selling_price'] ?? null,
+                'discount' => $data['discount'] ?? 0,
+                'stock' => $data['stock'] ?? 0,
+                'manufacture_date' => $data['manufacture_date'] ?? null,
+                'expiry_date' => $data['expiry_date'] ?? null,
+                'status' => $data['status'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-            // SAVE ATTRIBUTES
-            if (!empty($request['attributes'])) {
-                foreach ($request['attributes'] as $attr) {
-
-                    $attributeId = decodeIdOrFail($attr['attribute_id'], 'Invalid Attribute ID');
-                    $valueId = decodeIdOrFail($attr['attribute_value_id'], 'Invalid Attribute Value ID');
-
-                    ProductAttributeValue::create([
-                        'product_id' => $product->id,
-                        'attribute_id' => $attributeId,
-                        'attribute_value_id' => $valueId,
-                    ]);
-                }
-            }
-
-            // IMAGE UPLOAD
+            // Image Upload
             if ($request->hasFile('images')) {
 
                 $manager = new ImageManager(new Driver());
@@ -288,21 +315,18 @@ class ProductController extends Controller
 
                     $filename = time() . '_' . uniqid();
 
-                    // LARGE
                     $large = $manager->read($file)->cover(600, 600);
                     Storage::disk('public')->put(
                         "products/large/{$filename}.webp",
                         compressToTargetSize($large, 30)
                     );
 
-                    // MEDIUM
                     $medium = $manager->read($file)->cover(150, 150);
                     Storage::disk('public')->put(
                         "products/medium/{$filename}.webp",
                         compressToTargetSize($medium, 25)
                     );
 
-                    // SMALL
                     $small = $manager->read($file)->cover(40, 40);
                     Storage::disk('public')->put(
                         "products/small/{$filename}.webp",
@@ -310,7 +334,9 @@ class ProductController extends Controller
                     );
 
                     ProductImage::create([
-                        'product_id' => $product->id,
+                        'business_category_id' => $business->business_category_id,
+                        'product_id' => $productId,
+
                         'image_large' => "products/large/{$filename}.webp",
                         'image_medium' => "products/medium/{$filename}.webp",
                         'image_small' => "products/small/{$filename}.webp",
@@ -321,11 +347,12 @@ class ProductController extends Controller
             DB::commit();
 
             return response()->json([
-                'status'  => true,
+                'status' => true,
                 'message' => 'Product created successfully',
-                'data'    => new ProductResource(
-                    $product->load('images','attributes.attribute','attributes.value')
-                )
+                'data' => [
+                    'product_id' => Hashids::encode($productId),
+                    'table' => $tableName
+                ]
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -333,9 +360,9 @@ class ProductController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Validation error',
-                'errors'  => $e->errors()
+                'errors' => $e->errors()
             ], 422);
 
         } catch (\Exception $e) {
@@ -343,9 +370,9 @@ class ProductController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Something went wrong',
-                'error'   => config('app.debug') ? $e->getMessage() : null
+                'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }

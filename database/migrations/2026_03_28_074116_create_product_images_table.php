@@ -13,11 +13,21 @@ return new class extends Migration
     {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->index()->constrained()->cascadeOnDelete();
-            $table->string('image_large');   // 600x600
-            $table->string('image_medium');  // 150x150
-            $table->string('image_small');   // 40x40
+            // Category decides table
+            $table->foreignId('business_category_id')
+                ->constrained('business_categories')
+                ->cascadeOnDelete();
+
+            // Product ID inside that category table
+            $table->unsignedBigInteger('product_id');
+
+            $table->string('image_large');
+            $table->string('image_medium');
+            $table->string('image_small');
+
             $table->timestamps();
+
+            $table->index(['business_category_id', 'product_id']);
         });
     }
 

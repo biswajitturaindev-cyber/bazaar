@@ -23,13 +23,15 @@ class DatabaseSeeder extends Seeder
             BusinessCategorySeeder::class,
             CategorySeeder::class,
             SubCategorySeeder::class,
+            AttributeMasterSeeder::class,
             AttributeSeeder::class,
-            AttributeValueSeeder::class
+            AttributeValueSeeder::class,
             ]);
 
         // Create Test User
         User::create([
             'name' => 'Test User',
+            'vendor_id' => 'RV00000',
             'email' => 'test@example.com',
             'password' => Hash::make('123456'), // IMPORTANT
 

@@ -2,33 +2,31 @@
 
 namespace Database\Seeders;
 
-use App\Models\Attribute;
+use App\Models\AttributeMaster;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class AttributeSeeder extends Seeder
+class AttributeMasterSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Attribute::insert([
+        AttributeMaster::insert([
             [
                 'id' => 1,
-                'attribute_master_id' => 1, // Size
-                'type' => 'text',
+                'business_category_id' => 1,
+                'business_sub_category_id' => 1,
                 'name' => 'Size',
-                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'attribute_master_id' => 2, // Color
-                'type' => 'color',
+                'business_category_id' => 1,
+                'business_sub_category_id' => 1,
                 'name' => 'Color',
-                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

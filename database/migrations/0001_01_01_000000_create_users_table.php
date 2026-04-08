@@ -28,6 +28,7 @@ return new class extends Migration
             $table->decimal('wallet3', 10, 2)->default(0);
 
             $table->tinyInteger('status')->default(1)->index()->comment('1=active, 0=inactive');
+            $table->tinyInteger('kyc_status')->default(0)->index()->comment('0=not submitted, 1=approved, 2=pending, 3=cancel');
 
             $table->rememberToken();
             $table->timestamps();
