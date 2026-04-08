@@ -117,9 +117,9 @@ class UserController extends Controller
                 'state',
                 'pincode',
                 'landmark',
-                'google_map_location'
-                //'latitude',
-                //'longitude'
+                'google_map_location',
+                'latitude',
+                'longitude'
             ]));
 
             // Contact
@@ -146,9 +146,9 @@ class UserController extends Controller
                 'business.address',
                 'business.contact',
                 'business.agreement',
-                'business.bankDetail',
-                'business.kycDetail',
-                'business.operationalDetail'
+                //'business.bankDetail',
+                //'business.kycDetail',
+                //'business.operationalDetail'
             ]);
 
             return response()->json([
