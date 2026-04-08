@@ -187,9 +187,9 @@ class AuthController extends Controller
                 'business.address',
                 'business.contact',
                 'business.agreement',
-                'business.bankDetail',
-                'business.kycDetail',
-                'business.operationalDetail'
+                //'business.bankDetail',
+                //'business.kycDetail',
+                //'business.operationalDetail'
             ]);
 
             // Success response
