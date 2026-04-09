@@ -15,9 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
         $middleware->alias([
             'member.api' => \App\Http\Middleware\VerifyMemberApiToken::class,
         ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

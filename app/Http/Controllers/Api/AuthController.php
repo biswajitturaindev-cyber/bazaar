@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,68 +12,72 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 
+=======
+use App\Http\Resources\UserResource;
+>>>>>>> 314d3b2d2c51418d91eeb6523bc82a696204d897
 use App\Models\Business;
 use App\Models\BusinessAddress;
 use App\Models\BusinessAgreement;
 use App\Models\BusinessContact;
 use App\Models\User;
+<<<<<<< HEAD
+=======
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+>>>>>>> 314d3b2d2c51418d91eeb6523bc82a696204d897
 
 class AuthController extends Controller
 {
     /**
      * Register New User + Business Setup
      */
-
     public function register(Request $request)
     {
+        // Validation
+        $data = $request->validate([
+            // User
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'mobile' => 'required|digits_between:10,15|unique:users,mobile',
+            'password' => 'required|min:6',
+    
+            // Business
+            'business_name' => 'required|string|max:255',
+            'business_category_id' => 'required|numeric',
+            'business_sub_category_id' => 'required|numeric',
+    
+            // Contact
+            'contact_person_name' => 'required|string|max:255',
+            'contact_number' => 'required|digits_between:10,15',
+    
+            // Agreement
+            'agree_terms' => 'required|accepted',
+            'confirm_info' => 'required|accepted',
+    
+            // Optional
+            'sponsor_id' => 'nullable|numeric',
+            'dob' => 'nullable|date',
+            'gender' => 'nullable|numeric',
+            'years_in_business' => 'nullable|numeric',
+            'gst_number' => 'nullable|string|max:50',
+            'pan_number' => 'nullable|string|max:20',
+            'fssai_license' => 'nullable|string|max:50',
+            'registration_number' => 'nullable|string|max:50',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|digits:6',
+            'landmark' => 'nullable|string|max:255',
+            'google_map_location' => 'nullable|string',
+            'latitude' => 'nullable',
+            'longitude' => 'nullable',
+        ]);
+    
+        DB::beginTransaction();
+    
         try {
-    
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'mobile' => 'required|digits_between:10,15|unique:users,mobile',
-                'password' => 'required|min:6',
-    
-                'business_name' => 'required|string|max:255',
-                'business_category_id' => 'required|numeric',
-                'business_sub_category_id' => 'required|numeric',
-    
-                'agree_terms' => 'required|accepted',
-                'confirm_info' => 'required|accepted',
-    
-                'sponsor_id' => 'nullable|numeric',
-                'dob' => 'nullable|date',
-                'gender' => 'nullable|numeric',
-    
-                'years_in_business' => 'nullable|numeric',
-                'gst_number' => 'nullable|string|max:50',
-                'pan_number' => 'nullable|string|max:20',
-                'fssai_license' => 'nullable|string|max:50',
-                'registration_number' => 'nullable|string|max:50',
-    
-                'address_line_1' => 'nullable|string|max:255',
-                'address_line_2' => 'nullable|string|max:255',
-                'city' => 'nullable|string|max:100',
-                'state' => 'nullable|string|max:100',
-                'pincode' => 'nullable|digits:6',
-                'landmark' => 'nullable|string|max:255',
-                'google_map_location' => 'nullable|string',
-                'latitude' => 'nullable',
-                'longitude' => 'nullable',
-            ]);
-    
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'type' => 'validation_error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-    
-            $data = $validator->validated();
-    
-            DB::beginTransaction();
-    
             // Hash password
             $data['password'] = Hash::make($data['password']);
     
@@ -80,19 +85,19 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
                 'mobile' => $data['mobile'],
                 'dob' => $data['dob'] ?? null,
                 'gender' => $data['gender'] ?? null,
-                'status' => 1
+                'password' => $data['password'],
+                'status' => 1,
             ]);
     
-            // Vendor ID
+            // Generate Vendor ID
             $randomNumber = ($user->id * 7919) % 100000000;
             $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
             $user->update(['vendor_id' => $vendorId]);
     
-            // Business
+            // Create Business
             $business = Business::create([
                 'user_id' => $user->id,
                 'sponsor_id' => $data['sponsor_id'] ?? null,
@@ -106,7 +111,7 @@ class AuthController extends Controller
                 'registration_number' => $data['registration_number'] ?? null,
             ]);
     
-            // Address
+            // Business Address
             BusinessAddress::create([
                 'business_id' => $business->id,
                 'address_line_1' => $data['address_line_1'] ?? null,
@@ -120,14 +125,14 @@ class AuthController extends Controller
                 'longitude' => $data['longitude'] ?? null,
             ]);
     
-            // Contact
+            // Business Contact
             BusinessContact::create([
                 'business_id' => $business->id,
-                'contact_person_name' => $data['name'] ?? null,
-                'contact_number' => $data['mobile'] ?? null,
+                'contact_person_name' => $data['contact_person_name'],
+                'contact_number' => $data['contact_number'],
             ]);
     
-            // Agreement
+            // Business Agreement
             BusinessAgreement::create([
                 'business_id' => $business->id,
                 'agree_terms' => 1,
@@ -136,22 +141,30 @@ class AuthController extends Controller
     
             DB::commit();
     
+            // Load relations
+            $user->load([
+                'business.category',
+                'business.subCategory',
+                'business.address',
+                'business.contact',
+                'business.agreement',
+                'business.bankDetail',
+                'business.kycDetail',
+                'business.operationalDetail'
+            ]);
+    
             return response()->json([
                 'status' => true,
-                'message' => 'Registration successful with VendorID: '.$vendorId,
-                'user_id' => $user->id,
+                'message' => 'Registration successful',
+                'user' => new UserResource($user),
                 'vendor_id' => $vendorId
             ], 201);
     
-        } catch (\Throwable $e) {
-    
+        } catch (\Exception $e) {
             DB::rollBack();
-    
             Log::error('Vendor Register Error: ' . $e->getMessage() . ' | Line: ' . $e->getLine());
-    
             return response()->json([
                 'status' => false,
-                'type' => 'server_error',
                 'message' => $e->getMessage(),
                 'line' => $e->getLine()
             ], 500);

@@ -30,7 +30,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
     'member_api' => [ 
         'token' => env('MEMBER_API_TOKEN')
     ],
+
 ];
