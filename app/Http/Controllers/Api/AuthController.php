@@ -213,11 +213,11 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'Login successful',
                 'token' => $token,
-                //'user' => new UserResource($user)
-                'data' => [
-                    'user' => new UserResource($user),
-                    'kycDetail' => new KycDetailResource($user->business->kycDetail)
-                ]
+                'user' => new UserResource($user)
+                // 'data' => [
+                //     'user' => new UserResource($user),
+                //     'kycDetail' => new KycDetailResource($user->business->kycDetail)
+                // ]
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
