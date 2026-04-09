@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap');
+
+:root {
+    --primary-color: #FF6600;
+    --secondary-color: 069983;
+    --white-color: #ffffff;
+    --my-font: 'Mona Sans', sans-serif;
+}
+
+*, html⁠ ⁠ {
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+    font-size: 14px;
+}
+
+
+#sidebar {
+    scrollbar-width: thin;
+}

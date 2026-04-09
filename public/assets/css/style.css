@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap');
+
+:root {
+    --primary-color: #FF6600;
+    --secondary-color: 069983;
+    --white-color: #ffffff;
+    --my-font: 'Mona Sans', sans-serif;
+}
+
+*,
+html⁠ ⁠ {
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+    font-size: 14px;
+}
+
+
+#sidebar {
+    scrollbar-width: thin;
+}
+
+
+@media (max-width: 768px) {
+    .responsive_table table thead {
+        display: none;
+    }
+
+    .responsive_table table,
+    .responsive_table table tbody,
+    .responsive_table table tr,
+    .responsive_table table td {
+        display: block;
+        width: 100%;
+    }
+
+    .responsive_table table tr {
+        margin-bottom: 12px;
+        border-top: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .responsive_table table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 12px;
+    }
+    
+    .responsive_table table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #64748b;
+    }
+}
