@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-<<<<<<< HEAD
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -12,20 +10,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 
-=======
-use App\Http\Resources\UserResource;
->>>>>>> 314d3b2d2c51418d91eeb6523bc82a696204d897
 use App\Models\Business;
 use App\Models\BusinessAddress;
 use App\Models\BusinessAgreement;
 use App\Models\BusinessContact;
 use App\Models\User;
-<<<<<<< HEAD
-=======
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
->>>>>>> 314d3b2d2c51418d91eeb6523bc82a696204d897
 
 class AuthController extends Controller
 {
