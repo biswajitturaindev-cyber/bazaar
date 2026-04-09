@@ -215,7 +215,7 @@ class AuthController extends Controller
                 'token' => $token,
                 //'user' => new UserResource($user)
                 'data' => [
-                    'user' => $user,
+                    'user' => new UserResource($user),
                     'kycDetail' => new KycDetailResource($user->business->kycDetail)
                 ]
             ], 200);
