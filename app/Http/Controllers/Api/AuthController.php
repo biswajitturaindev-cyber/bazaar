@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\KycDetailResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -30,20 +31,20 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'mobile' => 'required|digits_between:10,15|unique:users,mobile',
             'password' => 'required|min:6',
-    
+
             // Business
             'business_name' => 'required|string|max:255',
             'business_category_id' => 'required|numeric',
             'business_sub_category_id' => 'required|numeric',
-    
+
             // Contact
             'contact_person_name' => 'required|string|max:255',
             'contact_number' => 'required|digits_between:10,15',
-    
+
             // Agreement
             'agree_terms' => 'required|accepted',
             'confirm_info' => 'required|accepted',
-    
+
             // Optional
             'sponsor_id' => 'nullable|numeric',
             'dob' => 'nullable|date',
@@ -63,13 +64,13 @@ class AuthController extends Controller
             'latitude' => 'nullable',
             'longitude' => 'nullable',
         ]);
-    
+
         DB::beginTransaction();
-    
+
         try {
             // Hash password
             $data['password'] = Hash::make($data['password']);
-    
+
             // Create User
             $user = User::create([
                 'name' => $data['name'],
@@ -80,12 +81,12 @@ class AuthController extends Controller
                 'password' => $data['password'],
                 'status' => 1,
             ]);
-    
+
             // Generate Vendor ID
             $randomNumber = ($user->id * 7919) % 100000000;
             $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
             $user->update(['vendor_id' => $vendorId]);
-    
+
             // Create Business
             $business = Business::create([
                 'user_id' => $user->id,
@@ -99,7 +100,7 @@ class AuthController extends Controller
                 'fssai_license' => $data['fssai_license'] ?? null,
                 'registration_number' => $data['registration_number'] ?? null,
             ]);
-    
+
             // Business Address
             BusinessAddress::create([
                 'business_id' => $business->id,
@@ -113,23 +114,23 @@ class AuthController extends Controller
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
             ]);
-    
+
             // Business Contact
             BusinessContact::create([
                 'business_id' => $business->id,
                 'contact_person_name' => $data['contact_person_name'],
                 'contact_number' => $data['contact_number'],
             ]);
-    
+
             // Business Agreement
             BusinessAgreement::create([
                 'business_id' => $business->id,
                 'agree_terms' => 1,
                 'confirm_info' => 1,
             ]);
-    
+
             DB::commit();
-    
+
             // Load relations
             $user->load([
                 'business.category',
@@ -141,14 +142,14 @@ class AuthController extends Controller
                 'business.kycDetail',
                 'business.operationalDetail'
             ]);
-    
+
             return response()->json([
                 'status' => true,
                 'message' => 'Registration successful',
                 'user' => new UserResource($user),
                 'vendor_id' => $vendorId
             ], 201);
-    
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vendor Register Error: ' . $e->getMessage() . ' | Line: ' . $e->getLine());
@@ -212,7 +213,11 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'Login successful',
                 'token' => $token,
-                'user' => new UserResource($user)
+                //'user' => new UserResource($user)
+                'data' => [
+                    'user' => $user,
+                    'kycDetail' => new KycDetailResource($user->business->kycDetail)
+                ]
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
