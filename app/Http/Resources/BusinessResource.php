@@ -34,7 +34,8 @@ class BusinessResource extends JsonResource
             'contact' => $this->whenLoaded('contact'),
             'agreement' => $this->whenLoaded('agreement'),
             'bankdetail' => $this->whenLoaded('bankDetail'),
-            'kycdetail' => $this->whenLoaded('kycDetail'),
+            //'kycdetail' => $this->whenLoaded('kycDetail'),
+            'kycdetail' => new KycDetailResource($this->whenLoaded('kycDetail')),
         ];
     }
 }
