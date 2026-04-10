@@ -25,7 +25,6 @@ use Illuminate\Support\Str;
 |--------------------------------------------------------------------------
 */
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('member.api');
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
