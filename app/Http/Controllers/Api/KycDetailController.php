@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\KycDetailResource;
+use App\Models\Business;
 use App\Models\KycDetail;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -111,6 +113,12 @@ class KycDetailController extends Controller
 
             // Save
             $kyc = KycDetail::create($data);
+
+            $business = Business::find($decoded[0]);
+
+            if ($business && $business->user) {
+                $business->user->update(['kyc_status' => 2]);
+            }
 
             return response()->json([
                 'status' => true,

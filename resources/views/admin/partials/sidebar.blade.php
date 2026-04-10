@@ -128,6 +128,34 @@
         </ul>
     </div>
 
+    <div>
+        <a href="javascript:void(0)"
+            class="dropdown-btn flex justify-between items-center text-slate-200 hover:text-orange-400 group">
+
+            <div class="flex gap-3 items-center">
+                <div class="w-10 h-10 shrink-0 bg-slate-600 rounded-md flex justify-center items-center">
+                    <i class="ri-team-line menu-icon all-items-icon"></i>
+                </div>
+                <span class="capitalize menu-text">Users Master</span>
+            </div>
+
+            <i class="ri-arrow-right-s-line transition-transform duration-300 dropdown-arrow"></i>
+        </a>
+
+        <ul
+            class="dropdown-content list-none w-5/6 mx-auto space-y-2 overflow-hidden max-h-0 opacity-0 transition-all duration-300 ease-in-out">
+
+            <li>
+                <a href="{{ route('users.index') }}"
+                    class="block text-slate-400 text-sm hover:text-white hover:pl-2 transition-all duration-200">
+                    - Users List
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+
 
     <div>
         <a href="#"
