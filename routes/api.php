@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,25 @@ use App\Http\Controllers\Api\UserController;
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('member.api');
 Route::post('/login', [AuthController::class, 'login']);
+
+/*
+|--------------------------------------------------------------------------
+| Captcha
+|--------------------------------------------------------------------------
+*/
+Route::get('/captcha', function () {
+    $code = strtoupper(Str::random(5));
+
+    return response()->json([
+        'image' => captcha_img($code),
+        'key' => encrypt([
+            'code' => $code,
+            'time' => now()->timestamp
+        ])
+    ]);
+});
+
+
 
 /*
 |--------------------------------------------------------------------------

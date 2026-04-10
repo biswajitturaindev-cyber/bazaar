@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
-
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use App\Models\Business;
 use App\Models\BusinessAddress;
 use App\Models\BusinessAgreement;
@@ -167,24 +168,68 @@ class AuthController extends Controller
     {
         try {
 
-            // Validate request
-            $validated = $request->validate([
-                'vendor_id' => 'required',
-                'password' => 'required'
-            ]);
+            $key = Str::lower($request->vendor_id) . '|' . $request->ip();
 
-            // Find user
-            $user = User::where('vendor_id', $validated['vendor_id'])->first();
-
-            // Invalid credentials
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
+            // Block after 5 attempts
+            if (RateLimiter::tooManyAttempts($key, 5)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid vendor id or password'
+                    'message' => 'Too many attempts. Try later.'
+                ], 429);
+            }
+
+            // Validate all fields INCLUDING captcha
+            $validated = $request->validate([
+                'vendor_id' => 'required',
+                'password' => 'required',
+                'captcha' => 'required',
+                'captcha_key' => 'required'
+            ]);
+
+            // STEP 1: CAPTCHA VALIDATION FIRST
+            try {
+                $data = decrypt($validated['captcha_key']);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid captcha key'
+                ], 422);
+            }
+
+            // Expiry check
+            if (now()->timestamp - $data['time'] > 120) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Captcha expired'
+                ], 422);
+            }
+
+            // If captcha wrong → STOP here
+            if (strtolower($data['code']) !== strtolower($validated['captcha'])) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid captcha'
+                ], 422);
+            }
+
+            // STEP 2: Now check login
+            $user = User::where('vendor_id', $validated['vendor_id'])->first();
+
+            if (!$user || !Hash::check($validated['password'], $user->password)) {
+
+                RateLimiter::hit($key, 60);
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials',
+                    'attempts' => RateLimiter::attempts($key)
                 ], 401);
             }
 
-            // Check active status
+            // Success → clear attempts
+            RateLimiter::clear($key);
+
+            // Inactive
             if ($user->status != 1) {
                 return response()->json([
                     'status' => false,
@@ -192,32 +237,27 @@ class AuthController extends Controller
                 ], 403);
             }
 
-            // Create token
+            // Token
             $token = $user->createToken('api-token')->plainTextToken;
 
-            // Load relations
             $user->load([
                 'business.category',
                 'business.subCategory',
                 'business.address',
                 'business.contact',
                 'business.agreement',
-                //'business.bankDetail',
                 'business.kycDetail',
-                //'business.operationalDetail'
             ]);
 
-            // Success response
             return response()->json([
                 'status' => true,
                 'message' => 'Login successful',
                 'token' => $token,
                 'user' => new UserResource($user)
-            ], 200);
+            ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
 
-            // Validation errors
             return response()->json([
                 'status' => false,
                 'message' => 'Validation error',
@@ -226,14 +266,14 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
 
-            // General errors
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production if needed
+                'error' => $e->getMessage()
             ], 500);
         }
     }
+
     /**
      *  Profile
      */
