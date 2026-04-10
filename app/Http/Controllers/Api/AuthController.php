@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\KycDetailResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -214,10 +213,6 @@ class AuthController extends Controller
                 'message' => 'Login successful',
                 'token' => $token,
                 'user' => new UserResource($user)
-                // 'data' => [
-                //     'user' => new UserResource($user),
-                //     'kycDetail' => new KycDetailResource($user->business->kycDetail)
-                // ]
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
