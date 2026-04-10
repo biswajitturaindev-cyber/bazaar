@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BusinessCategoryController;
 use App\Http\Controllers\Admin\BusinessCategoryMappingController;
 use App\Http\Controllers\Admin\BusinessSubCategoryController;
 use App\Http\Controllers\Admin\HsnController;
+use App\Http\Controllers\Admin\KycDetailController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
@@ -143,6 +144,8 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('users', UserController::class);
+        Route::resource('kyc-details', KycDetailController::class);
+
 
     });
 });
