@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\BusinessSubCategoryController;
 use App\Http\Controllers\Admin\HsnController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
-
+use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -137,6 +137,12 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('packages', PackageController::class);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Users Master
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('users', UserController::class);
 
     });
 });
