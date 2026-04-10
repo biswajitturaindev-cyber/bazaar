@@ -34,17 +34,20 @@ Route::post('/login', [AuthController::class, 'login']);
 |--------------------------------------------------------------------------
 */
 Route::get('/captcha', function () {
-    $code = strtoupper(Str::random(5));
+
+    $code = strtoupper(Str::random(6));
 
     return response()->json([
-        'image' => captcha_img($code),
+        'image' => '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
+                        <rect width="100%" height="100%" fill="#f2f2f2"/>
+                        <text x="10" y="25" font-size="20" fill="#333">'.$code.'</text>
+                    </svg>',
         'key' => encrypt([
             'code' => $code,
             'time' => now()->timestamp
         ])
     ]);
 });
-
 
 
 /*

@@ -167,7 +167,6 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-
             $key = Str::lower($request->vendor_id) . '|' . $request->ip();
 
             // Block after 5 attempts
