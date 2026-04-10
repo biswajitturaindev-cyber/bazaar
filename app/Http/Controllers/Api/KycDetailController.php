@@ -276,7 +276,7 @@ class KycDetailController extends Controller
     /**
      * Upload helper
      */
-    private function uploadFile($file, $folder = 'kyc')
+    private function uploadFile($file, $folder = 'storage/kyc')
     {
         $manager = new ImageManager(new Driver());
         $filename = Str::uuid();
