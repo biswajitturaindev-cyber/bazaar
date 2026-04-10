@@ -80,7 +80,9 @@
 
                         {{-- Owner Photo --}}
                         <td class="px-3 py-2">
-                            <img src="{{ asset($kyc->owner_photo) }}" class="w-10 h-10 rounded border">
+                            <img src="{{ $kyc->owner_photo ? asset('storage/' . $kyc->owner_photo) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
+
                             @php [$c,$t] = $statusMap[$kyc->owner_photo_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -89,7 +91,9 @@
 
                         {{-- Shop Photo --}}
                         <td class="px-3 py-2">
-                            <img src="{{ asset($kyc->shop_photo) }}" class="w-10 h-10 rounded border">
+                            <img src="{{ $kyc->shop_photo ? asset('storage/' . $kyc->shop_photo) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
+
                             @php [$c,$t] = $statusMap[$kyc->shop_photo_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -98,7 +102,10 @@
 
                         {{-- PAN --}}
                         <td class="px-3 py-2">
-                            <a href="{{ asset($kyc->pan_card) }}" target="_blank" class="text-blue-600">View</a>
+                            @if($kyc->pan_card)
+                                <a href="{{ asset('storage/' . $kyc->pan_card) }}" target="_blank" class="text-blue-600">View</a>
+                            @endif
+
                             @php [$c,$t] = $statusMap[$kyc->pan_card_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -108,8 +115,9 @@
                         {{-- GST --}}
                         <td class="px-3 py-2">
                             @if($kyc->gst_certificate)
-                                <a href="{{ asset($kyc->gst_certificate) }}" target="_blank class="text-blue-600">View</a>
+                                <a href="{{ asset('storage/' . $kyc->gst_certificate) }}" target="_blank" class="text-blue-600">View</a>
                             @endif
+
                             @php [$c,$t] = $statusMap[$kyc->gst_certificate_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -119,8 +127,9 @@
                         {{-- Trade --}}
                         <td class="px-3 py-2">
                             @if($kyc->trade_license)
-                                <a href="{{ asset($kyc->trade_license) }}" target="_blank" class="text-blue-600">View</a>
+                                <a href="{{ asset('storage/' . $kyc->trade_license) }}" target="_blank" class="text-blue-600">View</a>
                             @endif
+
                             @php [$c,$t] = $statusMap[$kyc->trade_license_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -130,8 +139,9 @@
                         {{-- FSSAI --}}
                         <td class="px-3 py-2">
                             @if($kyc->fssai_license)
-                                <a href="{{ asset($kyc->fssai_license) }}" target="_blank" class="text-blue-600">View</a>
+                                <a href="{{ asset('storage/' . $kyc->fssai_license) }}" target="_blank" class="text-blue-600">View</a>
                             @endif
+
                             @php [$c,$t] = $statusMap[$kyc->fssai_license_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
@@ -141,8 +151,9 @@
                         {{-- Address --}}
                         <td class="px-3 py-2">
                             @if($kyc->address_proof)
-                                <a href="{{ asset($kyc->address_proof) }}" target="_blank" class="text-blue-600">View</a>
+                                <a href="{{ asset('storage/' . $kyc->address_proof) }}" target="_blank" class="text-blue-600">View</a>
                             @endif
+
                             @php [$c,$t] = $statusMap[$kyc->address_proof_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
                                 <span class="px-2 py-1 text-xs font-semibold rounded {{ $c }}">{{ $t }}</span>
