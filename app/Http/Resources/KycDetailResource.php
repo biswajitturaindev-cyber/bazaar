@@ -11,7 +11,7 @@ class KycDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
             'business_id' => Hashids::encode($this->business_id),
 
             // Documents with status
