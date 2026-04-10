@@ -24,7 +24,6 @@ use App\Http\Controllers\Api\UserController;
 |--------------------------------------------------------------------------
 */
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('member.api');
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
