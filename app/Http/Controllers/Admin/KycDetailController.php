@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\KycDetail;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class KycDetailController extends Controller
@@ -82,9 +84,9 @@ class KycDetailController extends Controller
         }
 
         // Update user KYC
-        $userId = \App\Models\Business::where('id', $kyc->business_id)->value('user_id');
+        $userId = Business::where('id', $kyc->business_id)->value('user_id');
 
-        \App\Models\User::where('id', $userId)
+        User::where('id', $userId)
             ->update(['kyc_status' => $kycStatus]);
 
         return redirect()->route('kyc-details.index')
