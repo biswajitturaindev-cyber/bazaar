@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
+use App\Http\Controllers\Api\MasterProductController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
@@ -136,6 +137,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Master Products
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('master-products', MasterProductController::class);
 
 });

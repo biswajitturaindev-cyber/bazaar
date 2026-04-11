@@ -53,7 +53,7 @@
                     class="text-slate-400 text-sm hover:text-white">- Sub Category List</a></li>
             <li><a href="{{ route('admin.product.sub.category.item.list') }}"
                     class="text-slate-400 text-sm hover:text-white">- Sub Sub Category List</a></li>
-            <li><a href="{{ route('admin.product.list') }}" class="text-slate-400 text-sm hover:text-white">- Product
+            <li><a href="{{ route('master-products.index') }}" class="text-slate-400 text-sm hover:text-white">- Master Product
                     List</a></li>
         </ul>
     </div>
