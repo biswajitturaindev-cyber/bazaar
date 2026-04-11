@@ -1,11 +1,11 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Users List
+    KYC List
 @endsection
 
 @section('breadcrumb')
-    Users
+    KYC
 @endsection
 
 @section('content')
@@ -15,12 +15,12 @@
 
         {{-- Header --}}
         <div class="flex justify-between items-center px-5 py-3 border-b">
-            <h2 class="text-lg font-semibold">Users List</h2>
+            <h2 class="text-lg font-semibold">KYC List</h2>
 
-            <a href="{{ route('users.create') }}"
+            {{-- <a href="{{ route('users.create') }}"
                 class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
                 + Add User
-            </a>
+            </a> --}}
         </div>
 
         {{-- Flash Messages --}}

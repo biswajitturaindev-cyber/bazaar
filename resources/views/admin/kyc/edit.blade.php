@@ -1,11 +1,11 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Edit User
+    Edit KYC
 @endsection
 
 @section('breadcrumb')
-    Edit User
+    Edit KYC
 @endsection
 
 @section('content')
@@ -14,7 +14,7 @@
 
         {{-- Header --}}
         <div class="flex justify-between items-center p-5 border-b">
-            <h2 class="text-lg font-semibold">Edit User</h2>
+            <h2 class="text-lg font-semibold">Edit KYC</h2>
 
             <a href="{{ route('users.index') }}"
                 class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
@@ -33,7 +33,9 @@
                 <div>
                     <label class="block mb-2 font-medium">Owner Photo</label>
 
-                    <img src="{{ asset($kyc->owner_photo) }}" class="w-24 h-24 rounded border mb-2">
+                    @if($kyc->owner_photo)
+                    <img src="{{ $kyc->owner_photo ? asset('storage/' . $kyc->owner_photo) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+                    @endif
 
                     <select name="owner_photo_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
@@ -52,7 +54,9 @@
                 <div>
                     <label class="block mb-2 font-medium">Shop Photo</label>
 
-                    <img src="{{ asset($kyc->shop_photo) }}" class="w-24 h-24 rounded border mb-2">
+                    @if($kyc->shop_photo)
+                    <img src="{{ $kyc->shop_photo ? asset('storage/' . $kyc->shop_photo) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+                    @endif
 
                     <select name="shop_photo_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
@@ -71,7 +75,9 @@
                 <div>
                     <label class="block mb-2 font-medium">PAN Card</label>
 
-                    <a href="{{ asset($kyc->pan_card) }}" target="_blank" class="text-blue-600 underline mb-2 block">View File</a>
+                    @if($kyc->pan_card)
+                    <img src="{{ $kyc->pan_card ? asset('storage/' . $kyc->pan_card) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+                    @endif
 
                     <select name="pan_card_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
@@ -91,7 +97,7 @@
                     <label class="block mb-2 font-medium">GST Certificate</label>
 
                     @if($kyc->gst_certificate)
-                        <a href="{{ asset($kyc->gst_certificate) }}" target="_blank" class="text-blue-600 underline mb-2 block">View File</a>
+                    <img src="{{ $kyc->gst_certificate ? asset('storage/' . $kyc->gst_certificate) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
                     @endif
 
                     <select name="gst_certificate_status"
@@ -108,15 +114,15 @@
                     <label class="block mb-2 font-medium">Trade License</label>
 
                     @if($kyc->trade_license)
-                        <a href="{{ asset($kyc->trade_license) }}" target="_blank" class="text-blue-600 underline mb-2 block">View File</a>
+                        <img src="{{ $kyc->trade_license ? asset('storage/' . $kyc->trade_license) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
                     @endif
 
                     <select name="trade_license_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
 
-                        <option value="0">Pending</option>
-                        <option value="1">Approved</option>
-                        <option value="2">Rejected</option>
+                        <option value="0" {{ old('trade_license_status', $kyc->trade_license_status) == 0 ? 'selected' : '' }}>Pending</option>
+                        <option value="1" {{ old('trade_license_status', $kyc->trade_license_status) == 1 ? 'selected' : '' }}>Approved</option>
+                        <option value="2" {{ old('trade_license_status', $kyc->trade_license_status) == 2 ? 'selected' : '' }}>Rejected</option>
                     </select>
                 </div>
 
@@ -125,15 +131,15 @@
                     <label class="block mb-2 font-medium">FSSAI License</label>
 
                     @if($kyc->fssai_license)
-                        <a href="{{ asset($kyc->fssai_license) }}" target="_blank" class="text-blue-600 underline mb-2 block">View File</a>
+                        <img src="{{ $kyc->fssai_license ? asset('storage/' . $kyc->fssai_license) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
                     @endif
 
                     <select name="fssai_license_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
 
-                        <option value="0">Pending</option>
-                        <option value="1">Approved</option>
-                        <option value="2">Rejected</option>
+                        <option value="0" {{ old('fssai_license_status', $kyc->fssai_license_status) == 0 ? 'selected' : '' }}>Pending</option>
+                        <option value="1" {{ old('fssai_license_status', $kyc->fssai_license_status) == 1 ? 'selected' : '' }}>Approved</option>
+                        <option value="2" {{ old('fssai_license_status', $kyc->fssai_license_status) == 2 ? 'selected' : '' }}>Rejected</option>
                     </select>
                 </div>
 
@@ -142,15 +148,15 @@
                     <label class="block mb-2 font-medium">Address Proof</label>
 
                     @if($kyc->address_proof)
-                        <a href="{{ asset($kyc->address_proof) }}" target="_blank" class="text-blue-600 underline mb-2 block">View File</a>
+                        <img src="{{ $kyc->address_proof ? asset('storage/' . $kyc->address_proof) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
                     @endif
 
                     <select name="address_proof_status"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
 
-                        <option value="0">Pending</option>
-                        <option value="1">Approved</option>
-                        <option value="2">Rejected</option>
+                        <option value="0" {{ old('address_proof_status', $kyc->address_proof_status) == 0 ? 'selected' : '' }}>Pending</option>
+                        <option value="1" {{ old('address_proof_status', $kyc->address_proof_status) == 1 ? 'selected' : '' }}>Approved</option>
+                        <option value="2" {{ old('address_proof_status', $kyc->address_proof_status) == 2 ? 'selected' : '' }}>Rejected</option>
                     </select>
                 </div>
 
