@@ -94,12 +94,14 @@ class UserController extends Controller
 
             // Ensure Business exists
             $business = Business::where('user_id', $user->id)->firstOrFail();
+            $business_category_id = decodeIdOrFail($request->business_category_id, 'Invalid business category ID');
+            $business_sub_category_id = decodeIdOrFail($request->business_sub_category_id, 'Invalid business sub category ID');
 
             $business->update([
                 'sponsor_id' => $request->sponsor_id,
                 'business_name' => $request->business_name,
-                'business_category_id' => $request->business_category_id,
-                'business_sub_category_id' => $request->business_sub_category_id,
+                'business_category_id' => $business_category_id,
+                'business_sub_category_id' => $business_sub_category_id,
                 'years_in_business' => $request->years_in_business,
                 'gst_number' => $request->gst_number,
                 'pan_number' => $request->pan_number,

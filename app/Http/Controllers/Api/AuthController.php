@@ -121,6 +121,7 @@ class AuthController extends Controller
             $data['business_category_id'] = $catiddecoded[0];
             $data['business_sub_category_id'] = $subcatiddecoded[0];
 
+
             $psw = $data['password'];
 
             $data['password'] = Hash::make($data['password']);
