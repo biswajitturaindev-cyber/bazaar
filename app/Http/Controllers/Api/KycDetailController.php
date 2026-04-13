@@ -237,6 +237,23 @@ class KycDetailController extends Controller
 
             $kyc->update($data);
 
+            // Auto update main KYC status
+            $statuses = collect($data);
+
+            if ($statuses->contains(2)) {
+                $kycStatus = 3; // Rejected
+            } elseif ($statuses->every(fn($s) => $s == 1)) {
+                $kycStatus = 1; // Approved
+            } else {
+                $kycStatus = 2; // Pending
+            }
+
+            // Update user KYC
+            $userId = Business::where('id', $kyc->business_id)->value('user_id');
+
+            User::where('id', $userId)
+                ->update(['kyc_status' => $kycStatus]);
+
             return response()->json([
                 'status' => true,
                 'message' => 'KYC updated',
