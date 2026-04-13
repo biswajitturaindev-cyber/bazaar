@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankDetailController;
 use App\Http\Controllers\Api\BusinessCategoryController;
+use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HsnController;
@@ -144,4 +145,10 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::apiResource('master-products', MasterProductController::class);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Business Lists
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('vendor-business', BusinessController::class);
 });
