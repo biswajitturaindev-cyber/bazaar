@@ -42,6 +42,8 @@ class BusinessController extends Controller
             'agreement',
             'bankDetail',
             'kycDetail',
+            'user',
+            'operationalDetail'
         ])->find($businessId);
 
         if (!$business) {

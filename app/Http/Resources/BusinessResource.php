@@ -36,6 +36,8 @@ class BusinessResource extends JsonResource
             'bankdetail' => $this->whenLoaded('bankDetail'),
             //'kycdetail' => $this->whenLoaded('kycDetail'),
             'kycdetail' => new KycDetailResource($this->whenLoaded('kycDetail')),
+            'user' => new UserResource($this->whenLoaded('user')),
+            'store_operational_detail' => new StoreOperationalResource($this->whenLoaded('operationalDetail')),
         ];
     }
 }
