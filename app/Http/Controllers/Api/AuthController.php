@@ -293,19 +293,19 @@ class AuthController extends Controller
             // Token
             $token = $user->createToken('api-token')->plainTextToken;
 
-            // $user->load([
-            //     'business.category',
-            //     'business.subCategory',
-            //     'business.address',
-            //     'business.contact',
-            //     'business.agreement',
-            //     'business.kycDetail',
-            // ]);
-
             $user->load([
-                'business:id,user_id',
-                'business.category:id,name',
+                'business.category',
+                'business.subCategory',
+                'business.address',
+                'business.contact',
+                'business.agreement',
+                'business.kycDetail',
             ]);
+
+            // $user->load([
+            //     'business:id,user_id',
+            //     'business.category:id,name',
+            // ]);
 
             return response()->json([
                 'status' => true,
