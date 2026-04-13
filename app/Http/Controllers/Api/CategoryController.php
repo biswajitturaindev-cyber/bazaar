@@ -185,7 +185,13 @@ class CategoryController extends Controller
         $categories = Category::where('status', 1)
             ->select('id', 'name')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => Hashids::encode($category->id),
+                    'name' => $category->name,
+                ];
+            });
 
         return response()->json([
             'status' => true,
