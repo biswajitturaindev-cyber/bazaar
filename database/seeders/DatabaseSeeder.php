@@ -23,9 +23,12 @@ class DatabaseSeeder extends Seeder
             BusinessCategorySeeder::class,
             CategorySeeder::class,
             SubCategorySeeder::class,
-            AttributeMasterSeeder::class,
-            AttributeSeeder::class,
-            AttributeValueSeeder::class,
+            //AttributeMasterSeeder::class,
+            //AttributeSeeder::class,
+            //AttributeValueSeeder::class,
+            StateSeeder::class,
+            CitySeeder::class,
+            PincodeSeeder::class,
             ]);
 
         // Create Test User

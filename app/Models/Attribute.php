@@ -8,6 +8,8 @@ use Vinkla\Hashids\Facades\Hashids;
 class Attribute extends Model
 {
     protected $fillable = [
+        'category_id',
+        'sub_category_id',
         'attribute_master_id',
         'type',
         'name',
@@ -25,4 +27,17 @@ class Attribute extends Model
     {
         return $this->hasMany(AttributeValue::class);
     }
+
+    // Attribute → Category
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    // Attribute → Sub Category
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class);
+    }
+
 }

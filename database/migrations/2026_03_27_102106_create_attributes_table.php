@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attribute_master_id')->constrained('attribute_masters')->cascadeOnDelete();
+            $table->foreignId('category_id')->index()->constrained('categories')->cascadeOnDelete();
+            $table->foreignId('sub_category_id')->index()->constrained('sub_categories')->cascadeOnDelete();
+            $table->foreignId('attribute_master_id')->index()->constrained('attribute_masters')->cascadeOnDelete();
             $table->enum('type', ['text', 'color'])->default('text');
             $table->string('name');
             $table->boolean('status')->default(1);
