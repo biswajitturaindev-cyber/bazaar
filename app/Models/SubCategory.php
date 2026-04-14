@@ -15,6 +15,10 @@ class SubCategory extends Model
         'status'
     ];
 
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -31,6 +35,10 @@ class SubCategory extends Model
         return $this->hasMany(Product::class);
     }
 
-
+    // SubCategory  Attributes (IMPORTANT)
+    public function attributes()
+    {
+        return $this->hasMany(Attribute::class);
+    }
 
 }
