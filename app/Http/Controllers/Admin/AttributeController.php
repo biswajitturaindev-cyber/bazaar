@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
+use App\Models\AttributeMaster;
+use App\Models\Category;
+use App\Models\SubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AttributeController extends Controller
 {
@@ -13,7 +17,11 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        $attributes = Attribute::latest()->paginate(10);
+        $attributes = Attribute::with([
+            'category',
+            'subCategory',
+            'attributeMaster'
+        ])->latest()->paginate(10);
         return view('admin.attributes.index', compact('attributes'));
     }
 
@@ -22,7 +30,24 @@ class AttributeController extends Controller
      */
     public function create()
     {
-        return view('admin.attributes.create');
+        try {
+            $categories = Category::where('status', 1)->get();
+            $subCategories = SubCategory::where('status', 1)->get();
+            $attributeMasters = AttributeMaster::get();
+
+            return view('admin.attributes.create', compact(
+                'categories',
+                'subCategories',
+                'attributeMasters'
+            ));
+        } catch (\Exception $e) {
+
+            \Log::error('Attribute Create Error: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -31,6 +56,10 @@ class AttributeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'category_id' => 'required|integer',
+            'sub_category_id' => 'required|integer',
+            'attribute_master_id' => 'required|integer',
+            'type' => 'required|in:text,color',
             'name' => 'required|unique:attributes,name',
             'status' => 'required|in:0,1',
         ]);
@@ -55,7 +84,19 @@ class AttributeController extends Controller
     public function edit(string $id)
     {
         $attribute = Attribute::findOrFail($id);
-        return view('admin.attributes.edit', compact('attribute'));
+
+        $categories = Category::where('status', 1)->get();
+        $subCategories = SubCategory::where('category_id', $attribute->category_id)
+            ->where('status', 1)
+            ->get();
+        $attributeMasters = AttributeMaster::get();
+
+        return view('admin.attributes.edit', compact(
+            'attribute',
+            'categories',
+            'subCategories',
+            'attributeMasters'
+        ));
     }
 
     /**
@@ -66,6 +107,10 @@ class AttributeController extends Controller
         $attribute = Attribute::findOrFail($id);
 
         $data = $request->validate([
+            'category_id' => 'required|integer',
+            'sub_category_id' => 'required|integer',
+            'attribute_master_id' => 'required|integer',
+            'type' => 'required|in:text,color',
             'name' => 'required|unique:attributes,name,' . $id,
             'status' => 'required|in:0,1',
         ]);
@@ -86,4 +131,15 @@ class AttributeController extends Controller
 
         return back()->with('success', 'Deleted successfully');
     }
+
+    /**
+     * Get subcategory list by category id
+     */
+    public function getSubCategories($id)
+    {
+        return SubCategory::where('category_id', $id)
+            ->where('status', 1)
+            ->get();
+    }
+
 }

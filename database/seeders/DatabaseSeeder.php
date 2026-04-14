@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             BusinessCategorySeeder::class,
             CategorySeeder::class,
             SubCategorySeeder::class,
-            //AttributeMasterSeeder::class,
+            AttributeMasterSeeder::class,
             //AttributeSeeder::class,
             //AttributeValueSeeder::class,
             StateSeeder::class,

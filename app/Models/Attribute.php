@@ -17,7 +17,7 @@ class Attribute extends Model
     ];
 
     // Attribute → Master
-    public function master()
+    public function attributeMaster()
     {
         return $this->belongsTo(AttributeMaster::class, 'attribute_master_id');
     }

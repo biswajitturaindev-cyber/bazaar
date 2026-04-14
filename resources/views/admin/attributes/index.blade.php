@@ -22,12 +22,26 @@
                 </a>
             </div>
 
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{-- Table --}}
             <div class="overflow-x-auto p-5">
                 <table class="w-full text-sm text-left" id="example">
                     <thead class="bg-gray-100">
                         <tr class="border">
                             <th class="px-3 py-2">Sl.No</th>
+                            <th class="px-3 py-2">Category</th>
+                            <th class="px-3 py-2">Sub Category</th>
+                            <th class="px-3 py-2">Attribute Master</th>
+                            <th class="px-3 py-2">Type</th>
                             <th class="px-3 py-2">Attribute Name</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">Action</th>
@@ -35,7 +49,7 @@
                     </thead>
 
                     <tbody class="divide-y">
-                        @foreach ($attributes as $attribute)
+                        @forelse ($attributes as $attribute)
                             <tr class="border-l border-r">
 
                                 {{-- Serial --}}
@@ -43,17 +57,36 @@
                                     {{ ($attributes->currentPage() - 1) * $attributes->perPage() + $loop->iteration }}
                                 </td>
 
+                                {{-- Category --}}
+                                <td class="px-3 py-2">
+                                    {{ $attribute->category->name ?? '-' }}
+                                </td>
+
+                                {{-- Sub Category --}}
+                                <td class="px-3 py-2">
+                                    {{ $attribute->subCategory->name ?? '-' }}
+                                </td>
+
+                                {{-- Attribute Master --}}
+                                <td class="px-3 py-2">
+                                    {{ $attribute->attributeMaster->name ?? '-' }}
+                                </td>
+
+                                {{-- Type --}}
+                                <td class="px-3 py-2 capitalize">
+                                    {{ $attribute->type ?? '-' }}
+                                </td>
+
                                 {{-- Name --}}
                                 <td class="px-3 py-2 font-medium">
                                     {{ $attribute->name ?? '-' }}
                                 </td>
 
-
                                 {{-- Status --}}
                                 <td class="px-3 py-2">
                                     <span
                                         class="px-2 py-1 text-xs font-semibold rounded
-                                    {{ $attribute->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        {{ $attribute->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                         {{ $attribute->status == 1 ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
@@ -82,7 +115,13 @@
                                 </td>
 
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-gray-500">
+                                    No attributes found
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
 
