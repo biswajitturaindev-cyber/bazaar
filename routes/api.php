@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
 use App\Http\Controllers\Api\MasterProductController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
@@ -135,8 +136,15 @@ Route::middleware('auth:sanctum')->group(function () {
     | Products
     |--------------------------------------------------------------------------
     */
-    Route::apiResource('products', ProductController::class);
-    Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
+     Route::apiResource('products', ProductController::class);
+     Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Review Products
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('review-products', ProductReviewController::class);
 
     /*
     |--------------------------------------------------------------------------
