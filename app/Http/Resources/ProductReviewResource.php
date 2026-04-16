@@ -37,6 +37,7 @@ class ProductReviewResource extends JsonResource
             'cost_price' => $this->cost_price,
             'selling_price' => $this->selling_price,
             'discount' => $this->discount,
+            'final_price'=> $this->discount,
 
             // Dates
             'manufacture_date' => $this->manufacture_date,

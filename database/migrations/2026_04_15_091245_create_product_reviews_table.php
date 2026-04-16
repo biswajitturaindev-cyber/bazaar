@@ -63,6 +63,7 @@ return new class extends Migration
             $table->decimal('cost_price', 10, 2)->nullable();
             $table->decimal('selling_price', 10, 2)->nullable();
             $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('final_price', 10, 2)->nullable();
 
             // Dates
             $table->date('manufacture_date')->nullable();

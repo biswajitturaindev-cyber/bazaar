@@ -66,6 +66,7 @@ class ProductReviewController extends Controller
                 'mrp' => 'nullable|numeric',
                 'selling_price' => 'nullable|numeric',
                 'cost_price' => 'nullable|numeric',
+                'final_price' => 'nullable|numeric',
                 'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
                 // attributes
@@ -298,6 +299,7 @@ class ProductReviewController extends Controller
                 'cost_price',
                 'selling_price',
                 'discount',
+                'final_price',
                 'manufacture_date',
                 'expiry_date',
                 'status'

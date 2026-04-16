@@ -25,6 +25,7 @@ class ProductReview extends Model
         'cost_price',
         'selling_price',
         'discount',
+        'final_price',
         'manufacture_date',
         'expiry_date',
         'status',
