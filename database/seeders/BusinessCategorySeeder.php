@@ -104,11 +104,11 @@ class BusinessCategorySeeder extends Seeder
             'Retail & General' => [
                 'image' => 'Sculptor Making.webp',
                 'subs' => [
-                    ['name' => 'Gift Shop', 'image' => 'agriculture/Gift Shop.webp'],
-                    ['name' => 'Printing Press', 'image' => 'agriculture/Printing Press.webp'],
-                    ['name' => 'Sculptor Making', 'image' => 'agriculture/Sculptor Making.webp'],
-                    ['name' => 'Agarbatti Sticks', 'image' => 'agriculture/Agarbatti Sticks.webp'],
-                    ['name' => 'Dashakarma (Puja Items)', 'image' => 'agriculture/dashakarma-bhandar-puja-items-seller-behala-kolkata-puja-item-dealers-vf2rg5zxxu.webp'],
+                    ['name' => 'Gift Shop', 'image' => 'retail & general/Gift Shop.webp'],
+                    ['name' => 'Printing Press', 'image' => 'retail & general/Printing Press.webp'],
+                    ['name' => 'Sculptor Making', 'image' => 'retail & general/Sculptor Making.webp'],
+                    ['name' => 'Agarbatti Sticks', 'image' => 'retail & general/Agarbatti Sticks.webp'],
+                    ['name' => 'Dashakarma (Puja Items)', 'image' => 'retail & general/dashakarma-bhandar-puja-items-seller-behala-kolkata-puja-item-dealers-vf2rg5zxxu.webp'],
                 ],
             ],
 

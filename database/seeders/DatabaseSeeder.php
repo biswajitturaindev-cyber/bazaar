@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             AttributeValueSeeder::class,
             StateSeeder::class,
             CitySeeder::class,
-            //PincodeSeeder::class,
+            PincodeSeeder::class,
             ]);
 
         // Create Test User
