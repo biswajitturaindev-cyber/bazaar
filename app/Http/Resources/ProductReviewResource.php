@@ -19,17 +19,9 @@ class ProductReviewResource extends JsonResource
         return [
             'id' => Hashids::encode($this->id),
 
-            // FK
-            'business_id' => $this->business_id ? Hashids::encode($this->business_id) : null,
-            'business_sub_category_id' => $this->business_sub_category_id ? Hashids::encode($this->business_sub_category_id) : null,
-            'category_id' => $this->category_id ? Hashids::encode($this->category_id) : null,
-            'sub_category_id' => $this->sub_category_id ? Hashids::encode($this->sub_category_id) : null,
-            'sub_sub_category_id' => $this->sub_sub_category_id ? Hashids::encode($this->sub_sub_category_id) : null,
-
             // Product Info
             'name' => $this->name,
             'sku' => $this->sku,
-            'hsn_id' => $this->hsn_id ? Hashids::encode($this->hsn_id) : null,
             'description' => $this->description,
 
             // Pricing
@@ -37,7 +29,7 @@ class ProductReviewResource extends JsonResource
             'cost_price' => $this->cost_price,
             'selling_price' => $this->selling_price,
             'discount' => $this->discount,
-            'final_price'=> $this->discount,
+            'final_price' => $this->final_price,
 
             // Dates
             'manufacture_date' => $this->manufacture_date,
@@ -48,11 +40,41 @@ class ProductReviewResource extends JsonResource
                 ? asset('storage/' . $this->image)
                 : null,
 
-            // Status with label
+            // Status
             'status' => $this->status,
             'status_label' => $this->statusLabel($this->status),
 
-            // Relation (like your example)
+            'business_category' => $this->businessCategory ? [
+                'id' => Hashids::encode($this->businessCategory->id),
+                'name' => $this->businessCategory->name,
+            ] : null,
+
+            'business_sub_category' => $this->businessSubCategory ? [
+                'id' => Hashids::encode($this->businessSubCategory->id),
+                'name' => $this->businessSubCategory->name,
+            ] : null,
+
+            'product_category' => $this->category ? [
+                'id' => Hashids::encode($this->category->id),
+                'name' => $this->category->name,
+            ] : null,
+
+            'product_sub_category' => $this->subCategory ? [
+                'id' => Hashids::encode($this->subCategory->id),
+                'name' => $this->subCategory->name,
+            ] : null,
+
+            'product_sub_sub_category' => $this->subSubCategory ? [
+                'id' => Hashids::encode($this->subSubCategory->id),
+                'name' => $this->subSubCategory->name,
+            ] : null,
+
+            'hsn' => $this->hsn ? [
+                'id' => Hashids::encode($this->hsn->id),
+                'code' => $this->hsn->hsn_code,
+            ] : null,
+
+            // Attributes
             'product_attributes' => ProductReviewAttributeResource::collection(
                 $this->whenLoaded('productAttributes')
             ),
@@ -69,7 +91,7 @@ class ProductReviewResource extends JsonResource
     {
         return match ($status) {
             1 => 'Active',
-            2 => 'Inactive',
+            2 => 'Unapproved',
             default => 'Unknown',
         };
     }
