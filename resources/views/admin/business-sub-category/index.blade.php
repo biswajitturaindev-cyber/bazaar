@@ -40,9 +40,7 @@
                             <tr class="border-l border-r">
 
                                 {{-- Serial --}}
-                                <td class="px-3 py-2">
-                                    {{ ($subcategories->currentPage() - 1) * $subcategories->perPage() + $loop->iteration }}
-                                </td>
+                                <td class="px-3 py-2"></td>
 
                                 {{-- Category Name --}}
                                 <td class="px-3 py-2">
@@ -91,6 +89,7 @@
                 </table>
             </div>
 
+
         </div>
     </div>
 
@@ -103,11 +102,20 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                $('#example').DataTable({
+                let table = $('#example').DataTable({
                     paging: true,
                     searching: true,
                     info: true,
-                    pagingType: "simple_numbers"
+                    pageLength: 10
+                });
+
+                // Dynamic serial number
+                table.on('draw.dt', function () {
+                    let PageInfo = table.page.info();
+
+                    table.column(0, { page: 'current' }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1 + PageInfo.start;
+                    });
                 });
             });
         </script>
