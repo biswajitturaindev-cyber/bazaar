@@ -28,7 +28,8 @@ class BusinessSubCategoryController extends Controller
             $query->where('business_category_id', $request->business_category_id);
         }
 
-        $subcategories = $query->latest()->paginate(10);
+        // ❌ Remove paginate
+        $subcategories = $query->latest()->get();
 
         return view('admin.business-sub-category.index', compact('subcategories'));
     }
