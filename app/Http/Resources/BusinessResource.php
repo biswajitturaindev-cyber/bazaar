@@ -19,6 +19,9 @@ class BusinessResource extends JsonResource
             ...parent::toArray($request),
 
             'id' => Hashids::encode($this->id),
+            'user_id' => Hashids::encode($this->user_id),
+            'business_category_id' => Hashids::encode($this->business_category_id),
+            'business_sub_category_id' => Hashids::encode($this->business_sub_category_id),
             'business_name' => $this->business_name,
             'category' => [
                 'id' => Hashids::encode($this->business_category_id),
