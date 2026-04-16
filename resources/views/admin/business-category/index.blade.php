@@ -50,8 +50,12 @@
                                 {{-- Image --}}
                                 <td class="px-3 py-2">
                                     @if ($businessCategory->image)
-                                        <img src="{{ asset('storage/business_category/' . $businessCategory->image) }}"
-                                            width="50" height="50" class="rounded" style="object-fit:cover;">
+                                        <a href="{{ asset('storage/business_category/' . $businessCategory->image) }}" data-fancybox="category-gallery">
+                                            <img src="{{ asset('storage/business_category/' . $businessCategory->image) }}"
+                                                width="50" height="50"
+                                                class="rounded cursor-pointer"
+                                                style="object-fit:cover;">
+                                        </a>
                                     @else
                                         <span class="text-gray-400">No Image</span>
                                     @endif
@@ -101,6 +105,8 @@
 
     @push('scripts')
         <link href="{{ asset('admin_assets/datatables/dataTables.dataTables.css') }}" type="text/css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
         <script src="{{ asset('admin_assets/datatables/dataTables.js') }}" type="text/javascript"></script>
         <script src="{{ asset('admin_assets/js/script.js') }}"></script>
 
@@ -111,6 +117,14 @@
                     searching: true,
                     info: true,
                     pagingType: "simple_numbers"
+                });
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                Fancybox.bind("[data-fancybox='gallery']", {
+                    Toolbar: {
+                        display: ["close"]
+                    }
                 });
             });
         </script>
