@@ -31,6 +31,10 @@ class ProductReview extends Model
         'status',
     ];
 
+    protected $casts = [
+        'status' => 'integer',
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | Relationships

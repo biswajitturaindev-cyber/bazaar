@@ -14,37 +14,37 @@ return new class extends Migration
         Schema::create('product_reviews', function (Blueprint $table) {
             $table->id();
 
-        // Business
-        $table->foreignId('business_id')
-            ->nullable()
-            ->constrained('businesses')
-            ->nullOnDelete();
+            // Business
+            $table->foreignId('business_id')
+                ->nullable()
+                ->constrained('businesses')
+                ->nullOnDelete();
 
-        $table->foreignId('business_category_id')
-            ->nullable()
-            ->constrained('business_categories')
-            ->nullOnDelete();
+            $table->foreignId('business_category_id')
+                ->nullable()
+                ->constrained('business_categories')
+                ->nullOnDelete();
 
-        $table->foreignId('business_sub_category_id')
-            ->nullable()
-            ->constrained('business_sub_categories')
-            ->nullOnDelete();
+            $table->foreignId('business_sub_category_id')
+                ->nullable()
+                ->constrained('business_sub_categories')
+                ->nullOnDelete();
 
 
-        // Product Category
-        $table->foreignId('category_id')
-            ->constrained('categories')
-            ->cascadeOnDelete();
+            // Product Category
+            $table->foreignId('category_id')
+                ->constrained('categories')
+                ->cascadeOnDelete();
 
-        $table->foreignId('sub_category_id')
-            ->nullable()
-            ->constrained('sub_categories')
-            ->nullOnDelete();
+            $table->foreignId('sub_category_id')
+                ->nullable()
+                ->constrained('sub_categories')
+                ->nullOnDelete();
 
-        $table->foreignId('sub_sub_category_id')
-            ->nullable()
-            ->constrained('sub_category_items')
-            ->nullOnDelete();
+            $table->foreignId('sub_sub_category_id')
+                ->nullable()
+                ->constrained('sub_category_items')
+                ->nullOnDelete();
 
             // Product
             $table->string('sku')->nullable();
@@ -70,9 +70,7 @@ return new class extends Migration
             $table->date('expiry_date')->nullable();
 
             // Status
-            $table->tinyInteger('status')
-                  ->default(2)
-                  ->comment('0=Inactive,1=Active,2=Unapproved');
+            $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
 
             $table->timestamps();
             $table->softDeletes();

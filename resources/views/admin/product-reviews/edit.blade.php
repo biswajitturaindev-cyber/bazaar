@@ -21,7 +21,33 @@
             </a>
         </div>
 
-        <form action="{{ route('master-products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+        {{-- Success Message --}}
+        @if(session('success'))
+            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Error Message (Exception) --}}
+        @if(session('error'))
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Validation Errors --}}
+        @if ($errors->any())
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>• {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+
+        <form action="{{ route('product-reviews.update', $product->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -146,6 +172,13 @@
                     @endif
                 </div>
 
+                {{-- Description --}}
+                <div class="md:col-span-2">
+                    <label>Description</label>
+                    <textarea name="description" class="w-full border rounded-lg px-3 py-2">{{ $product->description }}</textarea>
+                </div>
+
+
                 {{-- Status --}}
                 <div>
                     <label>Status</label>
@@ -155,11 +188,50 @@
                     </select>
                 </div>
 
-                {{-- Description --}}
                 <div class="md:col-span-2">
-                    <label>Description</label>
-                    <textarea name="description" class="w-full border rounded-lg px-3 py-2">{{ $product->description }}</textarea>
+                    <label class="font-bold">Product Attributes</label>
+
+                    @foreach($product->productAttributes as $key => $attr)
+                        <div class="grid grid-cols-4 gap-4 mb-3 border p-3 rounded">
+
+                            <div>
+                                <label>Attribute ID</label>
+                                <input type="text"
+                                    name="attributes[{{ $key }}][attribute_id]"
+                                    value="{{ $attr->attribute->name ?? '' }}"
+                                    class="w-full border px-2 py-1">
+                            </div>
+
+                            <div>
+                                <label>Attribute Value ID</label>
+                                <input type="text"
+                                    name="attributes[{{ $key }}][attribute_value_id]"
+                                    value="{{ $attr->attributeValue->value ?? '' }}"
+                                    class="w-full border px-2 py-1">
+                            </div>
+
+                            <div>
+                                <label>Stock</label>
+                                <input type="number"
+                                    name="attributes[{{ $key }}][stock]"
+                                    value="{{ $attr->stock }}"
+                                    class="w-full border px-2 py-1">
+                            </div>
+
+                            <div>
+                                <label>Price</label>
+                                <input type="number" step="0.01"
+                                    name="attributes[{{ $key }}][price]"
+                                    value="{{ $attr->price }}"
+                                    class="w-full border px-2 py-1">
+                            </div>
+
+                        </div>
+                    @endforeach
+
                 </div>
+
+
 
             </div>
 
