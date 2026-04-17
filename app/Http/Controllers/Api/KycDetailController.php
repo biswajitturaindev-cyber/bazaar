@@ -334,4 +334,64 @@ class KycDetailController extends Controller
             Storage::disk('public')->delete($path);
         }
     }
+
+    /**
+     * Update KYC Details update shop image
+     */
+    public function updateShopImage(Request $request)
+    {
+        try {
+            $request->validate([
+                'id' => 'required',
+                'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ]);
+
+            $decodedId = decodeIdOrFail($request->id);
+
+            $kyc = KycDetail::findOrFail($decodedId);
+
+            // delete old image
+            if ($kyc->shop_photo && Storage::disk('public')->exists($kyc->shop_photo)) {
+                Storage::disk('public')->delete($kyc->shop_photo);
+            }
+
+            // upload new image
+            $path = $this->uploadFile($request->file('image'), 'kyc');
+
+            // update DB
+            $kyc->update([
+                'shop_photo' => $path,
+                // 'shop_photo_status' => 0
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Shop image updated successfully',
+                'data' => $kyc
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'KYC record not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage() // remove in production if needed
+            ], 500);
+        }
+    }
 }
