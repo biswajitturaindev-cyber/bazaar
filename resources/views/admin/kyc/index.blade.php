@@ -102,9 +102,9 @@
 
                         {{-- PAN --}}
                         <td class="px-3 py-2">
-                            @if($kyc->pan_card)
-                                <a href="{{ asset('storage/' . $kyc->pan_card) }}" target="_blank" class="text-blue-600">View</a>
-                            @endif
+
+                            <img src="{{ $kyc->pan_card ? asset('storage/' . $kyc->pan_card) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
 
                             @php [$c,$t] = $statusMap[$kyc->pan_card_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
@@ -114,9 +114,8 @@
 
                         {{-- GST --}}
                         <td class="px-3 py-2">
-                            @if($kyc->gst_certificate)
-                                <a href="{{ asset('storage/' . $kyc->gst_certificate) }}" target="_blank" class="text-blue-600">View</a>
-                            @endif
+                            <img src="{{ $kyc->gst_certificate ? asset('storage/' . $kyc->gst_certificate) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
 
                             @php [$c,$t] = $statusMap[$kyc->gst_certificate_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
@@ -126,9 +125,8 @@
 
                         {{-- Trade --}}
                         <td class="px-3 py-2">
-                            @if($kyc->trade_license)
-                                <a href="{{ asset('storage/' . $kyc->trade_license) }}" target="_blank" class="text-blue-600">View</a>
-                            @endif
+                            <img src="{{ $kyc->trade_license ? asset('storage/' . $kyc->trade_license) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
 
                             @php [$c,$t] = $statusMap[$kyc->trade_license_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
@@ -138,9 +136,8 @@
 
                         {{-- FSSAI --}}
                         <td class="px-3 py-2">
-                            @if($kyc->fssai_license)
-                                <a href="{{ asset('storage/' . $kyc->fssai_license) }}" target="_blank" class="text-blue-600">View</a>
-                            @endif
+                            <img src="{{ $kyc->fssai_license ? asset('storage/' . $kyc->fssai_license) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
 
                             @php [$c,$t] = $statusMap[$kyc->fssai_license_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
@@ -150,9 +147,8 @@
 
                         {{-- Address --}}
                         <td class="px-3 py-2">
-                            @if($kyc->address_proof)
-                                <a href="{{ asset('storage/' . $kyc->address_proof) }}" target="_blank" class="text-blue-600">View</a>
-                            @endif
+                            <img src="{{ $kyc->address_proof ? asset('storage/' . $kyc->address_proof) : asset('images/no-image.png') }}"
+                                class="w-10 h-10 rounded border object-cover">
 
                             @php [$c,$t] = $statusMap[$kyc->address_proof_status] ?? $statusMap[0]; @endphp
                             <div class="mt-1">
