@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/category/dropdown', [UserController::class, 'CategoryDropdown']);
     Route::apiResource('bank-details', BankDetailController::class);
     Route::apiResource('kyc-details', KycDetailController::class);
+    Route::post('kyc-details/update/shop-image', [KycDetailController::class, 'updateShopImage']);
     Route::apiResource('store-operational', StoreOperationalController::class);
 
     /*
