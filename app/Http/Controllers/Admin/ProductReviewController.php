@@ -7,10 +7,14 @@ use App\Models\BusinessCategory;
 use App\Models\BusinessSubCategory;
 use App\Models\Category;
 use App\Models\Hsn;
+use App\Models\ProductAttributeValue;
+use App\Models\ProductBusinessCategoryAttributeValue;
+use App\Models\ProductFoodBeverages;
 use App\Models\ProductReview;
 use App\Models\SubCategory;
 use App\Models\SubCategoryItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductReviewController extends Controller
 {
@@ -116,7 +120,87 @@ class ProductReviewController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $request->validate([
+                'status' => 'required|in:1,2',
+            ]);
+
+            $product = ProductReview::with('productAttributes')->findOrFail($id);
+
+            // FIX: before transaction
+            if ($product->status == 1) {
+                return back()->with('error', 'Product already approved.');
+            }
+
+            DB::beginTransaction();
+
+            $product->status = $request->status;
+            $product->save();
+
+            if ($request->status == 1) {
+
+                $tableMap = [
+                    1 => ProductFoodBeverages::class,
+                    //2 => ProductConstructionHardware::class,
+                ];
+
+                $categoryId = $product->business_category_id;
+
+                if (!isset($tableMap[$categoryId])) {
+                    throw new \Exception('Invalid business category mapping');
+                }
+
+                $modelClass = $tableMap[$categoryId];
+
+                // Prevent duplicate SKU
+                if ($modelClass::where('sku', $product->sku)->exists()) {
+                    throw new \Exception('Product with same SKU already exists.');
+                }
+
+                // Create Product
+                $newProduct = $modelClass::create([
+                    'business_id' => $product->business_id,
+                    'business_category_id' => $product->business_category_id,
+                    'business_sub_category_id' => $product->business_sub_category_id,
+                    'category_id' => $product->category_id,
+                    'sub_category_id' => $product->sub_category_id,
+                    'sub_sub_category_id' => $product->sub_sub_category_id,
+                    'sku' => $product->sku,
+                    'hsn_id' => $product->hsn_id,
+                    'name' => $product->name,
+                    'image' => $product->image,
+                    'description' => $product->description,
+                    'mrp' => $product->mrp,
+                    'cost_price' => $product->cost_price,
+                    'selling_price' => $product->selling_price,
+                    'discount' => $product->discount,
+                    'final_price' => $product->final_price,
+                    'manufacture_date' => $product->manufacture_date,
+                    'expiry_date' => $product->expiry_date,
+                    'status' => 1,
+                ]);
+
+                // BEST: Use relationship (no manual product_type)
+                foreach ($product->productAttributes as $attr) {
+                    $newProduct->attributes()->create([
+                        'attribute_id' => $attr->attribute_id,
+                        'attribute_value_id' => $attr->attribute_value_id,
+                        'stock' => $attr->stock,
+                        'price' => $attr->price,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Status updated successfully.');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -124,6 +208,14 @@ class ProductReviewController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $product = ProductReview::findOrFail($id);
+            $product->delete();
+
+            return redirect()->back()->with('success', 'Product deleted successfully.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 }
