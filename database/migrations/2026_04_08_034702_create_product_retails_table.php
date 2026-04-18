@@ -13,33 +13,67 @@ return new class extends Migration
     {
         Schema::create('product_retails', function (Blueprint $table) {
             $table->id();
-        
-            $table->foreignId('business_id')->constrained('businesses')->cascadeOnDelete();
-        
-            $table->foreignId('business_sub_category_id')->nullable()->constrained('business_sub_categories')->nullOnDelete();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
-            $table->foreignId('sub_category_id')->nullable()->constrained('sub_categories')->nullOnDelete();
-        
-            $table->string('sku')->unique();
+
+            // Business
+            $table->foreignId('business_id')
+                ->nullable()
+                ->constrained('businesses')
+                ->nullOnDelete();
+
+            $table->foreignId('business_category_id')
+                ->nullable()
+                ->constrained('business_categories')
+                ->nullOnDelete();
+
+            $table->foreignId('business_sub_category_id')
+                ->nullable()
+                ->constrained('business_sub_categories')
+                ->nullOnDelete();
+
+
+            // Product Category
+            $table->foreignId('category_id')
+                ->constrained('categories')
+                ->cascadeOnDelete();
+
+            $table->foreignId('sub_category_id')
+                ->nullable()
+                ->constrained('sub_categories')
+                ->nullOnDelete();
+
+            $table->foreignId('sub_sub_category_id')
+                ->nullable()
+                ->constrained('sub_category_items')
+                ->nullOnDelete();
+
+            // Product
+            $table->string('sku')->nullable();
+            $table->foreignId('hsn_id')
+                ->nullable()
+                ->constrained('hsns')
+                ->nullOnDelete();
+
+            // Basic Info
             $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('mrp', 10, 2)->comment('Maximum Retail Price');
-            $table->decimal('cost_price', 10, 2)->nullable()->comment('Vendor cost');
-            $table->decimal('selling_price', 10, 2)->nullable()->comment('Final selling price');
-            $table->decimal('discount', 5, 2)->default(0)->comment('Discount %');
-        
-            $table->integer('stock')->default(0);
-        
+            $table->string('image')->nullable();
+            $table->longText('description')->nullable();
+
+            // Pricing
+            $table->decimal('mrp', 10, 2)->nullable();
+            $table->decimal('cost_price', 10, 2)->nullable();
+            $table->decimal('selling_price', 10, 2)->nullable();
+            $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('final_price', 10, 2)->nullable();
+
+            // Dates
             $table->date('manufacture_date')->nullable();
             $table->date('expiry_date')->nullable();
-        
-            $table->boolean('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
-        
-            $table->index(['business_id', 'category_id']);
-            $table->index(['status']);
-            $table->index(['name']);
-        
+
+            // Status
+            $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

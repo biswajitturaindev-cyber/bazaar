@@ -6,11 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\BusinessCategory;
 use App\Models\BusinessSubCategory;
 use App\Models\Category;
+use App\Models\EducationStationary;
 use App\Models\Hsn;
+use App\Models\ProductAgriculture;
 use App\Models\ProductAttributeValue;
+use App\Models\ProductAutomobile;
 use App\Models\ProductBusinessCategoryAttributeValue;
+use App\Models\ProductConstructionHardware;
+use App\Models\ProductFashionLifestyle;
 use App\Models\ProductFoodBeverages;
+use App\Models\ProductHealth;
+use App\Models\ProductHomeLiving;
+use App\Models\ProductRetail;
 use App\Models\ProductReview;
+use App\Models\ProductSports;
 use App\Models\SubCategory;
 use App\Models\SubCategoryItem;
 use Illuminate\Http\Request;
@@ -140,8 +149,16 @@ class ProductReviewController extends Controller
             if ($request->status == 1) {
 
                 $tableMap = [
-                    1 => ProductFoodBeverages::class,
-                    //2 => ProductConstructionHardware::class,
+                    1  => ProductFoodBeverages::class,
+                    2  => ProductConstructionHardware::class,
+                    3  => ProductHomeLiving::class,
+                    4  => ProductFashionLifestyle::class,
+                    5  => ProductAutomobile::class,
+                    6  => EducationStationary::class,
+                    7  => ProductAgriculture::class,
+                    8  => ProductRetail::class,
+                    9  => ProductHealth::class,
+                    10 => ProductSports::class,
                 ];
 
                 $categoryId = $product->business_category_id;
