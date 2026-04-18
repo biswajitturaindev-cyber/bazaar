@@ -127,7 +127,7 @@ class VendorProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product added successfully',
-                'data' => $newProduct
+                //'data' => $newProduct
             ]);
 
         } catch (\Exception $e) {
