@@ -6,7 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductReview;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductReviewResource;
+use App\Models\EducationStationary;
+use App\Models\ProductAgriculture;
+use App\Models\ProductAutomobile;
+use App\Models\ProductConstructionHardware;
+use App\Models\ProductFashionLifestyle;
+use App\Models\ProductFoodBeverages;
+use App\Models\ProductHealth;
+use App\Models\ProductHomeLiving;
+use App\Models\ProductRetail;
 use App\Models\ProductReviewAttribute;
+use App\Models\ProductSports;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -16,20 +26,110 @@ class ProductReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     try {
+
+    //         $query = ProductReview::with('productAttributes')
+    //             ->where('status', 2)
+    //             ->latest();
+
+    //         if ($request->filled('business_id')) {
+    //             try {
+    //                 $decodedBusinessId = decodeIdOrFail($request->business_id);
+
+    //                 $query->where('business_id', $decodedBusinessId);
+    //             } catch (\Exception $e) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Invalid business_id'
+    //                 ], 400);
+    //             }
+    //         }
+
+    //         $products = $query->paginate(10);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Product list fetched successfully',
+    //             'data' => ProductReviewResource::collection($products),
+    //             'meta' => [
+    //                 'current_page' => $products->currentPage(),
+    //                 'last_page' => $products->lastPage(),
+    //                 'per_page' => $products->perPage(),
+    //                 'total' => $products->total(),
+    //             ]
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid business_id or something went wrong',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function index(Request $request)
     {
         try {
-            $query = ProductReview::with('productAttributes')->latest();
+            // Category Model mapping
+            $tableMap = [
+                1  => ProductFoodBeverages::class,
+                2  => ProductConstructionHardware::class,
+                3  => ProductHomeLiving::class,
+                4  => ProductFashionLifestyle::class,
+                5  => ProductAutomobile::class,
+                6  => EducationStationary::class,
+                7  => ProductAgriculture::class,
+                8  => ProductRetail::class,
+                9  => ProductHealth::class,
+                10 => ProductSports::class,
+            ];
 
+            // Base Query (Product Reviews)
+            $query = ProductReview::with('productAttributes')
+                ->where('status', 2)
+                ->latest();
+
+            // Filter by business_id (decoded)
             if ($request->filled('business_id')) {
-                $query->where(
-                    'business_id',
-                    decodeIdOrFail($request->business_id)
-                );
+                try {
+                    $decodedBusinessId = decodeIdOrFail($request->business_id);
+                    $query->where('business_id', $decodedBusinessId);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid business_id'
+                    ], 400);
+                }
             }
 
+            // 🔹 Paginate reviews
             $products = $query->paginate(10);
 
+            // Attach mapped products (based on business_id)
+            $products->getCollection()->transform(function ($product) use ($tableMap) {
+
+                $categoryId = $product->business_category_id;
+
+                if (isset($tableMap[$categoryId])) {
+                    $modelClass = $tableMap[$categoryId];
+
+                    // Get ALL products of this business with attributes
+                    $mappedProducts = $modelClass::with('attributes')
+                        ->where('business_id', $product->business_id)
+                        ->get();
+
+                    $product->mapped_products = $mappedProducts;
+                } else {
+                    $product->mapped_products = [];
+                }
+
+                return $product;
+            });
+
+            // Response
             return response()->json([
                 'success' => true,
                 'message' => 'Product list fetched successfully',
@@ -45,7 +145,7 @@ class ProductReviewController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid business_id or something went wrong',
+                'message' => 'Something went wrong',
                 'error' => $e->getMessage()
             ], 500);
         }
