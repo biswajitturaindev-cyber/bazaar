@@ -16,19 +16,24 @@ class ProductReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $products = ProductReview::with('productAttributes') // eager load
-                ->latest()
-                ->paginate(10);
+            $query = ProductReview::with('productAttributes')->latest();
+
+            if ($request->filled('business_id')) {
+                $query->where(
+                    'business_id',
+                    decodeIdOrFail($request->business_id)
+                );
+            }
+
+            $products = $query->paginate(10);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Product list fetched successfully',
                 'data' => ProductReviewResource::collection($products),
-
-                // pagination meta (important for frontend)
                 'meta' => [
                     'current_page' => $products->currentPage(),
                     'last_page' => $products->lastPage(),
@@ -40,7 +45,7 @@ class ProductReviewController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Something went wrong',
+                'message' => 'Invalid business_id or something went wrong',
                 'error' => $e->getMessage()
             ], 500);
         }
