@@ -26,50 +26,6 @@ class ProductReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index(Request $request)
-    // {
-    //     try {
-
-    //         $query = ProductReview::with('productAttributes')
-    //             ->where('status', 2)
-    //             ->latest();
-
-    //         if ($request->filled('business_id')) {
-    //             try {
-    //                 $decodedBusinessId = decodeIdOrFail($request->business_id);
-
-    //                 $query->where('business_id', $decodedBusinessId);
-    //             } catch (\Exception $e) {
-    //                 return response()->json([
-    //                     'success' => false,
-    //                     'message' => 'Invalid business_id'
-    //                 ], 400);
-    //             }
-    //         }
-
-    //         $products = $query->paginate(10);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Product list fetched successfully',
-    //             'data' => ProductReviewResource::collection($products),
-    //             'meta' => [
-    //                 'current_page' => $products->currentPage(),
-    //                 'last_page' => $products->lastPage(),
-    //                 'per_page' => $products->perPage(),
-    //                 'total' => $products->total(),
-    //             ]
-    //         ]);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid business_id or something went wrong',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function index(Request $request)
     {
         try {
@@ -87,16 +43,15 @@ class ProductReviewController extends Controller
                 10 => ProductSports::class,
             ];
 
-            // Base Query (Product Reviews)
-            $query = ProductReview::with('productAttributes')
+            // Step 1: Get Reviews
+            $reviewQuery = ProductReview::with('productAttributes')
                 ->where('status', 2)
                 ->latest();
 
-            // Filter by business_id (decoded)
             if ($request->filled('business_id')) {
                 try {
                     $decodedBusinessId = decodeIdOrFail($request->business_id);
-                    $query->where('business_id', $decodedBusinessId);
+                    $reviewQuery->where('business_id', $decodedBusinessId);
                 } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
@@ -105,40 +60,74 @@ class ProductReviewController extends Controller
                 }
             }
 
-            // 🔹 Paginate reviews
-            $products = $query->paginate(10);
+            $reviews = $reviewQuery->get();
 
-            // Attach mapped products (based on business_id)
-            $products->getCollection()->transform(function ($product) use ($tableMap) {
+            // Step 2: Get Products
+            $productsCollection = collect();
 
-                $categoryId = $product->business_category_id;
+            $businessIds = $reviews->pluck('business_id')->unique();
+
+            foreach ($businessIds as $businessId) {
+
+                $review = $reviews->firstWhere('business_id', $businessId);
+
+                if (!$review) continue;
+
+                $categoryId = $review->business_category_id;
 
                 if (isset($tableMap[$categoryId])) {
                     $modelClass = $tableMap[$categoryId];
 
-                    // Get ALL products of this business with attributes
-                    $mappedProducts = $modelClass::with('attributes')
-                        ->where('business_id', $product->business_id)
-                        ->get();
+                    $items = $modelClass::with('attributes')
+                        ->where('business_id', $businessId)
+                        ->get()
+                        ->map(function ($item) {
 
-                    $product->mapped_products = $mappedProducts;
-                } else {
-                    $product->mapped_products = [];
+                            // Ensure attributes always exists
+                            if (!$item->relationLoaded('attributes') || $item->attributes === null) {
+                                $item->setRelation('attributes', collect());
+                            }
+
+                            // Mark as product type
+                            $item->type = 'approve';
+
+                            return $item;
+                        });
+
+                    $productsCollection = $productsCollection->concat($items);
                 }
+            }
 
-                return $product;
+            // 🔹 Step 3: Format Reviews
+            $reviews = $reviews->map(function ($review) {
+                $review->type = 'unapprove';
+                return $review;
             });
 
-            // Response
+            // Step 4: Merge BOTH (FINAL LIST)
+            $finalData = $reviews->concat($productsCollection)->values();
+
+            // Step 5: Manual Pagination (IMPORTANT)
+            $perPage = 10;
+            $currentPage = request()->get('page', 1);
+
+            $paginatedData = new \Illuminate\Pagination\LengthAwarePaginator(
+                $finalData->forPage($currentPage, $perPage),
+                $finalData->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
+
             return response()->json([
                 'success' => true,
-                'message' => 'Product list fetched successfully',
-                'data' => ProductReviewResource::collection($products),
+                'message' => 'Product + Review list fetched successfully',
+                'data' => $paginatedData->values(),
                 'meta' => [
-                    'current_page' => $products->currentPage(),
-                    'last_page' => $products->lastPage(),
-                    'per_page' => $products->perPage(),
-                    'total' => $products->total(),
+                    'current_page' => $paginatedData->currentPage(),
+                    'last_page' => $paginatedData->lastPage(),
+                    'per_page' => $paginatedData->perPage(),
+                    'total' => $paginatedData->total(),
                 ]
             ]);
 
@@ -150,6 +139,7 @@ class ProductReviewController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Show the form for creating a new resource.
