@@ -20,6 +20,9 @@ class ProductReviewResource extends JsonResource
             'id' => Hashids::encode($this->id),
             'business_id' => Hashids::encode($this->business_id),
             'business_category_id' => Hashids::encode($this->business_category_id),
+            'category_id' => Hashids::encode($this->category_id),
+            'sub_category_id' => Hashids::encode($this->sub_category_id),
+            'sub_sub_category_id' => Hashids::encode($this->sub_sub_category_id),
 
             'name' => $this->name,
             'sku' => $this->sku,
