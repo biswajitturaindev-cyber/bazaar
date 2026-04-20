@@ -206,11 +206,15 @@ class ProductReviewController extends Controller
                         'price' => $attr->price,
                     ]);
                 }
+
+                // SOFT DELETE ORIGINAL REVIEW
+                $product->delete();
             }
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Status updated successfully.');
+            return redirect('admin/product-reviews')
+                ->with('success', 'Status updated and product approved successfully.');
 
         } catch (\Exception $e) {
 
