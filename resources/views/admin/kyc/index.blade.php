@@ -52,7 +52,7 @@
             <thead class="bg-gray-100">
                 <tr class="border">
                     <th class="px-3 py-2">Sl.No</th>
-                    <th class="px-3 py-2">Business ID</th>
+                    <th class="px-3 py-2">User Name</th>
                     <th class="px-3 py-2">Owner Photo</th>
                     <th class="px-3 py-2">Shop Photo</th>
                     <th class="px-3 py-2">PAN</th>
@@ -75,7 +75,7 @@
 
                         {{-- Business --}}
                         <td class="px-3 py-2 font-medium">
-                            {{ $kyc->business_id }}
+                            {{ $kyc->business->user->name }} ({{$kyc->business->user->vendor_id}})
                         </td>
 
                         {{-- Owner Photo --}}
