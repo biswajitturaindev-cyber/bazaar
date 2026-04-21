@@ -15,8 +15,8 @@ class KycDetailController extends Controller
      */
     public function index()
     {
-    $kycs = KycDetail::with('business')->latest()->paginate(10);
-    return view('admin.kyc.index', compact('kycs'));
+        $kycs = KycDetail::with('business.user')->latest()->paginate(10);
+        return view('admin.kyc.index', compact('kycs'));
     }
 
     /**
