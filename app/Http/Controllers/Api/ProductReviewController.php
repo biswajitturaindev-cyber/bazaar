@@ -268,37 +268,6 @@ class ProductReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    // public function show(string $id)
-    // {
-    //     try {
-    //         // Decode Hashid
-    //         $decodedId = decodeIdOrFail($id);
-
-    //         // Load with relation
-    //         $product = ProductReview::with('productAttributes')
-    //             ->findOrFail($decodedId);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => new ProductReviewResource($product)
-    //         ]);
-
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Product not found'
-    //         ], 404);
-
-    //     } catch (\Exception $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ], 400);
-    //     }
-    // }
-
     public function show(string $id)
     {
         try {
@@ -337,7 +306,6 @@ class ProductReviewController extends Controller
             ], 400);
         }
     }
-
 
     /**
      * Show the form for editing the specified resource.
