@@ -78,7 +78,7 @@ class ProductReviewResource extends JsonResource
                 'label' => $this->hsn->hsn_code,
             ] : null,
 
-            // ✅ FIXED: ALWAYS RETURN product_attributes
+            // FIXED: ALWAYS RETURN product_attributes
             'product_attributes' => collect($this->productAttributes ?? [])->map(function ($attr) {
                 return [
                     'id' => Hashids::encode($attr->id),

@@ -136,7 +136,7 @@ class ProductReviewController extends Controller
 
             $product = ProductReview::with('productAttributes')->findOrFail($id);
 
-            // FIX: before transaction
+            // Already approved check
             if ($product->status == 1) {
                 return back()->with('error', 'Product already approved.');
             }
@@ -169,35 +169,44 @@ class ProductReviewController extends Controller
 
                 $modelClass = $tableMap[$categoryId];
 
-                // Prevent duplicate SKU
-                if ($modelClass::where('sku', $product->sku)->exists()) {
-                    throw new \Exception('Product with same SKU already exists.');
+                // Normalize SKU (avoid case duplicates)
+                $sku = $product->sku ? strtolower(trim($product->sku)) : null;
+
+                try {
+                    // Create Product (DB handles uniqueness)
+                    $newProduct = $modelClass::create([
+                        'business_id' => $product->business_id,
+                        'business_category_id' => $product->business_category_id,
+                        'business_sub_category_id' => $product->business_sub_category_id,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'sub_sub_category_id' => $product->sub_sub_category_id,
+                        'sku' => $sku,
+                        'hsn_id' => $product->hsn_id,
+                        'name' => $product->name,
+                        'image' => $product->image,
+                        'description' => $product->description,
+                        'mrp' => $product->mrp,
+                        'cost_price' => $product->cost_price,
+                        'selling_price' => $product->selling_price,
+                        'discount' => $product->discount,
+                        'final_price' => $product->final_price,
+                        'manufacture_date' => $product->manufacture_date,
+                        'expiry_date' => $product->expiry_date,
+                        'status' => 1,
+                    ]);
+
+                } catch (\Illuminate\Database\QueryException $e) {
+
+                    // SQLSTATE[23000] = Integrity constraint violation
+                    if ($e->getCode() == 23000) {
+                        throw new \Exception('Duplicate product: same combination already exists.');
+                    }
+
+                    throw $e;
                 }
 
-                // Create Product
-                $newProduct = $modelClass::create([
-                    'business_id' => $product->business_id,
-                    'business_category_id' => $product->business_category_id,
-                    'business_sub_category_id' => $product->business_sub_category_id,
-                    'category_id' => $product->category_id,
-                    'sub_category_id' => $product->sub_category_id,
-                    'sub_sub_category_id' => $product->sub_sub_category_id,
-                    'sku' => $product->sku,
-                    'hsn_id' => $product->hsn_id,
-                    'name' => $product->name,
-                    'image' => $product->image,
-                    'description' => $product->description,
-                    'mrp' => $product->mrp,
-                    'cost_price' => $product->cost_price,
-                    'selling_price' => $product->selling_price,
-                    'discount' => $product->discount,
-                    'final_price' => $product->final_price,
-                    'manufacture_date' => $product->manufacture_date,
-                    'expiry_date' => $product->expiry_date,
-                    'status' => 1,
-                ]);
-
-                // BEST: Use relationship (no manual product_type)
+                // Copy attributes
                 foreach ($product->productAttributes as $attr) {
                     $newProduct->attributes()->create([
                         'attribute_id' => $attr->attribute_id,
@@ -207,7 +216,7 @@ class ProductReviewController extends Controller
                     ]);
                 }
 
-                // SOFT DELETE ORIGINAL REVIEW
+                // Soft delete review product
                 $product->delete();
             }
 
