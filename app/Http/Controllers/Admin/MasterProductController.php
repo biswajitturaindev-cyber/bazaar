@@ -74,8 +74,11 @@ class MasterProductController extends Controller
                 (string) $image->encode()
             );
 
+            // full path
+            $path = 'master_products/' . $imageName;
+
             // Save only filename in DB
-            $data['image'] = $imageName;
+            $data['image'] = $path;
         }
 
         MasterProduct::create($data);
