@@ -5,15 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Vinkla\Hashids\Facades\Hashids;
-use App\Http\Resources\ProductReviewAttributeResource;
 
 class ProductReviewResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -27,12 +21,12 @@ class ProductReviewResource extends JsonResource
             'sub_sub_category_id' => $this->sub_sub_category_id ? Hashids::encode($this->sub_sub_category_id) : null,
             'hsn_id' => $this->hsn_id ? Hashids::encode($this->hsn_id) : null,
 
-            // BASIC FIELDS (ALL FROM TABLE)
+            // BASIC FIELDS
             'sku' => $this->sku,
             'name' => $this->name,
             'description' => $this->description,
 
-            // PRICE FIELDS
+            // PRICE
             'mrp' => $this->mrp,
             'cost_price' => $this->cost_price,
             'selling_price' => $this->selling_price,
@@ -50,10 +44,10 @@ class ProductReviewResource extends JsonResource
             'status' => $this->status,
             'status_label' => $this->statusLabel($this->status),
 
-            // TYPE
-            'type' => $this->type,
+            // TYPE (optional, keep if you need)
+            'type' => $this->type ?? null,
 
-            // RELATIONS (ID + LABEL)
+            // RELATIONS
             'business_category' => $this->businessCategory ? [
                 'id' => Hashids::encode($this->businessCategory->id),
                 'label' => $this->businessCategory->name,
@@ -84,55 +78,48 @@ class ProductReviewResource extends JsonResource
                 'label' => $this->hsn->hsn_code,
             ] : null,
 
-            // REVIEW ATTRIBUTES
-            'product_attributes' => $this->type === 'unapprove'
-                ? collect($this->productAttributes ?? [])->map(function ($attr) {
-                    return [
-                        'id' => Hashids::encode($attr->id),
+            // ✅ FIXED: ALWAYS RETURN product_attributes
+            'product_attributes' => collect($this->productAttributes ?? [])->map(function ($attr) {
+                return [
+                    'id' => Hashids::encode($attr->id),
 
-                        'attribute' => [
-                            'id' => Hashids::encode($attr->attribute_id),
-                            'label' => optional($attr->attribute)->name,
-                        ],
+                    'attribute' => [
+                        'id' => Hashids::encode($attr->attribute_id),
+                        'label' => optional($attr->attribute)->name,
+                    ],
 
-                        'attribute_value' => [
-                            'id' => Hashids::encode($attr->attribute_value_id),
-                            'label' => optional($attr->attributeValue)->value,
-                        ],
+                    'attribute_value' => [
+                        'id' => Hashids::encode($attr->attribute_value_id),
+                        'label' => optional($attr->attributeValue)->value,
+                    ],
 
-                        'stock' => $attr->stock,
-                        'price' => $attr->price,
-                    ];
-                })
-                : [],
+                    'stock' => $attr->stock,
+                    'price' => $attr->price,
+                ];
+            }),
 
-            // PRODUCT ATTRIBUTES
-            'attributes' => $this->type === 'approve'
-                ? collect($this->attributes ?? [])->map(function ($attr) {
-                    return [
-                        'id' => Hashids::encode($attr->id),
+            // OPTIONAL: approved attributes (if needed)
+            'attributes' => collect($this->attributes ?? [])->map(function ($attr) {
+                return [
+                    'id' => Hashids::encode($attr->id),
 
-                        'attribute' => [
-                            'id' => Hashids::encode($attr->attribute_id),
-                            'label' => optional($attr->attribute)->name,
-                        ],
+                    'attribute' => [
+                        'id' => Hashids::encode($attr->attribute_id),
+                        'label' => optional($attr->attribute)->name,
+                    ],
 
-                        'attribute_value' => [
-                            'id' => Hashids::encode($attr->attribute_value_id),
-                            'label' => optional($attr->attributeValue)->value,
-                        ],
+                    'attribute_value' => [
+                        'id' => Hashids::encode($attr->attribute_value_id),
+                        'label' => optional($attr->attributeValue)->value,
+                    ],
 
-                        'stock' => $attr->stock,
-                        'price' => $attr->price,
-                    ];
-                })
-                : [],
+                    'stock' => $attr->stock,
+                    'price' => $attr->price,
+                ];
+            }),
         ];
     }
 
-    /**
-     * Status Label Helper
-     */
     private function statusLabel($status): string
     {
         return match ($status) {
