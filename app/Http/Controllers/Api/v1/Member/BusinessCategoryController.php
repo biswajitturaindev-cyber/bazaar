@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BusinessCategoryResource;
 use App\Models\BusinessCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BusinessCategoryController extends Controller
 {
@@ -14,8 +15,21 @@ class BusinessCategoryController extends Controller
      */
     public function index()
     {
-        $categories = BusinessCategory::latest()->paginate(10);
-        return BusinessCategoryResource::collection($categories);
+        try {
+            $categories = BusinessCategory::latest()->paginate(10);
+
+            return BusinessCategoryResource::collection($categories);
+        } catch (\Exception $e) {
+
+            Log::error('BusinessCategory index error', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong'
+            ], 500);
+        }
     }
 
     /**
