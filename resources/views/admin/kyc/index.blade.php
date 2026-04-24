@@ -102,7 +102,6 @@
 
                         {{-- PAN --}}
                         <td class="px-3 py-2">
-
                             <img src="{{ $kyc->pan_card ? asset('storage/' . $kyc->pan_card) : asset('images/no-image.png') }}"
                                 class="w-10 h-10 rounded border object-cover">
 
