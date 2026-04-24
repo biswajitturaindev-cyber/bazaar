@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductReviewController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VendorProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -163,6 +164,14 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('product-reviews', ProductReviewController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Vendot Products Master
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('vendors.products', VendorProductController::class);
+
 
     });
 });
