@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\Api\v1\Member\BusinessCategoryController;
 use App\Http\Controllers\Api\v1\Member\BusinessSubCategoryController;
 use App\Http\Controllers\Api\AuthController;
@@ -12,12 +13,15 @@ use Illuminate\Support\Facades\Route;
 | Business Category Master
 |--------------------------------------------------------------------------
 */
-Route::prefix('member')->middleware('member.api')->group(function () {
-    
-    Route::post('register', [AuthController::class, 'register']);
-    Route::apiResource('business-categories', BusinessCategoryController::class);
-    Route::apiResource('business-subcategories', BusinessSubCategoryController::class);
 
+Route::prefix('member')->group(function () {
+
+    // Public
+    Route::get('business-categories', [BusinessCategoryController::class, 'index']);
+    Route::get('business-subcategories', [BusinessSubCategoryController::class, 'index']);
+
+    // Protected
+    Route::middleware('member.api')->group(function () {
+        Route::post('business-subcategories', [BusinessSubCategoryController::class, 'store']);
+    });
 });
-
-
