@@ -37,12 +37,12 @@ class BusinessController extends Controller
         $business = Business::with([
             'category',
             'subCategory',
-            'address',
+            'address.latitude,longitude',
             'contact',
             'agreement',
             'bankDetail',
             'kycDetail',
-            'user',
+            'user.name,email,vendor_id',
             'operationalDetail'
         ])->find($businessId);
 
