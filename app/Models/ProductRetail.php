@@ -82,4 +82,8 @@ class ProductRetail extends Model
         );
     }
 
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
+    }
 }

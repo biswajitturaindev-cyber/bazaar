@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -79,5 +80,9 @@ class EducationStationary extends Model
             ProductBusinessCategoryAttributeValue::class,
             'product'
         );
+    }
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
     }
 }
