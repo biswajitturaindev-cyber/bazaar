@@ -81,4 +81,9 @@ class ProductSports extends Model
             'product'
         );
     }
+
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
+    }
 }

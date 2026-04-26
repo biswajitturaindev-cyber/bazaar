@@ -68,7 +68,7 @@ class MemberProductResource extends JsonResource
             },
 
             // Product Type (VERY IMPORTANT for multi-table)
-            'product_type' => class_basename($this),
+            'product_type' => class_basename($this->resource),
 
             // Attributes (if loaded)
             'attributes' => $this->whenLoaded('attributes', function () {
