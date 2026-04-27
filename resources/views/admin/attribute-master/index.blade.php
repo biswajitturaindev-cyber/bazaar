@@ -28,8 +28,8 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-3 py-2">#</th>
-                        <th class="px-3 py-2">Category</th>
-                        <th class="px-3 py-2">Sub Category</th>
+                        <th class="px-3 py-2">Business Category</th>
+                        <th class="px-3 py-2">Business Sub Category</th>
                         <th class="px-3 py-2">Name</th>
                         <th class="px-3 py-2">Action</th>
                     </tr>
