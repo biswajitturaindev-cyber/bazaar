@@ -32,13 +32,18 @@ Route::prefix('member')->group(function () {
         ]);
     });
 
-    // Public
+    /*
+    |--------------------------------------------------------------------------
+    | Public Routes
+    |--------------------------------------------------------------------------
+    */
     Route::get('business-categories', [BusinessCategoryController::class, 'index']);
     Route::get('business-subcategories', [BusinessSubCategoryController::class, 'index']);
     Route::get('vendors', [VendorController::class, 'index']);
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('products', [ProductController::class, 'index']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']); // FIXED
 
     // Protected
     // Route::middleware('member.api')->group(function () {
