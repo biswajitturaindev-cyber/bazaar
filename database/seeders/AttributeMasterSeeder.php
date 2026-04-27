@@ -16,17 +16,17 @@ class AttributeMasterSeeder extends Seeder
         AttributeMaster::insert([
             [
                 'id' => 1,
-                'business_category_id' => 1,
-                'business_sub_category_id' => 1,
-                'name' => 'Size',
+                'business_category_id' => 4,
+                'business_sub_category_id' => 26,
+                'name' => 'Color',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'business_category_id' => 1,
-                'business_sub_category_id' => 1,
-                'name' => 'Color',
+                'business_category_id' => 4,
+                'business_sub_category_id' => 26,
+                'name' => 'Size',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

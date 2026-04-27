@@ -19,6 +19,7 @@ return new class extends Migration
             // Prevent duplicate category names
             $table->unique('name');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
