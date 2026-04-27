@@ -43,13 +43,14 @@ Route::prefix('member')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('products', [ProductController::class, 'index']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']); // FIXED
+    Route::post('register', [AuthController::class, 'register']);
 
-    // Protected
-    // Route::middleware('member.api')->group(function () {
-    //     Route::post('business-subcategories', [BusinessSubCategoryController::class, 'store']);
-    // });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Protected Routes
+    |--------------------------------------------------------------------------
+    */
     Route::middleware('auth:sanctum')->group(function () {
         // Auth
         Route::get('/profile', [AuthController::class, 'profile']);
