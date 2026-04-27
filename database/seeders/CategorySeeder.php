@@ -77,6 +77,13 @@ class CategorySeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'Clothing',
+                'description' => '',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
         ]);
     }

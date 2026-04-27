@@ -16,56 +16,80 @@ class AttributeValueSeeder extends Seeder
     {
 
         AttributeValue::insert([
-            // Size Values
+            // Shirt Color (attribute_id = 1)
             [
                 'attribute_id' => 1,
-                'value' => 'Small',
-                'color_code' => null,
+                'value' => 'BLACK',
+                'color_code' => '#000000',
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'attribute_id' => 1,
-                'value' => 'Medium',
-                'color_code' => null,
+                'value' => 'LAVENDER',
+                'color_code' => '#E6E6FA',
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'attribute_id' => 1,
-                'value' => 'Large',
-                'color_code' => null,
+                'value' => 'NAVY',
+                'color_code' => '#000080',
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'attribute_id' => 1,
+                'value' => 'WHITE',
+                'color_code' => '#FFFFFF',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
             ],
 
-            // Color Values
+            // Shirt Size (attribute_id = 2)
             [
                 'attribute_id' => 2,
-                'value' => 'Red',
-                'color_code' => '#FF0000',
+                'value' => 'S',
+                'color_code' => null,
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'attribute_id' => 2,
-                'value' => 'Blue',
-                'color_code' => '#0000FF',
+                'value' => 'M',
+                'color_code' => null,
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
             ],
             [
                 'attribute_id' => 2,
-                'value' => 'Green',
-                'color_code' => '#00FF00',
+                'value' => 'L',
+                'color_code' => null,
                 'status' => 1,
                 'created_at' => now(),
-                'updated_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'attribute_id' => 2,
+                'value' => 'XL',
+                'color_code' => null,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'attribute_id' => 2,
+                'value' => 'XXL',
+                'color_code' => null,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
             ],
         ]);
 

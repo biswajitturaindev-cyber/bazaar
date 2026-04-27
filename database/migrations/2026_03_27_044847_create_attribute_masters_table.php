@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('business_sub_category_id')->nullable()->constrained('business_sub_categories')->restrictOnDelete();
             $table->string('name');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

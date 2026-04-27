@@ -16,22 +16,22 @@ class AttributeSeeder extends Seeder
         Attribute::insert([
             [
                 'id' => 1,
-                'attribute_master_id' => 1, // Size
-                'category_id' => 1,
-                'sub_category_id' => 1,
+                'attribute_master_id' => 1, // Color
+                'category_id' => 10,
+                'sub_category_id' => 18,
                 'type' => 'text',
-                'name' => 'Size',
+                'name' => 'Shirt Color',
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id' => 2,
-                'attribute_master_id' => 2, // Color
-                'category_id' => 1,
-                'sub_category_id' => 1,
-                'type' => 'color',
-                'name' => 'Color',
+                'attribute_master_id' => 2, // Size
+                'category_id' => 10,
+                'sub_category_id' => 18,
+                'type' => 'text',
+                'name' => 'Shirt Size',
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),

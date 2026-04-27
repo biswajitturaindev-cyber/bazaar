@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributemasterController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -124,6 +125,7 @@ Route::prefix('admin')->group(function () {
         | Attributes & Attributes Values
         |--------------------------------------------------------------------------
         */
+        Route::resource('attribute-master', AttributemasterController::class);
         Route::resource('attributes', AttributeController::class);
         Route::resource('attribute-values', AttributeValueController::class);
 
