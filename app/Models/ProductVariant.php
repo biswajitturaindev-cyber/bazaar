@@ -11,7 +11,6 @@ class ProductVariant extends Model
         'product_type',
         'sku',
         'barcode',
-        'price',
         'mrp',
         'cost_price',
         'selling_price',
