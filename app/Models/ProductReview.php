@@ -16,36 +16,13 @@ class ProductReview extends Model
         'category_id',
         'sub_category_id',
         'sub_sub_category_id',
-        'sku',
         'hsn_id',
         'name',
-        'image',
         'description',
-        'mrp',
-        'cost_price',
-        'selling_price',
-        'discount',
-        'final_price',
-        'manufacture_date',
-        'expiry_date',
         'status',
     ];
 
-    protected $casts = [
-        'status' => 'integer',
-    ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
-
-    public function productAttributes()
-    {
-        return $this->hasMany(ProductReviewAttribute::class, 'product_review_id');
-    }
-
+    // Business Relations
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
@@ -61,6 +38,7 @@ class ProductReview extends Model
         return $this->belongsTo(BusinessSubCategory::class, 'business_sub_category_id');
     }
 
+    // Category Relations
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
@@ -76,8 +54,15 @@ class ProductReview extends Model
         return $this->belongsTo(SubCategoryItem::class, 'sub_sub_category_id');
     }
 
+    // HSN
     public function hsn()
     {
         return $this->belongsTo(Hsn::class, 'hsn_id');
+    }
+
+    // Variants
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id');
     }
 }
