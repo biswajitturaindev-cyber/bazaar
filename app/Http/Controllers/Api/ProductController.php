@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductImage;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\VariantResource;
 use App\Models\Business;
 use App\Models\BusinessCategory;
 use App\Models\Category;
@@ -419,6 +420,9 @@ class ProductController extends Controller
 
                 // ✅ ATTRIBUTES WITH DECODE
                 if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
+
+                    $insertData = [];
+
                     foreach ($variantData['attributes'] as $attr) {
 
                         if (!empty($attr['attribute_id']) && !empty($attr['attribute_value_id'])) {
@@ -426,7 +430,7 @@ class ProductController extends Controller
                             $attributeId = decodeIdOrFail($attr['attribute_id'], 'Invalid Attribute ID');
                             $attributeValueId = decodeIdOrFail($attr['attribute_value_id'], 'Invalid Attribute Value ID');
 
-                            // Optional DB validation (recommended)
+                            // Optional validation
                             if (!DB::table('attributes')->where('id', $attributeId)->exists()) {
                                 throw new \Exception('Attribute not found');
                             }
@@ -435,14 +439,19 @@ class ProductController extends Controller
                                 throw new \Exception('Attribute value not found');
                             }
 
-                            DB::table('product_attribute_values')->insert([
-                                'product_id' => $productId, // ✅ FIXED HERE
+                            $insertData[] = [
+                                'product_variant_id' => $variant->id, // ✅ FIXED
                                 'attribute_id' => $attributeId,
                                 'attribute_value_id' => $attributeValueId,
                                 'created_at' => now(),
                                 'updated_at' => now(),
-                            ]);
+                            ];
                         }
+                    }
+
+                    // ✅ Bulk insert (faster)
+                    if (!empty($insertData)) {
+                        DB::table('product_attribute_relations')->insert($insertData);
                     }
                 }
 
@@ -489,14 +498,20 @@ class ProductController extends Controller
 
             //DB::commit();
 
+            $variants = ProductVariant::with([
+                'attributes.attribute',
+                'attributes.attributeValue',
+                'images',
+                'meta',
+                'stocks'
+            ])->whereIn('id', $variantIds)->get();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Product created successfully',
-                'data' => [
-                    'product_id' => Hashids::encode($productId),
-                    'variant_ids' => array_map(fn($id) => Hashids::encode($id), $variantIds),
-                    'table' => $tableName
-                ]
+                'data' => VariantResource::collection($variants),
+                'product_id' => Hashids::encode($productId),
+                'table' => $tableName
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
 
