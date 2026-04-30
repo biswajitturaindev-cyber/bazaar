@@ -16,6 +16,7 @@ class ProductVariant extends Model
         'selling_price',
         'discount',
         'final_price',
+        'is_primary',
         'manufacture_date',
         'expiry_date'
     ];

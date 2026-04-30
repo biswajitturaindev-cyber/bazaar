@@ -26,6 +26,8 @@ class VariantResource extends JsonResource
             'discount' => $this->discount,
             'final_price' => $this->final_price,
 
+            'is_primary' => $this->is_primary,
+
             // ALL STOCKS
             'stocks' => ProductVendorStockResource::collection(
                 $this->whenLoaded('stocks')
