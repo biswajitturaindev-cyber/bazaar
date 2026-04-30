@@ -423,48 +423,69 @@ class ProductController extends Controller
     {
         try {
 
-            $decodedUser = Hashids::decode($id);
+            $decoded = Hashids::decode($id);
 
-            if (empty($decodedUser)) {
+            if (empty($decoded)) {
                 return response()->json([
                     'status'  => false,
-                    'message' => 'Invalid User ID'
+                    'message' => 'Invalid Product ID'
                 ], 400);
             }
 
-            $id = $decodedUser[0];
+            $id = $decoded[0];
 
+            $modelMap = config('product.model_map');
+            $product = null;
 
-            $product = Product::with([
-                'category',
-                'subCategory',
-                'subSubCategory',
-                'hsn',
-                'images',
-                'attributes.attribute',
-                'attributes.value'
-            ])->findOrFail($id);
+            // search in all product tables
+            foreach ($modelMap as $type => $modelClass) {
+
+                $product = $modelClass::with([
+                    'category',
+                    'subCategory',
+                    'subSubCategory',
+                    'hsn',
+
+                    // correct structure
+                    'primaryVariant' => function ($q) {
+                        $q->with([
+                            'meta',
+                            'attributes.attribute',
+                            'attributes.attributeValue',
+                            'images'
+                        ]);
+                    }
+                ])->find($id);
+
+                if ($product) {
+                    $product->product_type = $type;
+                    break;
+                }
+            }
+
+            if (!$product) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
 
             return response()->json([
                 'status' => true,
-                'data' => new ProductResource($product)
+                'data'   => new ProductResource($product)
             ], 200);
-        } catch (ModelNotFoundException $e) {
 
-            return response()->json([
-                'status' => false,
-                'message' => 'Product not found'
-            ], 404);
         } catch (\Exception $e) {
 
+            Log::error('Product Show Error: ' . $e->getMessage());
+
             return response()->json([
-                'status' => false,
-                'message' => 'Error',
-                'error' => $e->getMessage()
+                'status'  => false,
+                'message' => 'Something went wrong',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
-
     /**
      * Update the specified resource in storage.
      */
