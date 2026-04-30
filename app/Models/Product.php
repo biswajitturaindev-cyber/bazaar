@@ -88,4 +88,11 @@ class Product extends Model
     {
         return $query->where('status', true);
     }
+
+    public function primaryVariant()
+    {
+        return $this->hasOne(ProductVariant::class, 'product_id')
+            ->where('is_primary', 1);
+    }
+
 }

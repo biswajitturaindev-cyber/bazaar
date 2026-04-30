@@ -18,15 +18,33 @@ class ProductVariant extends Model
         'final_price',
         'is_primary',
         'manufacture_date',
-        'expiry_date'
+        'expiry_date',
+    ];
+
+    protected $casts = [
+        'is_primary' => 'boolean',
+        'mrp' => 'float',
+        'cost_price' => 'float',
+        'selling_price' => 'float',
+        'discount' => 'float',
+        'final_price' => 'float',
+        'manufacture_date' => 'date',
+        'expiry_date' => 'date',
     ];
 
     /**
-     * Dynamic Product Accessor
-     * Usage: $variant->product
+     * Optimized Dynamic Product Accessor (with caching)
      */
     public function getProductAttribute()
     {
+        static $cache = [];
+
+        $key = $this->product_type . '_' . $this->product_id;
+
+        if (isset($cache[$key])) {
+            return $cache[$key];
+        }
+
         $modelMap = config('product.model_map');
 
         if (!isset($modelMap[$this->product_type])) {
@@ -35,7 +53,7 @@ class ProductVariant extends Model
 
         $modelClass = $modelMap[$this->product_type];
 
-        return $modelClass::find($this->product_id);
+        return $cache[$key] = $modelClass::find($this->product_id);
     }
 
     /**
@@ -43,7 +61,15 @@ class ProductVariant extends Model
      */
     public function getProductModel()
     {
-        return $this->getProductAttribute();
+        return $this->product;
+    }
+
+    /**
+     * Scope: Only Primary
+     */
+    public function scopePrimary($query)
+    {
+        return $query->where('is_primary', 1);
     }
 
     /**

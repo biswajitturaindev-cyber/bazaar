@@ -11,6 +11,7 @@ use App\Http\Resources\VariantResource;
 use App\Models\Business;
 use App\Models\BusinessCategory;
 use App\Models\Category;
+use App\Models\ProductFashionLifestyle;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantMeta;
 use App\Models\ProductVendorStock;
@@ -24,42 +25,125 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+   public function index()
     {
         try {
-            $data = Product::with([
-                'category',
-                'subCategory',
-                'subSubCategory',
-                'hsn',
-                'images',
-                'attributes.attribute',
-                'attributes.value'
-            ])->latest()->get();
+
+            $modelMap = config('product.model_map');
+            $allProducts = collect();
+
+            $perPage = request()->get('per_page', 10);
+            $page = request()->get('page', 1);
+
+            foreach ($modelMap as $type => $modelClass) {
+
+                $products = $modelClass::query()
+                    ->select([
+                        'id',
+                        'name',
+                        'category_id',
+                        'sub_category_id',
+                        'sub_sub_category_id',
+                        'hsn_id',
+                        'created_at'
+                    ])
+                    ->with([
+                        'category:id,name',
+                        'subCategory:id,name',
+                        'subSubCategory:id,name',
+                        'hsn:id,hsn_code',
+
+                        // optimized variant loading
+                        'primaryVariant' => function ($q) {
+                            $q->select([
+                                'id',
+                                'product_id',
+                                'product_type',
+                                'selling_price',
+                                'mrp',
+                                'is_primary'
+                            ])
+                            ->with([
+                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+                                'attributes' => function ($attr) {
+                                    $attr->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'attribute_id',
+                                        'attribute_value_id'
+                                    ])->with([
+                                        'attribute:id,name',
+                                        'attributeValue:id,value'
+                                    ]);
+                                },
+
+                                // ONLY ONE IMAGE
+                                'images' => function ($img) {
+                                    $img->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'image_medium'
+                                    ])->limit(1);
+                                }
+                            ]);
+                        }
+                    ])
+                    ->latest()
+                    ->get()
+                    ->map(function ($item) use ($type) {
+                        $item->product_type = $type;
+                        return $item;
+                    });
+
+                $allProducts = $allProducts->concat($products);
+            }
+
+            // global sort
+            $allProducts = $allProducts->sortByDesc('created_at')->values();
+
+            // manual pagination (lightweight)
+            $total = $allProducts->count();
+
+            $paginated = $allProducts
+                ->slice(($page - 1) * $perPage, $perPage)
+                ->values();
 
             return response()->json([
-                'status' => true,
-                'data' => ProductResource::collection($data)
-            ]);
+                'status'  => true,
+                'message' => 'Product list fetched successfully',
+                'data'    => ProductResource::collection($paginated),
+                'meta'    => [
+                    'current_page' => (int)$page,
+                    'per_page'     => (int)$perPage,
+                    'total'        => $total,
+                    'last_page'    => (int) ceil($total / $perPage),
+                ]
+            ], 200);
+
         } catch (Exception $e) {
+
+            Log::error('Product Index Error: ' . $e->getMessage());
+
             return response()->json([
-                'status' => false,
-                'message' => 'Error',
-                'error' => $e->getMessage()
+                'status'  => false,
+                'message' => 'Something went wrong',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
-
     public function store(Request $request)
     {
         //DB::beginTransaction();
