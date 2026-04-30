@@ -26,7 +26,13 @@ class VariantResource extends JsonResource
             'discount' => $this->discount,
             'final_price' => $this->final_price,
 
-            'stock' => $this->stocks->first()->stock ?? 0,
+            // ALL STOCKS
+            'stocks' => ProductVendorStockResource::collection(
+                $this->whenLoaded('stocks')
+            ),
+
+            // TOTAL STOCK
+            'total_stock' => $this->stocks->sum('stock'),
 
             'attributes' => AttributeRelationResource::collection(
                 $this->whenLoaded('attributes')

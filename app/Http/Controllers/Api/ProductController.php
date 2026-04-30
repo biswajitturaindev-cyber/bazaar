@@ -506,7 +506,7 @@ class ProductController extends Controller
                 'attributes.attributeValue',
                 'images',
                 'meta',
-                'stocks'
+                'stocks.business'
             ])->whereIn('id', $variantIds)->get();
 
              $product = DB::table($tableName)->where('id', $productId)->first();
