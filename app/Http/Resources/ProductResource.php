@@ -31,7 +31,7 @@ class ProductResource extends JsonResource
             // optional: quick access fields (VERY useful)
             'price' => optional($this->primaryVariant)->selling_price,
             'mrp' => optional($this->primaryVariant)->mrp,
-            'image' => optional($this->primaryVariant?->images->first())->image_path ?? null,
+            'image' => $this->primaryVariant?->images->first() ? asset($this->primaryVariant->images->first()->image_medium): null,
 
             'table' => $this->getTable(),
         ];
