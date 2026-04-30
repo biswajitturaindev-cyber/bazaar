@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasPrimaryVariant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use App\Traits\HasProductType;
 
 class ProductFashionLifestyle extends Model
 {
-    use HasFactory, SoftDeletes, HasProductType;
+    use HasFactory, SoftDeletes, HasProductType, HasPrimaryVariant;
 
     protected $table = 'product_fashion_lifestyles';
 
@@ -75,7 +76,18 @@ class ProductFashionLifestyle extends Model
     // ===============================
     public function variants()
     {
+        $type = array_search(static::class, config('product.model_map'));
+
         return $this->hasMany(ProductVariant::class, 'product_id')
-                    ->where('product_type', $this->getType());
+            ->where('product_type', $type);
+    }
+
+    public function primaryVariant()
+    {
+        $type = array_search(static::class, config('product.model_map'));
+
+        return $this->hasOne(ProductVariant::class, 'product_id')
+            ->where('product_type', $type)
+            ->where('is_primary', 1);
     }
 }

@@ -23,12 +23,17 @@ class ProductResource extends JsonResource
             'category_id' => $this->category_id ?? null,
             'sub_category_id' => $this->sub_category_id ?? null,
 
-            // variants (manually passed, not relation)
-            'variants' => isset($this->variants)
-                ? VariantResource::collection($this->variants)
-                : [],
+            // ✅ primary variant (single)
+            'variant' => $this->whenLoaded('primaryVariant', function () {
+                return new VariantResource($this->primaryVariant);
+            }),
 
-            'table' => $this->table ?? null,
+            // optional: quick access fields (VERY useful)
+            'price' => optional($this->primaryVariant)->selling_price,
+            'mrp' => optional($this->primaryVariant)->mrp,
+            'image' => optional($this->primaryVariant?->images->first())->image_path ?? null,
+
+            'table' => $this->getTable(),
         ];
     }
 }

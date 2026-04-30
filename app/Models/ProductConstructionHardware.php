@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasPrimaryVariant;
+use App\Traits\HasProductType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductConstructionHardware extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasProductType, HasPrimaryVariant;
     protected $table = 'product_construction_hardware';
 
     protected $fillable = [
@@ -65,6 +67,23 @@ class ProductConstructionHardware extends Model
     // Variants
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class, 'product_id');
+        $type = $this->getType();
+
+        return $this->hasMany(ProductVariant::class, 'product_id')
+            ->where('product_type', $type ?? 0); // safe fallback
     }
+
+    public function primaryVariant()
+    {
+        $type = $this->getType();
+
+        if (!$type) {
+            throw new \Exception('Invalid product type for table: ' . $this->getTable());
+        }
+
+        return $this->hasOne(ProductVariant::class, 'product_id')
+            ->where('product_type', $type)
+            ->where('is_primary', 1);
+    }
+
 }
