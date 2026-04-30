@@ -384,7 +384,6 @@ class ProductController extends Controller
                     'sku' => $variantData['sku'],
                     'barcode' => $variantData['barcode'] ?? null,
 
-                    'price' => $variantData['selling_price'] ?? null,
                     'mrp' => $variantData['mrp'],
                     'cost_price' => $variantData['cost_price'] ?? null,
                     'selling_price' => $variantData['selling_price'] ?? null,

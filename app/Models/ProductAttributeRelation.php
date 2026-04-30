@@ -6,34 +6,34 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductAttributeRelation extends Model
 {
-    protected $fillable = [
+        protected $fillable = [
         'product_variant_id',
-        'product_id',
         'attribute_id',
         'attribute_value_id'
     ];
 
-    // Variant
+    // ✅ Variant (MAIN RELATION)
     public function variant()
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
-    // Product
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    // Attribute
+    // ✅ Attribute
     public function attribute()
     {
         return $this->belongsTo(Attribute::class);
     }
 
-    // Attribute Value
+    // ✅ Attribute Value
     public function attributeValue()
     {
         return $this->belongsTo(AttributeValue::class);
+    }
+
+    // 🔥 OPTIONAL: Access actual product dynamically
+    public function getProductAttribute()
+    {
+        return $this->variant?->product;
+        // uses your ProductVariant accessor
     }
 }
