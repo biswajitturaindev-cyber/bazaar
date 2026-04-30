@@ -20,10 +20,10 @@ class ProductResource extends JsonResource
             'status' => $this->status ?? null,
             'status_label' => config('product.status')[$this->status] ?? 'Unknown',
 
-            'category_id' => $this->category_id ?? null,
-            'sub_category_id' => $this->sub_category_id ?? null,
+            'category_id' => Hashids::encode($this->category_id) ?? null,
+            'sub_category_id' => Hashids::encode($this->sub_category_id) ?? null,
 
-            // ✅ primary variant (single)
+            // primary variant (single)
             'variant' => $this->whenLoaded('primaryVariant', function () {
                 return new VariantResource($this->primaryVariant);
             }),

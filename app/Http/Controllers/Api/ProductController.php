@@ -48,10 +48,12 @@ class ProductController extends Controller
                     ->select([
                         'id',
                         'name',
+                        'description',
                         'category_id',
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'status',
                         'created_at'
                     ])
                     ->with([
@@ -64,6 +66,10 @@ class ProductController extends Controller
                         'primaryVariant' => function ($q) {
                             $q->select([
                                 'id',
+                                'sku',
+                                'barcode',
+                                'discount',
+                                'final_price',
                                 'product_id',
                                 'product_type',
                                 'selling_price',
