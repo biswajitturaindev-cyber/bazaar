@@ -47,9 +47,14 @@ class ProductResource extends JsonResource
                 'label' => $this->hsn?->hsn_code,
             ],
 
-            // primary variant (single)
-            'variant' => $this->whenLoaded('primaryVariant', function () {
+            // primary (highlight)
+            'primary_variant' => $this->whenLoaded('primaryVariant', function () {
                 return new VariantResource($this->primaryVariant);
+            }),
+
+            // all variants (full data)
+            'variants' => $this->whenLoaded('variants', function () {
+                return VariantResource::collection($this->variants);
             }),
 
             // optional: quick access fields (VERY useful)
