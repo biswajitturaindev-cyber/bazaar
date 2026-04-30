@@ -24,8 +24,28 @@ class ProductResource extends JsonResource
             'status' => $this->status ?? null,
             'status_label' => config('product.status')[$this->status] ?? 'Unknown',
 
-            'category_id' => Hashids::encode($this->category_id) ?? null,
-            'sub_category_id' => Hashids::encode($this->sub_category_id) ?? null,
+            'category' => [
+                'id' => Hashids::encode($this->category?->id),
+                'label' => $this->category?->name,
+            ],
+
+            // Sub Category
+            'sub_category' => [
+                'id' => $this->subCategory?->id ? Hashids::encode($this->subCategory->id) : null,
+                'label' => $this->subCategory?->name,
+            ],
+
+            // Sub Sub Category (optional)
+            'sub_sub_category' => [
+                'id' => $this->subSubCategory?->id ? Hashids::encode($this->subSubCategory->id) : null,
+                'label' => $this->subSubCategory?->name,
+            ],
+
+            // HSN
+            'hsn' => [
+                'id' => $this->hsn?->id ? Hashids::encode($this->hsn->id) : null,
+                'label' => $this->hsn?->hsn_code,
+            ],
 
             // primary variant (single)
             'variant' => $this->whenLoaded('primaryVariant', function () {
