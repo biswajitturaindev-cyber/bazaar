@@ -437,25 +437,67 @@ class ProductController extends Controller
             $modelMap = config('product.model_map');
             $product = null;
 
-            // search in all product tables
             foreach ($modelMap as $type => $modelClass) {
 
-                $product = $modelClass::with([
-                    'category',
-                    'subCategory',
-                    'subSubCategory',
-                    'hsn',
+                $product = $modelClass::query()
+                    ->select([
+                        'id',
+                        'name',
+                        'description',
+                        'category_id',
+                        'sub_category_id',
+                        'sub_sub_category_id',
+                        'hsn_id',
+                        'status',
+                        'created_at'
+                    ])
+                    ->with([
+                        'category:id,name',
+                        'subCategory:id,name',
+                        'subSubCategory:id,name',
+                        'hsn:id,hsn_code',
 
-                    // correct structure
-                    'primaryVariant' => function ($q) {
-                        $q->with([
-                            'meta',
-                            'attributes.attribute',
-                            'attributes.attributeValue',
-                            'images'
-                        ]);
-                    }
-                ])->find($id);
+                        // ALL VARIANTS (optimized)
+                        'variants' => function ($q) {
+                            $q->select([
+                                'id',
+                                'product_id',
+                                'product_type',
+                                'sku',
+                                'mrp',
+                                'selling_price',
+                                'discount',
+                                'final_price',
+                                'is_primary'
+                            ])
+                            ->with([
+                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+                                'attributes' => function ($attr) {
+                                    $attr->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'attribute_id',
+                                        'attribute_value_id'
+                                    ])->with([
+                                        'attribute:id,name',
+                                        'attributeValue:id,value'
+                                    ]);
+                                },
+
+                                'images' => function ($img) {
+                                    $img->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'image_medium'
+                                    ]);
+                                },
+
+                                'stocks:id,product_variant_id'
+                            ]);
+                        }
+                    ])
+                    ->find($id);
 
                 if ($product) {
                     $product->product_type = $type;
