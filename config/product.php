@@ -25,4 +25,11 @@ return [
         9 => \App\Models\ProductHealth::class,
         10 => \App\Models\ProductSports::class,
     ],
+
+    'status' => [
+        0 => 'Inactive',
+        1 => 'Active',
+        2 => 'Unapproved',
+    ],
+
 ];

@@ -337,8 +337,9 @@ class ProductController extends Controller
             $data['business_id'] = decodeIdOrFail($data['business_id'], 'Invalid Business ID');
             $data['category_id'] = decodeIdOrFail($data['category_id'], 'Invalid Category ID');
 
-            // DECODE HSN IDS
-            $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
+            if (!empty($data['hsn_id'])) {
+                $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
+            }
 
 
             if (!empty($data['sub_category_id'])) {
@@ -500,9 +501,6 @@ class ProductController extends Controller
 
                 $variantIds[] = $variant->id;
             }
-
-            //DB::commit();
-
             $variants = ProductVariant::with([
                 'attributes.attribute',
                 'attributes.attributeValue',
@@ -511,12 +509,20 @@ class ProductController extends Controller
                 'stocks'
             ])->whereIn('id', $variantIds)->get();
 
+             $product = DB::table($tableName)->where('id', $productId)->first();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Product created successfully',
-                'data' => VariantResource::collection($variants),
-                'product_id' => Hashids::encode($productId),
-                'table' => $tableName
+                'data' => [
+                    'product_id' => Hashids::encode($productId),
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'status' => $product->status,
+                    'status_label' => config('product.status')[$product->status] ?? 'Unknown',
+                    'variants' => VariantResource::collection($variants),
+                    'table' => $tableName
+                ]
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
 

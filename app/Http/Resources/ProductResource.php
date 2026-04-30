@@ -11,9 +11,22 @@ class ProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'product_id' => Hashids::encode($this->product_id),
+            'product_id' => isset($this->id)
+                ? Hashids::encode($this->id)
+                : ($this->product_id ?? null),
 
-            'variants' => VariantResource::collection($this->whenLoaded('variants')),
+            'name' => $this->name ?? null,
+            'description' => $this->description ?? null,
+            'status' => $this->status ?? null,
+            'status_label' => config('product.status')[$this->status] ?? 'Unknown',
+
+            'category_id' => $this->category_id ?? null,
+            'sub_category_id' => $this->sub_category_id ?? null,
+
+            // variants (manually passed, not relation)
+            'variants' => isset($this->variants)
+                ? VariantResource::collection($this->variants)
+                : [],
 
             'table' => $this->table ?? null,
         ];
