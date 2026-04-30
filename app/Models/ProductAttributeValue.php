@@ -25,7 +25,17 @@ class ProductAttributeValue extends Model
     // Product
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        $modelMap = config('product.model_map');
+
+        $type = $this->product_type;
+
+        if (!$type || !isset($modelMap[$type])) {
+            return null;
+        }
+
+        $modelClass = $modelMap[$type];
+
+        return (new $modelClass)->find($this->product_id);
     }
 
     // Attribute (e.g. Size, Color)
