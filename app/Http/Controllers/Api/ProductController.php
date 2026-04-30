@@ -299,6 +299,8 @@ class ProductController extends Controller
                 'description' => 'nullable|string',
                 'status' => 'required|integer',
 
+                'hsn_id' => 'nullable',
+
                 // Variants
                 'variants' => 'required|array|min:1',
 
@@ -335,6 +337,8 @@ class ProductController extends Controller
             $data['business_id'] = decodeIdOrFail($data['business_id'], 'Invalid Business ID');
             $data['category_id'] = decodeIdOrFail($data['category_id'], 'Invalid Category ID');
 
+            // DECODE HSN IDS
+            $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
 
 
             if (!empty($data['sub_category_id'])) {
@@ -366,6 +370,7 @@ class ProductController extends Controller
                 'category_id' => $data['category_id'],
                 'sub_category_id' => $data['sub_category_id'] ?? null,
                 'sub_sub_category_id' => $data['sub_sub_category_id'] ?? null,
+                'hsn_id' =>$data['hsn_id'] ?? null,
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'status' => $data['status'],
