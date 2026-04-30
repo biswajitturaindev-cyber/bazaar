@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class AttributeRelationResource extends JsonResource
 {
@@ -15,10 +16,10 @@ class AttributeRelationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'attribute_id' => $this->attribute_id,
+            'attribute_id' => Hashids::encode($this->attribute_id),
             'attribute_name' => $this->attribute->name ?? null,
 
-            'value_id' => $this->attribute_value_id,
+            'value_id' => Hashids::encode($this->attribute_value_id),
             'value' => $this->attributeValue->value ?? null,
         ];
     }
