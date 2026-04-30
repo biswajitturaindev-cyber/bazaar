@@ -48,9 +48,9 @@ class ProductResource extends JsonResource
             ],
 
             // primary (highlight)
-            'primary_variant' => $this->whenLoaded('primaryVariant', function () {
-                return new VariantResource($this->primaryVariant);
-            }),
+            // 'primary_variant' => $this->whenLoaded('primaryVariant', function () {
+            //     return new VariantResource($this->primaryVariant);
+            // }),
 
             // all variants (full data)
             'variants' => $this->whenLoaded('variants', function () {

@@ -493,7 +493,7 @@ class ProductController extends Controller
                                     ]);
                                 },
 
-                                'stocks:id,product_variant_id'
+                                'stocks'
                             ]);
                         }
                     ])
