@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
+
             // Category decides table
             $table->foreignId('business_category_id')
                 ->constrained('business_categories')
@@ -21,13 +22,23 @@ return new class extends Migration
             // Product ID inside that category table
             $table->unsignedBigInteger('product_id');
 
+            // Variant (MAIN LINK)
+            $table->unsignedBigInteger('product_variant_id');
+
             $table->string('image_large');
             $table->string('image_medium');
             $table->string('image_small');
 
             $table->timestamps();
 
-            $table->index(['business_category_id', 'product_id']);
+            // FIX: short index name
+            $table->index(
+                ['business_category_id', 'product_id', 'product_variant_id'],
+                'pi_bcat_pid_vid_idx'
+            );
+
+            // optional but recommended
+            $table->index('product_variant_id', 'pi_vid_idx');
         });
     }
 
