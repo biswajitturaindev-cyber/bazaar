@@ -20,12 +20,13 @@ return new class extends Migration
             $table->string('sku')->nullable()->unique()->index();
             $table->string('barcode')->nullable()->unique()->index();
 
-            $table->decimal('price', 10, 2)->nullable();
             $table->decimal('mrp', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
             $table->decimal('selling_price', 10, 2)->nullable();
             $table->decimal('discount', 10, 2)->nullable();
             $table->decimal('final_price', 10, 2)->nullable();
+
+            $table->boolean('is_primary')->default(false);
 
             $table->date('manufacture_date')->nullable();
             $table->date('expiry_date')->nullable();
