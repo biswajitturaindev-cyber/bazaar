@@ -4,12 +4,16 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 use Vinkla\Hashids\Facades\Hashids;
 
 class ProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $variant = $this->primaryVariant;
+        $image   = $variant?->images->first();
+
         return [
             'product_id' => isset($this->id)
                 ? Hashids::encode($this->id)
@@ -31,8 +35,9 @@ class ProductResource extends JsonResource
             // optional: quick access fields (VERY useful)
             'price' => optional($this->primaryVariant)->selling_price,
             'mrp' => optional($this->primaryVariant)->mrp,
-            'image' => $this->primaryVariant?->images->first() ? asset($this->primaryVariant->images->first()->image_medium): null,
-
+            'image' => $image
+            ? url('storage/' . $image->image_medium)
+            : null,
             'table' => $this->getTable(),
         ];
     }
