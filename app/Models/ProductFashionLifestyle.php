@@ -82,6 +82,9 @@ class ProductFashionLifestyle extends Model
             ->where('product_type', $type);
     }
 
+    // ===============================
+    // PrimaryVariant
+    // ===============================
     public function primaryVariant()
     {
         $type = array_search(static::class, config('product.model_map'));
