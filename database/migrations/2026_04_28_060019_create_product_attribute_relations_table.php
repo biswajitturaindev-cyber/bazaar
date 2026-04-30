@@ -15,18 +15,25 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('product_variant_id');
-            $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('attribute_id');
             $table->unsignedBigInteger('attribute_value_id');
 
             $table->timestamps();
 
             $table->foreign('product_variant_id')
-                  ->references('id')
-                  ->on('product_variants')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('product_variants')
+                ->onDelete('cascade');
 
-            $table->index(['product_id', 'attribute_id']);
+            $table->unique(
+                ['product_variant_id', 'attribute_id', 'attribute_value_id'],
+                'pav_unique'
+            );
+
+            $table->index(
+                ['product_variant_id', 'attribute_id'],
+                'pav_variant_attr_idx'
+            );
         });
     }
 
