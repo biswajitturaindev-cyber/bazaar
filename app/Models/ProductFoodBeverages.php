@@ -24,7 +24,9 @@ class ProductFoodBeverages extends Model
         'status',
     ];
 
+    // ===============================
     // Business Relations
+    // ===============================
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
@@ -40,7 +42,9 @@ class ProductFoodBeverages extends Model
         return $this->belongsTo(BusinessSubCategory::class, 'business_sub_category_id');
     }
 
+    // ===============================
     // Category Relations
+    // ===============================
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
@@ -56,15 +60,34 @@ class ProductFoodBeverages extends Model
         return $this->belongsTo(SubCategoryItem::class, 'sub_sub_category_id');
     }
 
+    // ===============================
     // HSN
+    // ===============================
     public function hsn()
     {
         return $this->belongsTo(Hsn::class, 'hsn_id');
     }
 
-    // Variants
+    // ===============================
+    // Variants (Dynamic FIX)
+    // ===============================
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class, 'product_id');
+        $type = array_search(static::class, config('product.model_map'));
+
+        return $this->hasMany(ProductVariant::class, 'product_id')
+            ->where('product_type', $type);
+    }
+
+    // ===============================
+    // PrimaryVariant
+    // ===============================
+    public function primaryVariant()
+    {
+        $type = array_search(static::class, config('product.model_map'));
+
+        return $this->hasOne(ProductVariant::class, 'product_id')
+            ->where('product_type', $type)
+            ->where('is_primary', 1);
     }
 }
