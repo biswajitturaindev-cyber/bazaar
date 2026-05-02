@@ -14,6 +14,9 @@ class ProductResource extends JsonResource
         $variant = $this->primaryVariant;
         $image   = $variant?->images->first();
 
+        // Detect index route
+        $isIndex = $request->routeIs('products.index');
+
         return [
             'product_id' => isset($this->id)
                 ? Hashids::encode($this->id)
@@ -47,19 +50,27 @@ class ProductResource extends JsonResource
                 'label' => $this->hsn?->hsn_code,
             ],
 
-            // primary (highlight)
-            // 'primary_variant' => $this->whenLoaded('primaryVariant', function () {
-            //     return new VariantResource($this->primaryVariant);
-            // }),
 
-            // all variants (full data)
-            'variants' => $this->whenLoaded('variants', function () {
-                return VariantResource::collection($this->variants);
-            }),
+            // ✅ Conditional variant block
+            ...(
+                $isIndex
+                ? [
+                    'primary_variant' => $this->whenLoaded('primaryVariant', function () {
+                        return new VariantResource($this->primaryVariant);
+                    }),
+                ]
+                : [
+                    'variants' => $this->whenLoaded('variants', function () {
+                        return VariantResource::collection($this->variants);
+                    }),
+                ]
+            ),
 
             // optional: quick access fields (VERY useful)
             'price' => optional($this->primaryVariant)->selling_price,
             'mrp' => optional($this->primaryVariant)->mrp,
+            'cost_price' => optional($this->primaryVariant)->cost_price,
+            'selling_price' => optional($this->primaryVariant)->selling_price,
             'image' => $image
             ? url('storage/' . $image->image_medium)
             : null,

@@ -32,7 +32,7 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index()
+    public function index()
     {
         try {
 
@@ -74,6 +74,7 @@ class ProductController extends Controller
                                 'product_type',
                                 'selling_price',
                                 'mrp',
+                                'cost_price',
                                 'is_primary'
                             ])
                             ->with([
