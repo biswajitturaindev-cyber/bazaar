@@ -22,6 +22,7 @@ class VariantResource extends JsonResource
             'barcode' => $this->barcode,
 
             'mrp' => $this->mrp,
+            'cost_price' => $this->cost_price,
             'selling_price' => $this->selling_price,
             'discount' => $this->discount,
             'final_price' => $this->final_price,
