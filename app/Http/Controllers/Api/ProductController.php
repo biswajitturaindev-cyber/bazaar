@@ -74,7 +74,9 @@ class ProductController extends Controller
                                 'selling_price',
                                 'mrp',
                                 'cost_price',
-                                'is_primary'
+                                'is_primary',
+                                'manufacture_date',
+                                'expiry_date'
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
@@ -466,15 +468,19 @@ class ProductController extends Controller
                         // ALL VARIANTS (optimized)
                         'variants' => function ($q) {
                             $q->select([
-                                'id',
-                                'product_id',
-                                'product_type',
+                               'id',
                                 'sku',
-                                'mrp',
-                                'selling_price',
+                                'barcode',
                                 'discount',
                                 'final_price',
-                                'is_primary'
+                                'product_id',
+                                'product_type',
+                                'selling_price',
+                                'mrp',
+                                'cost_price',
+                                'is_primary',
+                                'manufacture_date',
+                                'expiry_date'
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
