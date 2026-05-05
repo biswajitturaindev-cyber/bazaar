@@ -17,7 +17,6 @@ class MemberProductResource extends JsonResource
             'product_id' => Hashids::encode($this->id),
 
             'name' => $this->name ?? null,
-            'description' => $this->description ?? null,
 
             // Category IDs
             'business_category_id' => $this->business_category_id
