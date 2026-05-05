@@ -59,7 +59,7 @@ class ProductController extends Controller
                         'category:id,name',
                         'subCategory:id,name',
                         'subSubCategory:id,name',
-                        'hsn:id,hsn_code',
+                        'hsn:id,hsn_code,igst',
 
                         // optimized variant loading
                         'primaryVariant' => function ($q) {
