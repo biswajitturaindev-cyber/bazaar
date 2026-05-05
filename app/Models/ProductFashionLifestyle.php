@@ -23,7 +23,6 @@ class ProductFashionLifestyle extends Model
         'sub_sub_category_id',
         'hsn_id',
         'name',
-        'description',
         'status',
     ];
 

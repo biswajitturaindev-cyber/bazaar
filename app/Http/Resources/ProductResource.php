@@ -23,7 +23,6 @@ class ProductResource extends JsonResource
                 : ($this->product_id ?? null),
 
             'name' => $this->name ?? null,
-            'description' => $this->description ?? null,
             'status' => $this->status ?? null,
             'status_label' => config('product.status')[$this->status] ?? 'Unknown',
 
@@ -51,7 +50,7 @@ class ProductResource extends JsonResource
             ],
 
 
-            // ✅ Conditional variant block
+            // Conditional variant block
             ...(
                 $isIndex
                 ? [

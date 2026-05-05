@@ -248,7 +248,6 @@ class ProductController extends Controller
                 'sub_sub_category_id' => $data['sub_sub_category_id'] ?? null,
                 'hsn_id' =>$data['hsn_id'] ?? null,
                 'name' => $data['name'],
-                'description' => $data['description'] ?? null,
                 'status' => $data['status'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -397,7 +396,6 @@ class ProductController extends Controller
                 'data' => [
                     'product_id' => Hashids::encode($productId),
                     'name' => $product->name,
-                    'description' => $product->description,
                     'status' => $product->status,
                     'status_label' => config('product.status')[$product->status] ?? 'Unknown',
                     'variants' => VariantResource::collection($variants),
