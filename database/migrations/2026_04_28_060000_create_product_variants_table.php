@@ -26,6 +26,9 @@ return new class extends Migration
             $table->decimal('discount', 10, 2)->nullable();
             $table->decimal('final_price', 10, 2)->nullable();
 
+            $table->text('short_description')->nullable();
+            $table->longText('long_description')->nullable();
+
             $table->boolean('is_primary')->default(false);
 
             $table->date('manufacture_date')->nullable();

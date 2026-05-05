@@ -27,6 +27,9 @@ class VariantResource extends JsonResource
             'discount' => $this->discount,
             'final_price' => $this->final_price,
 
+            'short_description' => $this->short_description,
+            'long_description' => $this->long_description,
+
             'is_primary' => $this->is_primary,
 
             // ALL STOCKS

@@ -181,9 +181,15 @@ class ProductController extends Controller
                 'variants.*.selling_price' => 'nullable|numeric',
                 'variants.*.discount' => 'nullable|numeric',
 
+
                 'variants.*.stock' => 'nullable|integer',
                 'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
+
+                'variants.*.short_description' => 'nullable|string|max:1000',
+                'variants.*.long_description' => 'nullable|string',
+
+                'variants.*.is_primary' => 'nullable|boolean',
 
                 // Images
                 'variants.*.images' => 'nullable|array',
@@ -265,6 +271,9 @@ class ProductController extends Controller
                     'selling_price' => $variantData['selling_price'] ?? null,
                     'discount' => $variantData['discount'] ?? 0,
                     'final_price' => ($variantData['selling_price'] ?? $variantData['mrp']) - ($variantData['discount'] ?? 0),
+
+                    'short_description' => $variantData['short_description'] ?? null,
+                    'long_description' => $variantData['long_description'] ?? null,
 
                     'manufacture_date' => $variantData['manufacture_date'] ?? null,
                     'expiry_date' => $variantData['expiry_date'] ?? null,

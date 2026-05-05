@@ -16,6 +16,8 @@ class ProductVariant extends Model
         'selling_price',
         'discount',
         'final_price',
+        'short_description',
+        'long_description',
         'is_primary',
         'manufacture_date',
         'expiry_date',
@@ -30,6 +32,8 @@ class ProductVariant extends Model
         'final_price' => 'float',
         'manufacture_date' => 'date',
         'expiry_date' => 'date',
+        'short_description' => 'string',
+        'long_description' => 'string',
     ];
 
     /**

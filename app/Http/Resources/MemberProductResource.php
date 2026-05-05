@@ -40,7 +40,7 @@ class MemberProductResource extends JsonResource
                 ? Hashids::encode($this->sub_sub_category_id)
                 : null,
 
-            // ✅ ALWAYS RETURN PRIMARY VARIANT
+            // ALWAYS RETURN PRIMARY VARIANT
             'primary_variant' => $variant
                 ? new VariantResource($variant)
                 : null,
