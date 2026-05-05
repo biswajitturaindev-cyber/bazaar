@@ -29,8 +29,8 @@ class VariantResource extends JsonResource
 
             'short_description' => $this->short_description,
             'long_description' => $this->long_description,
-            'manufacture_date' => $this->manufacture_date,
-            'expiry_date' => $this->expiry_date,
+            'manufacture_date' => optional($this->manufacture_date)->format('Y-m-d'),
+            'expiry_date' => optional($this->expiry_date)->format('Y-m-d'),
 
             'is_primary' => $this->is_primary,
 
