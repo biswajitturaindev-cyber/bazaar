@@ -76,7 +76,9 @@ class ProductController extends Controller
                                 'cost_price',
                                 'is_primary',
                                 'manufacture_date',
-                                'expiry_date'
+                                'expiry_date',
+                                'short_description',
+                                'long_description'
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
