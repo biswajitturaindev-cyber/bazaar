@@ -120,7 +120,6 @@ public function index(Request $request)
                 ->select([
                     'id',
                     'name',
-                    'description',
                     'business_category_id',
                     'business_sub_category_id',
                     'category_id',

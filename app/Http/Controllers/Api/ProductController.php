@@ -48,7 +48,6 @@ class ProductController extends Controller
                     ->select([
                         'id',
                         'name',
-                        'description',
                         'category_id',
                         'sub_category_id',
                         'sub_sub_category_id',
