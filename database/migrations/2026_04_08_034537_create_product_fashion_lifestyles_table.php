@@ -55,7 +55,7 @@ return new class extends Migration
             // Basic Info
             $table->string('name');
             //$table->string('image')->nullable();
-            $table->longText('description')->nullable();
+            //$table->longText('description')->nullable();
 
             // Pricing
             // $table->decimal('mrp', 10, 2)->nullable();
