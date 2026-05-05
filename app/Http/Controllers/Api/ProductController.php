@@ -463,7 +463,7 @@ class ProductController extends Controller
                         'category:id,name',
                         'subCategory:id,name',
                         'subSubCategory:id,name',
-                        'hsn:id,hsn_code',
+                        'hsn:id,hsn_code,igst',
 
                         // ALL VARIANTS (optimized)
                         'variants' => function ($q) {
@@ -480,7 +480,9 @@ class ProductController extends Controller
                                 'cost_price',
                                 'is_primary',
                                 'manufacture_date',
-                                'expiry_date'
+                                'expiry_date',
+                                'short_description',
+                                'long_description'
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',

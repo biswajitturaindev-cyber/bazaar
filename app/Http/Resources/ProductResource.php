@@ -47,6 +47,7 @@ class ProductResource extends JsonResource
             'hsn' => [
                 'id' => $this->hsn?->id ? Hashids::encode($this->hsn->id) : null,
                 'label' => $this->hsn?->hsn_code,
+                'gst_percent' => $this->hsn?->igst,
             ],
 
 
