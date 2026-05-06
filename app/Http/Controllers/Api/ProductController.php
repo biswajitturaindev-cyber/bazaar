@@ -934,8 +934,16 @@ class ProductController extends Controller
     public function deleteProductImage($id)
     {
         try {
-            // Find image
-            $image = ProductImage::find($id);
+
+            // =============================
+            // DECODE ID
+            // =============================
+            $imageId = decodeIdOrFail($id);
+
+            // =============================
+            // FIND IMAGE
+            // =============================
+            $image = ProductImage::find($imageId);
 
             if (!$image) {
                 return response()->json([
