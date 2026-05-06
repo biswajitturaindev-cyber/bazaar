@@ -29,17 +29,121 @@ class ProductReviewController extends Controller
 {
     /**
      * Display a listing of the resource.
-     */
+      */
+    // public function index()
+    // {
+    //     try {
+
+    //         $modelMap = config('product.model_map');
+    //         $allProducts = collect();
+
+    //         foreach ($modelMap as $type => $modelClass) {
+
+    //             $products = $modelClass::query()
+    //                 ->select([
+    //                     'id',
+    //                     'name',
+    //                     'category_id',
+    //                     'sub_category_id',
+    //                     'sub_sub_category_id',
+    //                     'hsn_id',
+    //                     'status',
+    //                     'created_at'
+    //                 ])
+    //                 ->with([
+    //                     'category:id,name',
+    //                     'subCategory:id,name',
+    //                     'subSubCategory:id,name',
+    //                     'hsn:id,hsn_code,igst',
+
+    //                     // Optimized primary variant loading
+    //                     'primaryVariant' => function ($q) {
+    //                         $q->select([
+    //                             'id',
+    //                             'sku',
+    //                             'barcode',
+    //                             'discount',
+    //                             'final_price',
+    //                             'product_id',
+    //                             'product_type',
+    //                             'selling_price',
+    //                             'mrp',
+    //                             'cost_price',
+    //                             'is_primary',
+    //                             'manufacture_date',
+    //                             'expiry_date',
+    //                             'short_description',
+    //                             'long_description'
+    //                         ])
+    //                         ->with([
+
+    //                             // SEO Meta
+    //                             'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+    //                             // Variant Attributes
+    //                             'attributes' => function ($attr) {
+    //                                 $attr->select([
+    //                                     'id',
+    //                                     'product_variant_id',
+    //                                     'attribute_id',
+    //                                     'attribute_value_id'
+    //                                 ])->with([
+    //                                     'attribute:id,name',
+    //                                     'attributeValue:id,value'
+    //                                 ]);
+    //                             },
+
+    //                             // Only One Image
+    //                             'images' => function ($img) {
+    //                                 $img->select([
+    //                                     'id',
+    //                                     'product_variant_id',
+    //                                     'image_medium'
+    //                                 ])->limit(1);
+    //                             }
+    //                         ]);
+    //                     }
+    //                 ])
+    //                 ->latest()
+    //                 ->get()
+    //                 ->map(function ($item) use ($type) {
+    //                     $item->product_type = $type;
+    //                     return $item;
+    //                 });
+
+    //             $allProducts = $allProducts->concat($products);
+    //         }
+
+    //         // Global sorting
+    //         $products = $allProducts
+    //             ->sortByDesc('created_at')
+    //             ->values();
+
+    //         return view('admin.product-reviews.index', compact('products'));
+
+    //     } catch (\Exception $e) {
+
+    //         \Log::error('Product Index Error: ' . $e->getMessage());
+
+    //         return back()->with(
+    //             'error',
+    //             'Something went wrong: ' . $e->getMessage()
+    //         );
+    //     }
+    // }
+
     public function index()
     {
         try {
 
             $modelMap = config('product.model_map');
+
             $allProducts = collect();
 
             foreach ($modelMap as $type => $modelClass) {
 
                 $products = $modelClass::query()
+
                     ->select([
                         'id',
                         'name',
@@ -50,14 +154,22 @@ class ProductReviewController extends Controller
                         'status',
                         'created_at'
                     ])
+
                     ->with([
+
                         'category:id,name',
+
                         'subCategory:id,name',
+
                         'subSubCategory:id,name',
+
                         'hsn:id,hsn_code,igst',
 
-                        // Optimized primary variant loading
+                        // =============================
+                        // PRIMARY VARIANT ONLY
+                        // =============================
                         'primaryVariant' => function ($q) {
+
                             $q->select([
                                 'id',
                                 'sku',
@@ -75,26 +187,31 @@ class ProductReviewController extends Controller
                                 'short_description',
                                 'long_description'
                             ])
+
                             ->with([
 
-                                // SEO Meta
+                                // SEO META
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
 
-                                // Variant Attributes
+                                // ATTRIBUTES
                                 'attributes' => function ($attr) {
+
                                     $attr->select([
                                         'id',
                                         'product_variant_id',
                                         'attribute_id',
                                         'attribute_value_id'
-                                    ])->with([
+                                    ])
+
+                                    ->with([
                                         'attribute:id,name',
                                         'attributeValue:id,value'
                                     ]);
                                 },
 
-                                // Only One Image
+                                // ONLY ONE IMAGE
                                 'images' => function ($img) {
+
                                     $img->select([
                                         'id',
                                         'product_variant_id',
@@ -104,26 +221,38 @@ class ProductReviewController extends Controller
                             ]);
                         }
                     ])
+
                     ->latest()
+
                     ->get()
+
                     ->map(function ($item) use ($type) {
+
                         $item->product_type = $type;
+
                         return $item;
                     });
 
                 $allProducts = $allProducts->concat($products);
             }
 
-            // Global sorting
+            // =============================
+            // GLOBAL SORTING
+            // =============================
             $products = $allProducts
                 ->sortByDesc('created_at')
                 ->values();
 
-            return view('admin.product-reviews.index', compact('products'));
+            return view(
+                'admin.product-reviews.index',
+                compact('products')
+            );
 
         } catch (\Exception $e) {
 
-            \Log::error('Product Index Error: ' . $e->getMessage());
+            \Log::error(
+                'Product Index Error: ' . $e->getMessage()
+            );
 
             return back()->with(
                 'error',
@@ -131,6 +260,8 @@ class ProductReviewController extends Controller
             );
         }
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -151,9 +282,73 @@ class ProductReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        try {
+
+            // =============================
+            // DECODE PRODUCT ID
+            // =============================
+            $modelMap = config('product.model_map');
+
+            $product = null;
+
+            // =============================
+            // SEARCH PRODUCT IN ALL MODELS
+            // =============================
+            foreach ($modelMap as $type => $modelClass) {
+
+                $product = $modelClass::with([
+
+                    'category',
+                    'subCategory',
+                    'subSubCategory',
+                    'hsn',
+
+                    'variants.meta',
+
+                    'variants.attributes.attribute',
+                    'variants.attributes.attributeValue',
+
+                    'variants.images',
+
+                    'variants.stocks.business'
+
+                ])->find($productId);
+
+                if ($product) {
+                    break;
+                }
+            }
+
+            // =============================
+            // PRODUCT NOT FOUND
+            // =============================
+            if (!$product) {
+
+                return redirect()
+                    ->back()
+                    ->with('error', 'Product not found');
+            }
+
+            return view(
+                'admin.product-reviews.show',
+                compact('product')
+            );
+
+        } catch (\Exception $e) {
+
+            \Log::error(
+                'Product Show Error: ' . $e->getMessage()
+            );
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Something went wrong'
+                );
+        }
     }
 
     /**
