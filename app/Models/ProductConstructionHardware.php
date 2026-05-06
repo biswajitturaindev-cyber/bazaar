@@ -22,11 +22,12 @@ class ProductConstructionHardware extends Model
         'sub_sub_category_id',
         'hsn_id',
         'name',
-        'description',
         'status',
     ];
 
+    // ===============================
     // Business Relations
+    // ===============================
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
@@ -42,7 +43,9 @@ class ProductConstructionHardware extends Model
         return $this->belongsTo(BusinessSubCategory::class, 'business_sub_category_id');
     }
 
+    // ===============================
     // Category Relations
+    // ===============================
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
@@ -58,32 +61,39 @@ class ProductConstructionHardware extends Model
         return $this->belongsTo(SubCategoryItem::class, 'sub_sub_category_id');
     }
 
+    // ===============================
     // HSN
+    // ===============================
     public function hsn()
     {
         return $this->belongsTo(Hsn::class, 'hsn_id');
     }
 
-    // Variants
+    // ===============================
+    // Variants (Dynamic FIX)
+    // ===============================
     public function variants()
     {
-        $type = $this->getType();
+        $type = array_search(static::class, config('product.model_map'));
 
         return $this->hasMany(ProductVariant::class, 'product_id')
-            ->where('product_type', $type ?? 0); // safe fallback
+            ->where('product_type', $type);
     }
 
+    // ===============================
+    // PrimaryVariant
+    // ===============================
     public function primaryVariant()
     {
-        $type = $this->getType();
-
-        if (!$type) {
-            throw new \Exception('Invalid product type for table: ' . $this->getTable());
-        }
+        $type = array_search(static::class, config('product.model_map'));
 
         return $this->hasOne(ProductVariant::class, 'product_id')
             ->where('product_type', $type)
             ->where('is_primary', 1);
     }
 
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
+    }
 }
