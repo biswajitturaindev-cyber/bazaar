@@ -182,6 +182,7 @@ class ProductController extends Controller
                 'variants.*.cost_price' => 'nullable|numeric',
                 'variants.*.selling_price' => 'nullable|numeric',
                 'variants.*.discount' => 'nullable|numeric',
+                'variants.*.final_price' => 'nullable|numeric',
 
 
                 'variants.*.stock' => 'nullable|integer',
@@ -572,6 +573,7 @@ class ProductController extends Controller
                 'variants.*.cost_price' => 'nullable|numeric',
                 'variants.*.selling_price' => 'nullable|numeric',
                 'variants.*.discount' => 'nullable|numeric',
+                'variants.*.final_price' => 'nullable|numeric',
 
                 'variants.*.stock' => 'nullable|integer',
 
