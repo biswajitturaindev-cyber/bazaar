@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('education_stationaries', function (Blueprint $table) {
-           $table->id();
+            $table->id();
 
             // Business
             $table->foreignId('business_id')
@@ -54,20 +54,6 @@ return new class extends Migration
 
             // Basic Info
             $table->string('name');
-            //$table->string('image')->nullable();
-            $table->longText('description')->nullable();
-
-            // Pricing
-            // $table->decimal('mrp', 10, 2)->nullable();
-            // $table->decimal('cost_price', 10, 2)->nullable();
-            // $table->decimal('selling_price', 10, 2)->nullable();
-            // $table->decimal('discount', 10, 2)->nullable();
-            // $table->decimal('final_price', 10, 2)->nullable();
-
-            // Dates
-            // $table->date('manufacture_date')->nullable();
-            // $table->date('expiry_date')->nullable();
-
             // Status
             $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
 
