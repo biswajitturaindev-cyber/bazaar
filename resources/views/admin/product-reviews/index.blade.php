@@ -20,55 +20,97 @@
 
             <div class="overflow-x-auto p-5">
                 <table class="w-full text-sm text-left" id="example">
+
                     <thead class="bg-gray-100">
                         <tr class="border">
+
                             <th class="px-3 py-2">Sl.No</th>
+
                             <th class="px-3 py-2">Category</th>
+
                             <th class="px-3 py-2">Sub Category</th>
+
                             <th class="px-3 py-2">Sub Sub Category</th>
+
                             <th class="px-3 py-2">Product Name</th>
+
+                            <th class="px-3 py-2">SKU</th>
+
                             <th class="px-3 py-2">HSN</th>
+
                             <th class="px-3 py-2">MRP</th>
-                            <th class="px-3 py-2">Selling Price</th>
+
+                            <th class="px-3 py-2">Final Price</th>
+
                             <th class="px-3 py-2">Description</th>
-                            <th class="px-3 py-2">Image</th>
-                            <th class="px-3 py-2">Status</th>
-                            <th class="px-3 py-2">Action</th>
+
+                            <th class="px-3 py-2 text-center">Image</th>
+
+                            <th class="px-3 py-2 text-center">Status</th>
+
+                            <th class="px-3 py-2 text-center">Action</th>
+
                         </tr>
                     </thead>
 
                     <tbody class="divide-y">
-                        @foreach ($products as $key => $product)
+
+                        @forelse ($products as $product)
                             @php
+
                                 $variant = $product->primaryVariant;
-                                $image = $variant?->images?->first();
+
+                                $image = null;
+
+                                if ($variant && $variant->images && $variant->images->count() > 0) {
+                                    $image = $variant->images->first();
+                                }
+
+                                // STATUS
+                                $statusClass = match ($product->status) {
+                                    1 => 'bg-green-100 text-green-700',
+                                    0 => 'bg-red-100 text-red-700',
+                                    default => 'bg-yellow-100 text-yellow-700',
+                                };
+
+                                $statusLabel = match ($product->status) {
+                                    1 => 'Active',
+                                    0 => 'Inactive',
+                                    default => 'Unapproved',
+                                };
+
                             @endphp
 
-                            <tr class="border-l border-r">
+                            <tr class="border-l border-r hover:bg-gray-50 transition">
 
-                                {{-- Serial --}}
+                                {{-- SERIAL --}}
                                 <td class="px-3 py-2">
-                                    {{ $key + 1 }}
+                                    {{ $loop->iteration }}
                                 </td>
 
-                                {{-- Category --}}
+                                {{-- CATEGORY --}}
                                 <td class="px-3 py-2">
                                     {{ $product->category?->name ?? '-' }}
                                 </td>
 
-                                {{-- Sub Category --}}
+                                {{-- SUB CATEGORY --}}
                                 <td class="px-3 py-2">
                                     {{ $product->subCategory?->name ?? '-' }}
                                 </td>
 
-                                {{-- Sub Sub Category --}}
+                                {{-- SUB SUB CATEGORY --}}
                                 <td class="px-3 py-2">
                                     {{ $product->subSubCategory?->name ?? '-' }}
                                 </td>
 
-                                {{-- Product Name --}}
+                                {{-- PRODUCT NAME --}}
                                 <td class="px-3 py-2 font-medium">
                                     {{ $product->name ?? '-' }}
+                                </td>
+
+                                {{-- SKU --}}
+                                <td class="px-3 py-2">
+                                    {{ $variant?->sku ?? '-' }}
                                 </td>
 
                                 {{-- HSN --}}
@@ -78,80 +120,80 @@
 
                                 {{-- MRP --}}
                                 <td class="px-3 py-2">
-                                    ₹{{ $variant?->mrp ?? '-' }}
+                                    ₹{{ !empty($variant?->mrp) ? number_format($variant->mrp, 2) : '-' }}
                                 </td>
 
-                                {{-- Selling Price --}}
+                                {{-- SELLING PRICE --}}
                                 <td class="px-3 py-2 text-green-600 font-semibold">
-                                    ₹{{ $variant?->selling_price ?? '-' }}
+                                    ₹{{ !empty($variant?->final_price) ? number_format($variant->final_price, 2) : '-' }}
                                 </td>
 
-                                {{-- Description --}}
-                                <td class="px-3 py-2">
+                                {{-- DESCRIPTION --}}
+                                <td class="px-3 py-2 max-w-xs">
                                     {{ \Illuminate\Support\Str::limit($variant?->short_description ?? '-', 50) }}
                                 </td>
 
-                                {{-- Image --}}
-                                <td class="px-3 py-2">
-                                    @if ($image && $image->image_medium)
+                                {{-- IMAGE --}}
+                                <td class="px-3 py-2 text-center">
+
+                                    @if ($image && !empty($image->image_medium))
                                         <a href="{{ asset('storage/' . $image->image_medium) }}" data-fancybox="products"
                                             data-caption="{{ $product->name }}">
 
                                             <img src="{{ asset('storage/' . $image->image_medium) }}" width="50"
-                                                height="50" class="rounded cursor-pointer border"
+                                                height="50" class="rounded border mx-auto cursor-pointer"
                                                 style="object-fit: cover;">
                                         </a>
                                     @else
-                                        <span class="text-gray-400">No Image</span>
+                                        <span class="text-gray-400 text-xs">
+                                            No Image
+                                        </span>
                                     @endif
+
                                 </td>
 
-                                {{-- Status --}}
-                                <td class="px-3 py-2">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded
-                                        @if ($product->status == 1)
-                                            bg-green-100 text-green-700
-                                        @elseif($product->status == 0)
-                                            bg-red-100 text-red-700
-                                        @else
-                                            bg-yellow-100 text-yellow-700
-                                        @endif">
+                                {{-- STATUS --}}
+                                <td class="px-3 py-2 text-center">
 
-                                        @if ($product->status == 1)
-                                            Active
-                                        @elseif($product->status == 0)
-                                            Inactive
-                                        @else
-                                            Unapproved
-                                        @endif
+                                    <span class="px-2 py-1 text-xs font-semibold rounded {{ $statusClass }}">
+                                        {{ $statusLabel }}
                                     </span>
+
                                 </td>
 
-                                {{-- Actions --}}
-                                <td class="px-3 py-2 flex gap-2">
+                                {{-- ACTION --}}
+                                <td class="px-3 py-2">
 
-                                    <a href="{{ route('product-reviews.edit', $product->id) }}"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
-                                        Edit
-                                    </a>
+                                    <div class="flex items-center justify-center gap-2">
 
-                                    <form action="{{ route('product-reviews.destroy', $product->id) }}" method="POST"
-                                        onsubmit="return confirm('Delete this product?')">
+                                        {{-- VIEW PRODUCT DETAILS --}}
+                                        <a href="{{ route('product-reviews.show', $product->id) }}"
+                                            class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs">
 
-                                        @csrf
-                                        @method('DELETE')
+                                            View Details
+                                        </a>
 
-                                        <button type="submit"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
-                                            Delete
-                                        </button>
-                                    </form>
+                                    </div>
 
                                 </td>
 
                             </tr>
-                        @endforeach
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="13" class="text-center py-6 text-gray-500">
+
+                                    No products found
+
+                                </td>
+
+                            </tr>
+                        @endforelse
+
                     </tbody>
+
                 </table>
             </div>
 
