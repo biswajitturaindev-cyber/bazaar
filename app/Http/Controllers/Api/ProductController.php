@@ -579,6 +579,9 @@ class ProductController extends Controller
                 'variants.*.expiry_date' => 'nullable|date',
 
                 'variants.*.attributes' => 'nullable|array',
+
+                'variants.*.images' => 'nullable|array',
+                'variants.*.images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
             ];
 
             $data = $request->validate($rules);
@@ -664,7 +667,7 @@ class ProductController extends Controller
                     : null;
 
                 // =============================
-                // CHECK SKU BELONGS TO OTHER PRODUCT ❌
+                // CHECK SKU BELONGS TO OTHER PRODUCT
                 // =============================
                 $existingVariantOtherProduct = ProductVariant::where('sku', $sku)
                     ->where('product_id', '!=', $productId)
@@ -677,7 +680,7 @@ class ProductController extends Controller
                 }
 
                 // =============================
-                // FIND VARIANT IN SAME PRODUCT ✅
+                // FIND VARIANT IN SAME PRODUCT
                 // =============================
                 $variant = ProductVariant::where('product_id', $productId)
                     ->where('sku', $sku)
@@ -694,9 +697,12 @@ class ProductController extends Controller
                         'cost_price' => $variantData['cost_price'] ?? null,
                         'selling_price' => $variantData['selling_price'] ?? null,
                         'discount' => $variantData['discount'] ?? 0,
-                        'final_price' => ($variantData['selling_price'] ?? $variantData['mrp']) - ($variantData['discount'] ?? 0),
+                        'final_price' => $variantData['final_price'],
+                        'short_description' => $variantData['short_description'] ?? null,
+                        'long_description' => $variantData['long_description'] ?? null,
                         'manufacture_date' => $manufactureDate,
                         'expiry_date' => $expiryDate,
+                        'is_primary' => !empty($variantData['is_primary']) ? true : false,
                     ]);
                 }
 
@@ -714,9 +720,12 @@ class ProductController extends Controller
                         'cost_price' => $variantData['cost_price'] ?? null,
                         'selling_price' => $variantData['selling_price'] ?? null,
                         'discount' => $variantData['discount'] ?? 0,
-                        'final_price' => ($variantData['selling_price'] ?? $variantData['mrp']) - ($variantData['discount'] ?? 0),
+                        'final_price' => $variantData['final_price'],
+                        'short_description' => $variantData['short_description'] ?? null,
+                        'long_description' => $variantData['long_description'] ?? null,
                         'manufacture_date' => $manufactureDate,
                         'expiry_date' => $expiryDate,
+                        'is_primary' => !empty($variantData['is_primary']) ? true : false,
                     ]);
                 }
 
@@ -770,6 +779,55 @@ class ProductController extends Controller
 
                     DB::table('product_attribute_relations')->insert($insertData);
                 }
+
+                // =============================
+                // IMAGES
+                // =============================
+                if ($request->hasFile("variants.$index.images")) {
+
+                    $manager = new ImageManager(new Driver());
+
+                    foreach ($request->file("variants.$index.images") as $file) {
+
+                        $filename = time() . '_' . uniqid();
+
+                        // LARGE
+                        $large = $manager->read($file)->cover(600, 600);
+
+                        Storage::disk('public')->put(
+                            "products/large/{$filename}.webp",
+                            compressToTargetSize($large, 30)
+                        );
+
+                        // MEDIUM
+                        $medium = $manager->read($file)->cover(150, 150);
+
+                        Storage::disk('public')->put(
+                            "products/medium/{$filename}.webp",
+                            compressToTargetSize($medium, 25)
+                        );
+
+                        // SMALL
+                        $small = $manager->read($file)->cover(40, 40);
+
+                        Storage::disk('public')->put(
+                            "products/small/{$filename}.webp",
+                            compressToTargetSize($small, 15)
+                        );
+
+                        // SAVE IMAGE
+                        ProductImage::create([
+                            'business_category_id' => $business->business_category_id,
+                            'product_id' => $productId,
+                            'product_variant_id' => $variant->id,
+
+                            'image_large' => "products/large/{$filename}.webp",
+                            'image_medium' => "products/medium/{$filename}.webp",
+                            'image_small' => "products/small/{$filename}.webp",
+                        ]);
+                    }
+                }
+
             }
 
             // =============================
