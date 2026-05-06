@@ -20,7 +20,6 @@ class ProductFoodBeverages extends Model
         'sub_sub_category_id',
         'hsn_id',
         'name',
-        'description',
         'status',
     ];
 
@@ -89,5 +88,10 @@ class ProductFoodBeverages extends Model
         return $this->hasOne(ProductVariant::class, 'product_id')
             ->where('product_type', $type)
             ->where('is_primary', 1);
+    }
+
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
     }
 }

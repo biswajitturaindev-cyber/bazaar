@@ -92,4 +92,10 @@ class ProductFashionLifestyle extends Model
             ->where('product_type', $type)
             ->where('is_primary', 1);
     }
+
+    public function carts()
+    {
+        return $this->morphMany(Cart::class, 'product');
+    }
+
 }
