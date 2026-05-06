@@ -575,15 +575,27 @@ class ProductController extends Controller
                 'variants.*.discount' => 'nullable|numeric',
                 'variants.*.final_price' => 'nullable|numeric',
 
-                'variants.*.stock' => 'nullable|integer',
-
                 'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
 
-                'variants.*.attributes' => 'nullable|array',
+                'variants.*.short_description' => 'nullable|string|max:1000',
+                'variants.*.long_description' => 'nullable|string',
 
+                'variants.*.is_primary' => 'nullable|boolean',
+
+                // IMAGES
                 'variants.*.images' => 'nullable|array',
                 'variants.*.images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+
+                // ATTRIBUTES
+                'variants.*.attributes' => 'nullable|array',
+                'variants.*.attributes.*.attribute_id' => 'required_with:variants.*.attributes',
+                'variants.*.attributes.*.attribute_value_id' => 'required_with:variants.*.attributes',
+
+                // META
+                'variants.*.meta_title' => 'nullable|string',
+                'variants.*.meta_keyword' => 'nullable|string',
+                'variants.*.meta_description' => 'nullable|string',
             ];
 
             $data = $request->validate($rules);
