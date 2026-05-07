@@ -13,10 +13,19 @@ class MemberProductResource extends JsonResource
         $variant = $this->primaryVariant;
         $image   = $variant?->images->first();
 
+        // Detect index route
+$isIndex = request()->routeIs('products.index');
+
         return [
             'product_id' => Hashids::encode($this->id),
 
             'name' => $this->name ?? null,
+
+            // Business
+            'business' => [
+                'business_id' => Hashids::encode($this->business?->id),
+                'business_name' => $this->business?->business_name,
+            ],
 
             // Category IDs
             'business_category_id' => $this->business_category_id
@@ -40,9 +49,35 @@ class MemberProductResource extends JsonResource
                 : null,
 
             // ALWAYS RETURN PRIMARY VARIANT
-            'primary_variant' => $variant
-                ? new VariantResource($variant)
-                : null,
+            // 'primary_variant' => $variant
+            //     ? new VariantResource($variant)
+            //     : null,
+
+                // Conditional variant block
+            ...(
+                $isIndex
+                ? [
+                    'primary_variant' => $this->whenLoaded(
+                        'primaryVariant',
+                        function () {
+                            return new VariantResource(
+                                $this->primaryVariant
+                            );
+                        }
+                    ),
+                ]
+                : [
+                    'variants' => $this->whenLoaded(
+                        'variants',
+                        function () {
+                            return VariantResource::collection(
+                                $this->variants
+                            );
+                        }
+                    ),
+                ]
+            ),
+
 
             // Pricing
             'mrp' => (float) ($variant?->mrp ?? 0),
