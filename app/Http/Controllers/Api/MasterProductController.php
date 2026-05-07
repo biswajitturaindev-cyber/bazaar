@@ -15,12 +15,36 @@ class MasterProductController extends Controller
      */
     public function index()
     {
+        $businessCategoryId = request()->filled('business_category_id')
+            ? decodeIdOrFail(request()->business_category_id)
+            : null;
+
         $products = MasterProduct::with([
-            'category',
-            'subCategory',
-            'subSubCategory',
-            'hsn'
-        ])->latest()->get();
+                'category',
+                'subCategory',
+                'subSubCategory',
+                'hsn'
+            ])
+
+            ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
+
+                $q->join(
+                        'business_category_mappings',
+                        'business_category_mappings.category_id',
+                        '=',
+                        'master_products.category_id'
+                    )
+                    ->where(
+                        'business_category_mappings.business_category_id',
+                        $businessCategoryId
+                    )
+
+                    // IMPORTANT
+                    ->select('master_products.*');
+            })
+
+            ->latest('master_products.created_at')
+            ->get();
 
         return MasterProductResource::collection($products);
     }
