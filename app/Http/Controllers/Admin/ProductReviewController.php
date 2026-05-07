@@ -29,109 +29,7 @@ class ProductReviewController extends Controller
 {
     /**
      * Display a listing of the resource.
-      */
-    // public function index()
-    // {
-    //     try {
-
-    //         $modelMap = config('product.model_map');
-    //         $allProducts = collect();
-
-    //         foreach ($modelMap as $type => $modelClass) {
-
-    //             $products = $modelClass::query()
-    //                 ->select([
-    //                     'id',
-    //                     'name',
-    //                     'category_id',
-    //                     'sub_category_id',
-    //                     'sub_sub_category_id',
-    //                     'hsn_id',
-    //                     'status',
-    //                     'created_at'
-    //                 ])
-    //                 ->with([
-    //                     'category:id,name',
-    //                     'subCategory:id,name',
-    //                     'subSubCategory:id,name',
-    //                     'hsn:id,hsn_code,igst',
-
-    //                     // Optimized primary variant loading
-    //                     'primaryVariant' => function ($q) {
-    //                         $q->select([
-    //                             'id',
-    //                             'sku',
-    //                             'barcode',
-    //                             'discount',
-    //                             'final_price',
-    //                             'product_id',
-    //                             'product_type',
-    //                             'selling_price',
-    //                             'mrp',
-    //                             'cost_price',
-    //                             'is_primary',
-    //                             'manufacture_date',
-    //                             'expiry_date',
-    //                             'short_description',
-    //                             'long_description'
-    //                         ])
-    //                         ->with([
-
-    //                             // SEO Meta
-    //                             'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
-    //                             // Variant Attributes
-    //                             'attributes' => function ($attr) {
-    //                                 $attr->select([
-    //                                     'id',
-    //                                     'product_variant_id',
-    //                                     'attribute_id',
-    //                                     'attribute_value_id'
-    //                                 ])->with([
-    //                                     'attribute:id,name',
-    //                                     'attributeValue:id,value'
-    //                                 ]);
-    //                             },
-
-    //                             // Only One Image
-    //                             'images' => function ($img) {
-    //                                 $img->select([
-    //                                     'id',
-    //                                     'product_variant_id',
-    //                                     'image_medium'
-    //                                 ])->limit(1);
-    //                             }
-    //                         ]);
-    //                     }
-    //                 ])
-    //                 ->latest()
-    //                 ->get()
-    //                 ->map(function ($item) use ($type) {
-    //                     $item->product_type = $type;
-    //                     return $item;
-    //                 });
-
-    //             $allProducts = $allProducts->concat($products);
-    //         }
-
-    //         // Global sorting
-    //         $products = $allProducts
-    //             ->sortByDesc('created_at')
-    //             ->values();
-
-    //         return view('admin.product-reviews.index', compact('products'));
-
-    //     } catch (\Exception $e) {
-
-    //         \Log::error('Product Index Error: ' . $e->getMessage());
-
-    //         return back()->with(
-    //             'error',
-    //             'Something went wrong: ' . $e->getMessage()
-    //         );
-    //     }
-    // }
-
+    */
     public function index()
     {
         try {
@@ -154,7 +52,7 @@ class ProductReviewController extends Controller
                         'status',
                         'created_at'
                     ])
-
+                    ->where('status',2)
                     ->with([
 
                         'category:id,name',
