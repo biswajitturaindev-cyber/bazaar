@@ -14,8 +14,6 @@
 
             <div class="flex justify-between items-center px-5 py-3 border-b">
                 <h2 class="text-lg font-semibold">Product Review Master List</h2>
-
-
             </div>
 
             <div class="overflow-x-auto p-5">
@@ -26,13 +24,9 @@
 
                             <th class="px-3 py-2">Sl.No</th>
 
-                            <th class="px-3 py-2">Category</th>
+                            <th class="px-3 py-4">Category</th>
 
-                            <th class="px-3 py-2">Sub Category</th>
-
-                            <th class="px-3 py-2">Sub Sub Category</th>
-
-                            <th class="px-3 py-2">Product Name</th>
+                            <th class="px-3 py-4">Product Name</th>
 
                             <th class="px-3 py-2">SKU</th>
 
@@ -89,22 +83,13 @@
                                 </td>
 
                                 {{-- CATEGORY --}}
-                                <td class="px-3 py-2">
+                                <td class="px-3 py-4">
                                     {{ $product->category?->name ?? '-' }}
                                 </td>
 
-                                {{-- SUB CATEGORY --}}
-                                <td class="px-3 py-2">
-                                    {{ $product->subCategory?->name ?? '-' }}
-                                </td>
-
-                                {{-- SUB SUB CATEGORY --}}
-                                <td class="px-3 py-2">
-                                    {{ $product->subSubCategory?->name ?? '-' }}
-                                </td>
 
                                 {{-- PRODUCT NAME --}}
-                                <td class="px-3 py-2 font-medium">
+                                <td class="px-3 py-4 font-medium">
                                     {{ $product->name ?? '-' }}
                                 </td>
 
@@ -183,7 +168,7 @@
 
                             <tr>
 
-                                <td colspan="13" class="text-center py-6 text-gray-500">
+                                <td colspan="11" class="text-center py-6 text-gray-500">
 
                                     No products found
 
@@ -207,26 +192,33 @@
         <script src="{{ asset('admin_assets/datatables/dataTables.js') }}"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
 
                 let table = $('#example').DataTable({
                     paging: true,
                     searching: true,
                     info: true,
-                    pageLength: 10
+                    pageLength: 10,
+
+                    language: {
+                        emptyTable: "No products found"
+                    },
+
+                    columnDefs: [{
+                        targets: 0,
+                        orderable: false,
+                        searchable: false
+                    }]
                 });
 
-                // Serial number fix
-                table.on('draw.dt', function() {
+                table.on('draw.dt', function () {
+
                     let PageInfo = table.page.info();
 
-                    table.column(0, {
-                        page: 'current'
-                    }).nodes().each(function(cell, i) {
+                    table.column(0, { page: 'current' }).nodes().each(function (cell, i) {
                         cell.innerHTML = i + 1 + PageInfo.start;
                     });
 
-                    // Re-bind Fancybox after redraw
                     Fancybox.bind("[data-fancybox='products']");
                 });
 

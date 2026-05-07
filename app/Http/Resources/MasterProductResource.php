@@ -36,6 +36,11 @@ class MasterProductResource extends JsonResource
                 : null,
 
             'status' => $this->status,
+            'status_label' => match ($this->status) {
+                1 => 'Active',
+                0 => 'Inactive',
+                default => 'Unknown',
+            },
 
             'created_at' => $this->created_at?->format('d-m-Y'),
         ];
