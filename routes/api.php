@@ -36,19 +36,103 @@ Route::post('/login', [AuthController::class, 'login']);
 | Captcha
 |--------------------------------------------------------------------------
 */
+// Route::get('/captcha', function () {
+
+//     $code = strtoupper(Str::random(6));
+
+//     return response()->json([
+//         'image' => '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
+//                         <rect width="100%" height="100%" fill="#f2f2f2"/>
+//                         <text x="10" y="25" font-size="20" fill="#333">'.$code.'</text>
+//                     </svg>',
+//         'key' => encrypt([
+//             'code' => $code,
+//             'time' => now()->timestamp
+//         ])
+//     ]);
+// });
+
 Route::get('/captcha', function () {
 
+    // Generate random captcha code
     $code = strtoupper(Str::random(6));
 
+    // Create image
+    $width  = 160;
+    $height = 50;
+
+    $image = imagecreatetruecolor($width, $height);
+
+    // Colors
+    $bgColor    = imagecolorallocate($image, 240, 240, 240);
+    $textColor  = imagecolorallocate($image, 40, 40, 40);
+    $lineColor  = imagecolorallocate($image, 180, 180, 180);
+    $noiseColor = imagecolorallocate($image, 100, 120, 180);
+
+    // Background
+    imagefill($image, 0, 0, $bgColor);
+
+    // Random lines
+    for ($i = 0; $i < 6; $i++) {
+
+        imageline(
+            $image,
+            rand(0, $width),
+            rand(0, $height),
+            rand(0, $width),
+            rand(0, $height),
+            $lineColor
+        );
+    }
+
+    // Random dots
+    for ($i = 0; $i < 150; $i++) {
+
+        imagesetpixel(
+            $image,
+            rand(0, $width),
+            rand(0, $height),
+            $noiseColor
+        );
+    }
+
+    // Add captcha text
+    $fontSize = 5;
+
+    for ($i = 0; $i < strlen($code); $i++) {
+
+        imagestring(
+            $image,
+            $fontSize,
+            15 + ($i * 22),
+            rand(10, 20),
+            $code[$i],
+            $textColor
+        );
+    }
+
+    // Capture image output
+    ob_start();
+    imagepng($image);
+    $imageData = ob_get_clean();
+
+    imagedestroy($image);
+
+    // Base64 image
+    $base64 = 'data:image/png;base64,' . base64_encode($imageData);
+
     return response()->json([
-        'image' => '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
-                        <rect width="100%" height="100%" fill="#f2f2f2"/>
-                        <text x="10" y="25" font-size="20" fill="#333">'.$code.'</text>
-                    </svg>',
-        'key' => encrypt([
-            'code' => $code,
-            'time' => now()->timestamp
-        ])
+
+        'status' => true,
+
+        'captcha' => [
+            'image' => $base64,
+
+            'key' => encrypt([
+                'code' => $code,
+                'time' => now()->timestamp
+            ])
+        ]
     ]);
 });
 
