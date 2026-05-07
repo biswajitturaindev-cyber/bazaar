@@ -42,6 +42,8 @@ class ProductController extends Controller
             $perPage = request()->get('per_page', 10);
             $page = request()->get('page', 1);
 
+            // FILTERS
+            $businessId = decodeIdOrFail(request()->business_id);
             foreach ($modelMap as $type => $modelClass) {
 
                 $products = $modelClass::query()
@@ -106,6 +108,9 @@ class ProductController extends Controller
                             ]);
                         }
                     ])
+                    ->when($businessId, function ($q) use ($businessId) {
+                        $q->where('business_id', $businessId);
+                    })
                     ->latest()
                     ->get()
                     ->map(function ($item) use ($type) {
