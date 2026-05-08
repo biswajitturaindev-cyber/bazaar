@@ -203,17 +203,11 @@ class CartController extends Controller
             */
 
             $cartItem = Cart::where([
-
                 'user_id'              => $userId,
-
                 'business_category_id' => $businessCategoryId,
-
                 'product_id'           => $productId,
-
                 'product_variant_id'   => $variantId,
-
                 'attribute_hash'       => $attributeHash,
-
             ])->first();
 
             /*
