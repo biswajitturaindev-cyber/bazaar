@@ -12,7 +12,6 @@ class CartAttribute extends Model
         'attribute_value_id',
         'attribute_name',
         'attribute_value',
-        'price'
     ];
 
     /*

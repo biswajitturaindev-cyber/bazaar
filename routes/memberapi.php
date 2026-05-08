@@ -41,7 +41,7 @@ Route::prefix('member')->group(function () {
     Route::get('business-subcategories', [BusinessSubCategoryController::class, 'index']);
     Route::get('vendors', [VendorController::class, 'index']);
     Route::get('categories', [CategoryController::class, 'index']);
-    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/details',[ProductController::class, 'productDetails'])->name('products.details');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);

@@ -8,29 +8,64 @@ class Cart extends Model
 {
     protected $fillable = [
         'user_id',
+        'business_category_id',
         'product_id',
-        'product_type',
+        'product_variant_id',
         'quantity',
-        'price',
-        'total',
         'product_name',
-        'image',
-        'attribute_hash'
+        'attribute_hash',
     ];
 
-    protected $casts = [
-        'price' => 'float',
-        'total' => 'float',
-        'quantity' => 'integer',
-    ];
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
-    public function attributes()
+    public function user()
     {
-        return $this->hasMany(CartAttribute::class);
+        return $this->belongsTo(
+            User::class,
+            'user_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function cartAttributes()
+    {
+        return $this->hasMany(
+            CartAttribute::class,
+            'cart_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dynamic Product Resolver
+    |--------------------------------------------------------------------------
+    */
+
+    public function getProductModelClass()
+    {
+        return config('product.model_map')[
+            $this->business_category_id
+        ] ?? null;
     }
 
     public function product()
     {
-        return $this->morphTo();
+        $modelClass = $this->getProductModelClass();
+
+        if (!$modelClass) {
+            return null;
+        }
+
+        return $modelClass::find($this->product_id);
     }
+
 }

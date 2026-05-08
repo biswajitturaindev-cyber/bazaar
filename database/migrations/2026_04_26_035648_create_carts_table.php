@@ -12,32 +12,89 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('carts', function (Blueprint $table) {
+
             $table->id();
 
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product Source
+            |--------------------------------------------------------------------------
+            | Determines which model/table to use
+            */
+
+            $table->unsignedTinyInteger('business_category_id');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product ID
+            |--------------------------------------------------------------------------
+            */
 
             $table->unsignedBigInteger('product_id');
-            $table->string('product_type'); // Model name
 
-            $table->integer('quantity')->default(1);
-            $table->decimal('price', 10, 2);
-            $table->decimal('total', 10, 2)->nullable();
+            $table->unsignedBigInteger('product_variant_id')->nullable();
 
-            // Snapshot
-            $table->string('product_name')->nullable();
-            $table->string('image')->nullable();
+            /*
+            |--------------------------------------------------------------------------
+            | Quantity
+            |--------------------------------------------------------------------------
+            */
 
-            // VERY IMPORTANT
-            $table->string('attribute_hash')->nullable();
+            $table->unsignedInteger('quantity')
+                ->default(1);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Snapshot Data (Optional)
+            |--------------------------------------------------------------------------
+            | Used for faster cart display
+            */
+
+            $table->string('product_name')
+                ->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Variant Combination Hash
+            |--------------------------------------------------------------------------
+            | Example:
+            | color:red-size:m
+            | or md5 hash
+            */
+
+            $table->string('attribute_hash')
+                ->default('');
 
             $table->timestamps();
 
-            // Correct unique constraint
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent Duplicate Cart Rows
+            |--------------------------------------------------------------------------
+            */
+
             $table->unique([
                 'user_id',
+                'business_category_id',
                 'product_id',
-                'product_type',
                 'attribute_hash'
+            ], 'cart_unique_item');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Performance Indexes
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index('user_id');
+
+            $table->index([
+                'business_category_id',
+                'product_id'
             ]);
         });
     }
