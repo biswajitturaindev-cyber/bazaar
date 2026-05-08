@@ -14,7 +14,7 @@ class MemberProductResource extends JsonResource
         $image   = $variant?->images->first();
 
         // Detect index route
-$isIndex = request()->routeIs('products.index');
+        $isIndex = request()->routeIs('products.index');
 
         return [
             'product_id' => Hashids::encode($this->id),
@@ -48,12 +48,7 @@ $isIndex = request()->routeIs('products.index');
                 ? Hashids::encode($this->sub_sub_category_id)
                 : null,
 
-            // ALWAYS RETURN PRIMARY VARIANT
-            // 'primary_variant' => $variant
-            //     ? new VariantResource($variant)
-            //     : null,
-
-                // Conditional variant block
+            // Conditional variant block
             ...(
                 $isIndex
                 ? [
