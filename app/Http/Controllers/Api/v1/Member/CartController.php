@@ -354,20 +354,70 @@ class CartController extends Controller
     /**
      * Remove item
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        $userId = decodeIdOrFail($request->user_id, 'Invalid user ID');
-        $cartId = decodeIdOrFail($id, 'Invalid cart ID');
+        try {
 
-        $cartItem = Cart::where('user_id', $userId)
-            ->where('id', $cartId)
-            ->firstOrFail();
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Cart ID
+            |--------------------------------------------------------------------------
+            */
+            $cartId = decodeIdOrFail(
+                $id,
+                'Invalid cart ID'
+            );
 
-        $cartItem->delete();
+            /*
+            |--------------------------------------------------------------------------
+            | Find Cart Item
+            |--------------------------------------------------------------------------
+            */
+            $cartItem = Cart::find($cartId);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Item removed from cart'
-        ]);
+            /*
+            |--------------------------------------------------------------------------
+            | Cart Item Not Found
+            |--------------------------------------------------------------------------
+            */
+            if (!$cartItem) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cart item not found',
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Cart Attributes
+            |--------------------------------------------------------------------------
+            */
+            $cartItem->cartAttributes()->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Cart Item
+            |--------------------------------------------------------------------------
+            */
+            $cartItem->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+            return response()->json([
+                'success' => true,
+                'message' => 'Item removed from cart successfully',
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
