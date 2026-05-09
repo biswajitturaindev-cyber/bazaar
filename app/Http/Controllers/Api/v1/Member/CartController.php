@@ -19,29 +19,15 @@ class CartController extends Controller
     public function index(Request $request)
     {
         try {
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Request
-            |--------------------------------------------------------------------------
-            */
             $request->validate([
                 'user_id' => 'required',
             ]);
-            /*
-            |--------------------------------------------------------------------------
-            | Decode User ID
-            |--------------------------------------------------------------------------
-            */
+
             $userId = decodeIdOrFail(
                 $request->user_id,
                 'Invalid user ID'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Get Cart Items
-            |--------------------------------------------------------------------------
-            */
             $cart = Cart::with([
                 'user',
                 'cartAttributes',
@@ -51,11 +37,7 @@ class CartController extends Controller
             ->where('user_id', $userId)
             ->latest()
             ->get();
-            /*
-            |--------------------------------------------------------------------------
-            | Response
-            |--------------------------------------------------------------------------
-            */
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cart fetched successfully',
@@ -80,12 +62,6 @@ class CartController extends Controller
     {
         try {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Validation
-            |--------------------------------------------------------------------------
-            */
-
             $request->validate([
                 'user_id'               => 'required',
                 'business_category_id' => 'required',
@@ -94,12 +70,6 @@ class CartController extends Controller
                 'quantity'             => 'required|integer|min:1',
                 'attributes'           => 'required|array|min:1',
             ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Decode IDs
-            |--------------------------------------------------------------------------
-            */
 
             $userId = decodeIdOrFail(
                 $request->user_id,
@@ -116,12 +86,6 @@ class CartController extends Controller
                 'Invalid product ID'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Variant ID
-            |--------------------------------------------------------------------------
-            */
-
             $variantId = null;
 
             if ($request->filled('product_variant_id')) {
@@ -131,12 +95,6 @@ class CartController extends Controller
                     'Invalid product variant ID'
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Resolve Product Model
-            |--------------------------------------------------------------------------
-            */
 
             $modelClass = config('product.model_map')[
                 $businessCategoryId
@@ -157,12 +115,6 @@ class CartController extends Controller
                     'Product not found'
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Normalize Attributes
-            |--------------------------------------------------------------------------
-            */
 
             $decodedAttributes = collect(
                 $request->input('attributes', [])
@@ -186,21 +138,9 @@ class CartController extends Controller
             ->values()
             ->toArray();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Generate Unique Attribute Hash
-            |--------------------------------------------------------------------------
-            */
-
             $attributeHash = md5(
                 serialize($decodedAttributes)
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Find Existing Cart
-            |--------------------------------------------------------------------------
-            */
 
             $cartItem = Cart::where([
                 'user_id'              => $userId,
@@ -209,12 +149,6 @@ class CartController extends Controller
                 'product_variant_id'   => $variantId,
                 'attribute_hash'       => $attributeHash,
             ])->first();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Update Quantity
-            |--------------------------------------------------------------------------
-            */
 
             if ($cartItem) {
 
@@ -225,35 +159,16 @@ class CartController extends Controller
 
             } else {
 
-                /*
-                |--------------------------------------------------------------------------
-                | Create Cart Item
-                |--------------------------------------------------------------------------
-                */
-
                 $cartItem = Cart::create([
-
                     'user_id'              => $userId,
-
                     'business_category_id' => $businessCategoryId,
-
                     'product_id'           => $productId,
-
                     'product_variant_id'   => $variantId,
-
                     'quantity'             => $request->quantity,
-
                     'product_name'         => $product->name ?? null,
-
                     'attribute_hash'       => $attributeHash,
                 ]);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Store Cart Attributes
-            |--------------------------------------------------------------------------
-            */
 
             foreach ($decodedAttributes as $attr) {
 
@@ -269,12 +184,6 @@ class CartController extends Controller
                     continue;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Validate Attribute Mapping
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     (int) $value->attribute_id !==
                     (int) $attribute->id
@@ -282,14 +191,7 @@ class CartController extends Controller
                     continue;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Insert / Update Cart Attributes
-                |--------------------------------------------------------------------------
-                */
-
                 CartAttribute::updateOrCreate(
-
                     [
                         'cart_id' => $cartItem->id,
 
@@ -306,33 +208,18 @@ class CartController extends Controller
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Response
-            |--------------------------------------------------------------------------
-            */
-
             return response()->json([
-
                 'success' => true,
-
                 'message' => 'Product added to cart',
-
                 'data' => new CartResource(
                     $cartItem->load('cartAttributes')
                 )
             ]);
-
         } catch (\Throwable $e) {
-
             return response()->json([
-
                 'success' => false,
-
                 'message' => $e->getMessage(),
-
                 'line' => $e->getLine(),
-
             ], 500);
         }
     }
@@ -342,46 +229,145 @@ class CartController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $request->validate([
-        //     'user_id' => 'required',
-        //     'quantity' => 'required|integer|min:1'
-        // ]);
+        try {
 
-        // $userId = decodeIdOrFail($request->user_id, 'Invalid user ID');
-        // $cartId = decodeIdOrFail($id, 'Invalid cart ID');
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Request
+            |--------------------------------------------------------------------------
+            */
+            $request->validate([
+                'quantity' => 'required|integer|min:1',
+            ]);
 
-        // $cartItem = Cart::where('user_id', $userId)
-        //     ->where('id', $cartId)
-        //     ->firstOrFail();
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Cart ID
+            |--------------------------------------------------------------------------
+            */
+            $cartId = decodeIdOrFail(
+                $id,
+                'Invalid cart ID'
+            );
 
-        // $cartItem->quantity = $request->quantity;
-        // $cartItem->total = $cartItem->price * $request->quantity;
-        // $cartItem->save();
+            /*
+            |--------------------------------------------------------------------------
+            | Find Cart Item
+            |--------------------------------------------------------------------------
+            */
+            $cartItem = Cart::with([
+                    'user',
+                    'productVariant',
+                    'productVariant.stocks',
+                    'cartAttributes',
+                    'cartAttributes.attribute',
+                    'cartAttributes.attributeValue',
+                ])
+                ->where('id', $cartId)
+                ->first();
 
-        // return response()->json([
-        //     'success' => true,
-        //     'message' => 'Cart updated',
-        //     'data'    => new CartResource($cartItem)
-        // ]);
+            /*
+            |--------------------------------------------------------------------------
+            | Cart Not Found
+            |--------------------------------------------------------------------------
+            */
+            if (!$cartItem) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cart item not found',
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Available Stock
+            |--------------------------------------------------------------------------
+            */
+            $availableStock = $cartItem->productVariant
+                ? $cartItem->productVariant->stocks->sum('stock')
+                : 0;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check Stock
+            |--------------------------------------------------------------------------
+            */
+            if ($request->quantity > $availableStock) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only ' . $availableStock . ' items available in stock',
+                ], 422);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Quantity
+            |--------------------------------------------------------------------------
+            */
+            $cartItem->quantity = $request->quantity;
+
+            $cartItem->save();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reload Fresh Data
+            |--------------------------------------------------------------------------
+            */
+            $cartItem->load([
+                'user',
+                'productVariant',
+                'productVariant.stocks',
+                'cartAttributes',
+                'cartAttributes.attribute',
+                'cartAttributes.attributeValue',
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart updated successfully',
+                'data' => new CartResource($cartItem),
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first(),
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
-
     /**
      * Remove item
      */
     public function destroy(Request $request, $id)
     {
-        // $userId = decodeIdOrFail($request->user_id, 'Invalid user ID');
-        // $cartId = decodeIdOrFail($id, 'Invalid cart ID');
+        $userId = decodeIdOrFail($request->user_id, 'Invalid user ID');
+        $cartId = decodeIdOrFail($id, 'Invalid cart ID');
 
-        // $cartItem = Cart::where('user_id', $userId)
-        //     ->where('id', $cartId)
-        //     ->firstOrFail();
+        $cartItem = Cart::where('user_id', $userId)
+            ->where('id', $cartId)
+            ->firstOrFail();
 
-        // $cartItem->delete();
+        $cartItem->delete();
 
-        // return response()->json([
-        //     'success' => true,
-        //     'message' => 'Item removed from cart'
-        // ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart'
+        ]);
     }
 }
