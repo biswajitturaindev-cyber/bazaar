@@ -550,6 +550,7 @@ class ProductController extends Controller
             ], 500);
         }
     }*/
+
     public function show(Request $request, $id)
 {
     try {
@@ -559,207 +560,152 @@ class ProductController extends Controller
         | Decode Product ID
         |--------------------------------------------------------------------------
         */
-        $productId = decodeIdOrFail(
-            $id,
-            'Invalid Product ID'
-        );
+        $decoded = Hashids::decode($id);
+
+        if (empty($decoded)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Invalid Product ID'
+            ], 400);
+        }
+
+        $productId = $decoded[0];
 
         /*
         |--------------------------------------------------------------------------
-        | Decode Optional IDs
+        | Decode Business Category ID
         |--------------------------------------------------------------------------
         */
-        $businessId = $request->filled('business_id')
-            ? decodeIdOrFail(
-                $request->business_id,
-                'Invalid Business ID'
-            )
-            : null;
+        $businessCategoryId = null;
 
-        $businessCategoryId = $request->filled('business_category_id')
-            ? decodeIdOrFail(
-                $request->business_category_id,
-                'Invalid Business Category ID'
-            )
-            : null;
+        if ($request->filled('business_category_id')) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Product Model Map
-        |--------------------------------------------------------------------------
-        */
-        $modelMap = config('product.model_map');
+            $decodedBusinessCategory = Hashids::decode(
+                $request->business_category_id
+            );
 
-        $modelClass = null;
-
-        /*
-        |--------------------------------------------------------------------------
-        | First Check Business Category ID
-        |--------------------------------------------------------------------------
-        */
-        if ($businessCategoryId) {
-
-            if (!isset($modelMap[$businessCategoryId])) {
-
+            if (empty($decodedBusinessCategory)) {
                 return response()->json([
                     'status'  => false,
-                    'message' => 'Invalid Business Category'
+                    'message' => 'Invalid Business Category ID'
                 ], 400);
             }
 
-            $modelClass = $modelMap[$businessCategoryId];
-
-        } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Find Product Model Automatically
-            |--------------------------------------------------------------------------
-            */
-            foreach ($modelMap as $type => $class) {
-
-                $exists = $class::where('id', $productId)->exists();
-
-                if ($exists) {
-
-                    $modelClass = $class;
-
-                    break;
-                }
-            }
-
-            if (!$modelClass) {
-
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Product not found'
-                ], 404);
-            }
+            $businessCategoryId = $decodedBusinessCategory[0];
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Fetch Product
+        | Model Map
         |--------------------------------------------------------------------------
         */
-        $product = $modelClass::query()
+        $modelMap = config('product.model_map');
 
-            ->select([
+        $product = null;
+
+        foreach ($modelMap as $type => $modelClass) {
+
+            $query = $modelClass::query()
+                ->select([
+                    'id',
+                    'name',
+                    'category_id',
+                    'sub_category_id',
+                    'sub_sub_category_id',
+                    'hsn_id',
+                    'status',
+                    'created_at'
+                ])
+                ->with([
+
+                    'category:id,name',
+
+                    'subCategory:id,name',
+
+                    'subSubCategory:id,name',
+
+                    'hsn:id,hsn_code,igst',
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Variants
+                    |--------------------------------------------------------------------------
+                    */
+'variants' => function ($q) use ($productId) {
+
+    $q->select([
+        'id',
+        'product_id',
+        'product_type',
+        'sku',
+        'barcode',
+        'mrp',
+        'cost_price',
+        'selling_price',
+        'discount',
+        'final_price',
+        'short_description',
+        'long_description',
+        'is_primary',
+        'manufacture_date',
+        'expiry_date'
+    ])
+    ->where('product_id', $productId)
+
+    ->with([
+
+        'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+        'attributes' => function ($attr) {
+
+            $attr->select([
                 'id',
-                'name',
-                'category_id',
-                'sub_category_id',
-                'sub_sub_category_id',
-                'hsn_id',
-                'status',
-                'created_at'
-            ])
+                'product_variant_id',
+                'attribute_id',
+                'attribute_value_id'
+            ])->with([
 
-            ->with([
+                'attribute:id,name',
 
-                /*
-                |--------------------------------------------------------------------------
-                | Category Relations
-                |--------------------------------------------------------------------------
-                */
-                'category:id,name',
+                'attributeValue:id,value'
+            ]);
+        },
 
-                'subCategory:id,name',
+        'images' => function ($img) {
 
-                'subSubCategory:id,name',
+            $img->select([
+                'id',
+                'product_variant_id',
+                'image_medium'
+            ]);
+        },
 
-                'hsn:id,hsn_code,igst',
+        'stocks'
+    ]);
+}
+                ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | Variants
-                |--------------------------------------------------------------------------
-                */
-                'variants' => function ($q) use ($businessId) {
+            $product = $query->find($productId);
 
-                    $q->select([
-                        'id',
-                        'sku',
-                        'barcode',
-                        'discount',
-                        'final_price',
-                        'product_id',
-                        'product_type',
-                        'selling_price',
-                        'mrp',
-                        'cost_price',
-                        'is_primary',
-                        'manufacture_date',
-                        'expiry_date',
-                        'short_description',
-                        'long_description'
-                    ])
+            /*
+            |--------------------------------------------------------------------------
+            | Skip If No Matching Variant Found
+            |--------------------------------------------------------------------------
+            */
+            if (
+                $product &&
+                $businessCategoryId &&
+                $product->variants->isEmpty()
+            ) {
+                $product = null;
+                continue;
+            }
 
-                    ->with([
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Meta
-                        |--------------------------------------------------------------------------
-                        */
-                        'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Attributes
-                        |--------------------------------------------------------------------------
-                        */
-                        'attributes' => function ($attr) {
-
-                            $attr->select([
-                                'id',
-                                'product_variant_id',
-                                'attribute_id',
-                                'attribute_value_id'
-                            ])
-
-                            ->with([
-
-                                'attribute:id,name',
-
-                                'attributeValue:id,value'
-                            ]);
-                        },
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Images
-                        |--------------------------------------------------------------------------
-                        */
-                        'images' => function ($img) {
-
-                            $img->select([
-                                'id',
-                                'product_variant_id',
-                                'image_medium'
-                            ]);
-                        },
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Stocks
-                        |--------------------------------------------------------------------------
-                        */
-                        'stocks' => function ($stock) use ($businessId) {
-
-                            if ($businessId) {
-
-                                $stock->where(
-                                    'business_id',
-                                    $businessId
-                                );
-                            }
-                        }
-                    ]);
-                }
-            ])
-
-            ->find($productId);
+            if ($product) {
+                $product->product_type = $type;
+                break;
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -776,45 +722,25 @@ class ProductController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Set Product Type
-        |--------------------------------------------------------------------------
-        */
-        $productType = array_search(
-            $modelClass,
-            $modelMap
-        );
-
-        $product->product_type = $productType;
-
-        /*
-        |--------------------------------------------------------------------------
         | Success Response
         |--------------------------------------------------------------------------
         */
         return response()->json([
-
             'status' => true,
-
-            'data' => new ProductResource($product)
-
+            'data'   => new ProductResource($product)
         ], 200);
 
     } catch (\Exception $e) {
 
         Log::error('Product Show Error: ' . $e->getMessage());
 
-        $statusCode = $e->getCode() ?: 500;
-
         return response()->json([
-
             'status'  => false,
-
-            'message' => $e->getMessage()
-
-        ], $statusCode);
+            'message' => 'Something went wrong',
+            'error'   => $e->getMessage()
+        ], 500);
     }
 }
-
     /**
      * Update the specified resource in storage.
      */
