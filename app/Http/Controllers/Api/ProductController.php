@@ -435,8 +435,9 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    /*public function show($id)
     {
+        echo "here"; die;
         try {
 
             $decoded = Hashids::decode($id);
@@ -548,7 +549,215 @@ class ProductController extends Controller
                 'error'   => $e->getMessage()
             ], 500);
         }
+    }*/
+    public function show(Request $request, $id)
+    {
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Product ID
+            |--------------------------------------------------------------------------
+            */
+            $productId = decodeIdOrFail(
+                $id,
+                'Invalid Product ID'
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Business ID (Optional)
+            |--------------------------------------------------------------------------
+            */
+            $businessId = null;
+
+            if ($request->filled('business_id')) {
+
+                $businessId = decodeIdOrFail(
+                    $request->business_id,
+                    'Invalid Business ID'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product Models
+            |--------------------------------------------------------------------------
+            */
+            $modelMap = config('product.model_map');
+
+            $product = null;
+
+            foreach ($modelMap as $type => $modelClass) {
+
+                $product = $modelClass::query()
+                    ->select([
+                        'id',
+                        'name',
+                        'category_id',
+                        'sub_category_id',
+                        'sub_sub_category_id',
+                        'hsn_id',
+                        'status',
+                        'created_at'
+                    ])
+
+                    ->with([
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Category Relations
+                        |--------------------------------------------------------------------------
+                        */
+                        'category:id,name',
+
+                        'subCategory:id,name',
+
+                        'subSubCategory:id,name',
+
+                        'hsn:id,hsn_code,igst',
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Variants
+                        |--------------------------------------------------------------------------
+                        */
+                        'variants' => function ($q) use ($businessId) {
+
+                            $q->select([
+                                'id',
+                                'sku',
+                                'barcode',
+                                'discount',
+                                'final_price',
+                                'product_id',
+                                'product_type',
+                                'selling_price',
+                                'mrp',
+                                'cost_price',
+                                'is_primary',
+                                'manufacture_date',
+                                'expiry_date',
+                                'short_description',
+                                'long_description'
+                            ])
+
+                            ->with([
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Meta
+                                |--------------------------------------------------------------------------
+                                */
+                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Attributes
+                                |--------------------------------------------------------------------------
+                                */
+                                'attributes' => function ($attr) {
+
+                                    $attr->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'attribute_id',
+                                        'attribute_value_id'
+                                    ])
+
+                                    ->with([
+
+                                        'attribute:id,name',
+
+                                        'attributeValue:id,value'
+                                    ]);
+                                },
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Images
+                                |--------------------------------------------------------------------------
+                                */
+                                'images' => function ($img) {
+
+                                    $img->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'image_medium'
+                                    ]);
+                                },
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Stocks
+                                |--------------------------------------------------------------------------
+                                */
+                                'stocks' => function ($stock) use ($businessId) {
+
+                                    if ($businessId) {
+
+                                        $stock->where(
+                                            'business_id',
+                                            $businessId
+                                        );
+                                    }
+                                }
+                            ]);
+                        }
+                    ])
+
+                    ->find($productId);
+
+                if ($product) {
+
+                    $product->product_type = $type;
+
+                    break;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product Not Found
+            |--------------------------------------------------------------------------
+            */
+            if (!$product) {
+
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+            return response()->json([
+
+                'status' => true,
+
+                'data' => new ProductResource($product)
+
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            Log::error('Product Show Error: ' . $e->getMessage());
+
+            $statusCode = $e->getCode() ?: 500;
+
+            return response()->json([
+
+                'status'  => false,
+
+                'message' => $e->getMessage()
+
+            ], $statusCode);
+        }
     }
+
     /**
      * Update the specified resource in storage.
      */
