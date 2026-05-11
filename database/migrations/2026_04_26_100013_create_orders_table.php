@@ -14,20 +14,95 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
 
+            /*
+            |--------------------------------------------------------------------------
+            | Order Info
+            |--------------------------------------------------------------------------
+            */
             $table->string('order_no')->unique();
 
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-            $table->decimal('sub_total', 10, 2);
-            $table->decimal('handling_charge', 10, 2)->default(0);
-            $table->decimal('delivery_charge', 10, 2)->default(0);
-            $table->decimal('grand_total', 10, 2);
+            /*
+            |--------------------------------------------------------------------------
+            | Address
+            |--------------------------------------------------------------------------
+            */
+            $table->foreignId('billing_address_id')
+                ->nullable()
+                ->constrained('user_addresses')
+                ->nullOnDelete();
 
-            $table->integer('total_items');
+            $table->foreignId('shipping_address_id')
+                ->nullable()
+                ->constrained('user_addresses')
+                ->nullOnDelete();
 
-            $table->enum('status', ['pending', 'processing', 'delivered', 'cancelled'])
-                ->default('pending');
+            /*
+            |--------------------------------------------------------------------------
+            | Quantity & Amount
+            |--------------------------------------------------------------------------
+            */
+            $table->integer('total_items')->default(0);
+            $table->decimal('items_total', 12, 2)->default(0);
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('platform_charge', 12, 2)->default(0);
+            $table->decimal('delivery_charge', 12, 2)->default(0);
+            $table->decimal('tax_amount', 12, 2)->default(0);
+            $table->decimal('grand_total', 12, 2)->default(0);
 
+            /*
+            |--------------------------------------------------------------------------
+            | Loyalty & Wallet
+            |--------------------------------------------------------------------------
+            */
+            $table->decimal('loyalty_used', 12, 2)->default(0);
+            $table->decimal('loyalty_earned', 12, 2)->default(0);
+            $table->decimal('wallet_used', 12, 2)->default(0);
+            $table->decimal('online_paid', 12, 2)->default(0);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Payment
+            |--------------------------------------------------------------------------
+            */
+            $table->enum('payment_status', [
+                'Pending',
+                'Paid',
+                'Failed',
+                'Refunded',
+            ])->default('Pending');
+
+            $table->enum('payment_method', [
+                'Wallet',
+                'Online',
+                'COD',
+                'Mixed',
+            ])->default('Online');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Order Status
+            |--------------------------------------------------------------------------
+            */
+            $table->enum('order_status', [
+                'Pending',
+                'Confirmed',
+                'Processing',
+                'Shipped',
+                'Delivered',
+                'Cancelled',
+            ])->default('Pending');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Extra
+            |--------------------------------------------------------------------------
+            */
+            $table->text('notes')->nullable();
+            $table->timestamp('placed_at')->nullable();
             $table->timestamps();
         });
     }

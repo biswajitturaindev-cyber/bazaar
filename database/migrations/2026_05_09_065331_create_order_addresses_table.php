@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
+        Schema::create('order_addresses', function (Blueprint $table) {
 
             $table->id();
 
@@ -26,88 +26,72 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Business
+            | Address Type
             |--------------------------------------------------------------------------
             */
-            $table->foreignId('business_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
-
-            $table->foreignId('business_category_id')
-                ->nullable()
-                ->constrained('business_categories')
-                ->nullOnDelete();
+            $table->enum('type', [
+                'Billing',
+                'Shipping',
+            ]);
 
             /*
             |--------------------------------------------------------------------------
-            | Product
+            | Customer Details
             |--------------------------------------------------------------------------
             */
-            $table->unsignedBigInteger('product_id');
+            $table->string('full_name');
 
-            /*
-            |--------------------------------------------------------------------------
-            | Variant
-            |--------------------------------------------------------------------------
-            | No foreign key because variant may later be deleted
-            |--------------------------------------------------------------------------
-            */
-            $table->unsignedBigInteger('product_variant_id')
+            $table->string('phone');
+
+            $table->string('email')
                 ->nullable();
 
             /*
             |--------------------------------------------------------------------------
-            | Product Snapshot
+            | Address
             |--------------------------------------------------------------------------
             */
-            $table->string('product_name');
+            $table->text('address_line_1');
 
-            $table->string('sku')
+            $table->text('address_line_2')
+                ->nullable();
+
+            $table->string('landmark')
+                ->nullable();
+
+            $table->string('city');
+
+            $table->string('state');
+
+            $table->string('country');
+
+            $table->string('postal_code');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Geo Location
+            |--------------------------------------------------------------------------
+            */
+            $table->string('latitude')
+                ->nullable();
+
+            $table->string('longitude')
                 ->nullable();
 
             /*
             |--------------------------------------------------------------------------
-            | Quantity
+            | Default Address
             |--------------------------------------------------------------------------
             */
-            $table->integer('quantity')
-                ->default(1);
+            $table->boolean('is_default')
+                ->default(false);
 
             /*
             |--------------------------------------------------------------------------
-            | Pricing
+            | Extra
             |--------------------------------------------------------------------------
             */
-            $table->decimal('mrp', 12, 2)
-                ->default(0);
-
-            $table->decimal('selling_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('discount_amount', 12, 2)
-                ->default(0);
-
-            $table->decimal('final_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('subtotal', 12, 2)
-                ->default(0);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Loyalty
-            |--------------------------------------------------------------------------
-            */
-            $table->decimal('loyalty_points', 12, 2)
-                ->default(0);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product Snapshot JSON
-            |--------------------------------------------------------------------------
-            */
-            $table->json('product_snapshot')
+            $table->text('notes')
                 ->nullable();
 
             $table->timestamps();
@@ -119,6 +103,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_items');
+        Schema::dropIfExists('order_addresses');
     }
 };

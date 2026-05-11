@@ -14,11 +14,21 @@ return new class extends Migration
         Schema::create('order_item_attributes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('order_item_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_item_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('attribute_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('attribute_value_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->string('attribute_name');
+
             $table->string('attribute_value');
-            $table->decimal('price', 10, 2)->nullable();
 
             $table->timestamps();
         });
