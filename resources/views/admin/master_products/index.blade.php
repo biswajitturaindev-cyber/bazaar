@@ -74,28 +74,53 @@
                                 {{ $product->hsn->hsn_code ?? '-' }}
                             </td>
 
-                            <td class="px-3 py-2">{{ $product->product_price }}</td>
-                            <td class="px-3 py-2">{{ $product->selling_price }}</td>
-                            <td class="px-3 py-2">{{ \Str::limit($product->description, 50) }}</td>
-
-
-                            {{-- Image --}}
+                            {{-- Product Price --}}
                             <td class="px-3 py-2">
-                                @if ($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                         width="50" height="50"
-                                         class="rounded"
-                                         style="object-fit:cover;">
+                                {{ $product->product_price }}
+                            </td>
+
+                            {{-- Selling Price --}}
+                            <td class="px-3 py-2">
+                                {{ $product->selling_price }}
+                            </td>
+
+                            {{-- Description --}}
+                            <td class="px-3 py-2">
+                                {{ \Str::limit($product->description, 50) }}
+                            </td>
+
+                            {{-- Primary Image --}}
+                            <td class="px-3 py-2">
+
+                                @if ($product->primaryImage)
+
+                                    <img
+                                        src="{{ $product->primaryImage->image_url }}"
+                                        width="50"
+                                        height="50"
+                                        class="rounded border"
+                                        style="object-fit: cover;"
+                                    >
+
                                 @else
-                                    <span class="text-gray-400">No Image</span>
+
+                                    <span class="text-gray-400">
+                                        No Image
+                                    </span>
+
                                 @endif
+
                             </td>
 
                             {{-- Status --}}
                             <td class="px-3 py-2">
                                 <span class="px-2 py-1 text-xs font-semibold rounded
-                                    {{ $product->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ $product->status == 1
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-red-100 text-red-700' }}">
+
                                     {{ $product->status == 1 ? 'Active' : 'Inactive' }}
+
                                 </span>
                             </td>
 
@@ -105,22 +130,28 @@
                                 {{-- Edit --}}
                                 <a href="{{ route('master-products.edit', $product->id) }}"
                                     class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+
                                     Edit
+
                                 </a>
 
                                 {{-- Delete --}}
-                                <form action="{{ route('master-products.destroy', $product->id) }}" method="POST"
-                                    onsubmit="return confirm('Delete this product?')">
+                                <form
+                                    action="{{ route('master-products.destroy', $product->id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Delete this product?')"
+                                >
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+
+                                    <button
+                                        type="submit"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                                    >
                                         Delete
                                     </button>
                                 </form>
-
                             </td>
-
                         </tr>
                     @endforeach
                 </tbody>

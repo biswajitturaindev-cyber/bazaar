@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Hsn;
 use App\Models\MasterProduct;
+use App\Models\MasterProductImage;
 use App\Models\SubCategory;
 use App\Models\SubCategoryItem;
 use Illuminate\Http\Request;
@@ -20,8 +21,20 @@ class MasterProductController extends Controller
      */
     public function index()
     {
-        $products = MasterProduct::with(['category','subCategory','subSubCategory','hsn'])->latest()->get();
-        return view('admin.master_products.index', compact('products'));
+        $products = MasterProduct::with([
+            'category',
+            'subCategory',
+            'subSubCategory',
+            'hsn',
+            'primaryImage'
+        ])
+        ->latest()
+        ->get();
+
+        return view(
+            'admin.master_products.index',
+            compact('products')
+        );
     }
 
     /**
@@ -40,53 +53,103 @@ class MasterProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required',
-            'sub_category_id' => 'nullable',
-            'sub_sub_category_id' => 'nullable',
-            'hsn_id' => 'required',
-            'name' => 'required|string|max:255',
-            'product_price' => 'required|numeric',
-            'selling_price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image',
+            'category_id'          => 'required',
+            'sub_category_id'      => 'nullable',
+            'sub_sub_category_id'  => 'nullable',
+            'hsn_id'               => 'required',
+            'name'                 => 'required|string|max:255',
+            'product_price'        => 'required|numeric',
+            'selling_price'        => 'required|numeric',
+            'description'          => 'nullable|string',
+
+            // Multiple Images
+            'images'               => 'nullable|array|max:4',
+            'images.*'             => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            // Primary Image
+            'primary_image'        => 'nullable|integer',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except([
+            'images',
+            'primary_image'
+        ]);
 
-        // Image upload with Intervention
-        if ($request->hasFile('image')) {
+        /*
+        |--------------------------------------------------------------------------
+        | Create Product
+        |--------------------------------------------------------------------------
+        */
+        $product = MasterProduct::create($data);
 
-            $file = $request->file('image');
-
-            // Better unique name
-            $imageName = uniqid() . '.' . $file->extension();
+        /*
+        |--------------------------------------------------------------------------
+        | Upload Multiple Images
+        |--------------------------------------------------------------------------
+        */
+        if ($request->hasFile('images')) {
 
             $manager = new ImageManager(new Driver());
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300); // resize
+            // Selected Primary Image Index
+            $primaryIndex = $request->primary_image ?? 0;
 
-            Storage::disk('public')->put(
-                'master_products/' . $imageName,
-                (string) $image->encode()
-            );
+            foreach ($request->file('images') as $index => $file) {
 
-            // full path
-            $path = 'master_products/' . $imageName;
+                /*
+                |--------------------------------------------------------------------------
+                | Always Save as WEBP
+                |--------------------------------------------------------------------------
+                */
+                $imageName = uniqid() . '.webp';
 
-            // Save only filename in DB
-            $data['image'] = $path;
+                /*
+                |--------------------------------------------------------------------------
+                | Resize + Convert WEBP
+                |--------------------------------------------------------------------------
+                */
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300)
+                    ->toWebp(80);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Path
+                |--------------------------------------------------------------------------
+                */
+                $path = 'master_products/' . $imageName;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Store Image
+                |--------------------------------------------------------------------------
+                */
+                Storage::disk('public')->put(
+                    $path,
+                    (string) $image
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Image DB
+                |--------------------------------------------------------------------------
+                */
+                MasterProductImage::create([
+                    'master_product_id' => $product->id,
+                    'image'             => $path,
+                    'is_primary'        => ($primaryIndex == $index),
+                ]);
+            }
         }
 
-        MasterProduct::create($data);
-
-        return redirect()->route('master-products.index')
+        return redirect()
+            ->route('master-products.index')
             ->with('success', 'Product created successfully');
     }
-
+    
     /**
      * Display the specified resource.
      */
@@ -100,14 +163,17 @@ class MasterProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = MasterProduct::findOrFail($id);
+        $product = MasterProduct::with([
+            'images',
+            'primaryImage'
+        ])->findOrFail($id);
 
         return view('admin.master_products.edit', [
-            'product' => $product,
-            'categories' => Category::all(),
-            'subCategories' => SubCategory::all(),
-            'subSubCategories' => SubCategoryItem::all(),
-            'hsns' => Hsn::all()
+            'product'           => $product,
+            'categories'        => Category::all(),
+            'subCategories'     => SubCategory::all(),
+            'subSubCategories'  => SubCategoryItem::all(),
+            'hsns'              => Hsn::all()
         ]);
     }
 
@@ -116,54 +182,129 @@ class MasterProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $product = MasterProduct::findOrFail($id);
+        $product = MasterProduct::with('images')->findOrFail($id);
 
         $request->validate([
-            'category_id' => 'required',
-            'sub_category_id' => 'nullable',
-            'sub_sub_category_id' => 'nullable',
-            'hsn_id' => 'required',
-            'name' => 'required|string|max:255',
-            'product_price' => 'required|numeric',
-            'selling_price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image',
+            'category_id'          => 'required',
+            'sub_category_id'      => 'nullable',
+            'sub_sub_category_id'  => 'nullable',
+            'hsn_id'               => 'required',
+            'name'                 => 'required|string|max:255',
+            'product_price'        => 'required|numeric',
+            'selling_price'        => 'required|numeric',
+            'description'          => 'nullable|string',
+
+            // Multiple Images
+            'images'               => 'nullable|array|max:4',
+            'images.*'             => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            // Primary Image
+            'primary_image'        => 'nullable|integer',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except([
+            'images',
+            'primary_image',
+            'deleted_images'
+        ]);
 
-        // Image upload with resize
-        if ($request->hasFile('image')) {
+        /*
+        |--------------------------------------------------------------------------
+        | Update Product
+        |--------------------------------------------------------------------------
+        */
+        $product->update($data);
 
-            // delete old image (IMPORTANT)
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+        /*
+        |--------------------------------------------------------------------------
+        | Delete Removed Images
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('deleted_images')) {
+
+            $images = MasterProductImage::whereIn(
+                'id',
+                $request->deleted_images
+            )->get();
+
+            foreach ($images as $image) {
+
+                if (
+                    $image->image &&
+                    Storage::disk('public')->exists($image->image)
+                ) {
+                    Storage::disk('public')->delete($image->image);
+                }
+
+                $image->delete();
             }
+        }
 
-            $file = $request->file('image');
-
-            $imageName = uniqid() . '.' . $file->extension();
+        /*
+        |--------------------------------------------------------------------------
+        | Upload New Images (Convert to WEBP)
+        |--------------------------------------------------------------------------
+        */
+        if ($request->hasFile('images')) {
 
             $manager = new ImageManager(new Driver());
 
-            $image = $manager->read($file->getRealPath())
-                ->cover(300, 300);
+            foreach ($request->file('images') as $file) {
 
-            // full path
-            $path = 'master_products/' . $imageName;
+                // Always WEBP
+                $imageName = uniqid() . '.webp';
 
-            Storage::disk('public')->put(
-                $path,
-                (string) $image->encode()
-            );
+                // Resize + Convert WEBP
+                $image = $manager->read($file->getRealPath())
+                    ->cover(300, 300)
+                    ->toWebp(80);
 
-            // save path in DB
-            $data['image'] = $path;
+                // Save path
+                $path = 'master_products/' . $imageName;
+
+                // Store image
+                Storage::disk('public')->put(
+                    $path,
+                    (string) $image
+                );
+
+                // Save DB
+                MasterProductImage::create([
+                    'master_product_id' => $product->id,
+                    'image'             => $path,
+                    'is_primary'        => false,
+                ]);
+            }
         }
 
-        $product->update($data);
+        /*
+        |--------------------------------------------------------------------------
+        | Update Primary Image
+        |--------------------------------------------------------------------------
+        */
+        MasterProductImage::where(
+            'master_product_id',
+            $product->id
+        )->update([
+            'is_primary' => false
+        ]);
 
-        return redirect()->route('master-products.index')
+        $allImages = MasterProductImage::where(
+            'master_product_id',
+            $product->id
+        )->get();
+
+        $primaryIndex = $request->primary_image ?? 0;
+
+        if (isset($allImages[$primaryIndex])) {
+
+            $allImages[$primaryIndex]->update([
+                'is_primary' => true
+            ]);
+        }
+
+        return redirect()
+            ->route('master-products.index')
             ->with('success', 'Product updated successfully');
     }
 

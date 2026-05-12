@@ -174,6 +174,5 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('vendors.products', VendorProductController::class);
 
-
     });
 });

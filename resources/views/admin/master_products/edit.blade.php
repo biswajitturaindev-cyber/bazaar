@@ -106,12 +106,81 @@
                 </div>
 
                 <!-- Image -->
-                <div>
-                    <label>Image</label>
-                    <input type="file" name="image" class="w-full border rounded-lg px-3 py-2">
+                <div
+                    x-data="editImagePreview(
+                        {{ $product->images->map(function($img) {
+                            return [
+                                'id' => $img->id,
+                                'url' => asset('storage/' . $img->image),
+                                'is_primary' => $img->is_primary
+                            ];
+                        })->values() }}
+                    )"
+                >
 
-                    <img src="{{ asset('storage/' . $product->image) }}"
-                        style="width:80px;height:80px;margin-top:10px;">
+                    <label class="block mb-2 font-medium">
+                        Upload Images (Maximum 4)
+                    </label>
+
+                    <input
+                        type="file"
+                        x-ref="fileInput"
+                        name="images[]"
+                        multiple
+                        accept="image/*"
+                        @change="previewImages"
+                        class="w-full border rounded-lg px-3 py-2"
+                    >
+
+                    <!-- Old Deleted Images -->
+                    <template x-for="id in deletedImages">
+                        <input type="hidden" name="deleted_images[]" :value="id">
+                    </template>
+
+                    <!-- Preview -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+
+                        <template x-for="(image, index) in images" :key="index">
+
+                            <div class="relative border rounded-lg overflow-hidden p-2 bg-white">
+
+                                <!-- Image -->
+                                <img
+                                    :src="image.url"
+                                    class="w-full h-32 object-cover rounded"
+                                >
+
+                                <!-- Remove -->
+                                <button
+                                    type="button"
+                                    @click="removeImage(index)"
+                                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6"
+                                >
+                                    ×
+                                </button>
+
+                                <!-- Primary -->
+                                <div class="mt-2 flex items-center gap-2">
+
+                                    <input
+                                        type="radio"
+                                        name="primary_image"
+                                        :value="index"
+                                        x-model="primaryImage"
+                                    >
+
+                                    <label class="text-sm">
+                                        Primary Image
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </template>
+
+                    </div>
+
                 </div>
 
                 <!-- Status -->
@@ -144,6 +213,7 @@
 @endsection
 
 @push('scripts')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
 $(document).ready(function () {
 
@@ -183,5 +253,85 @@ $(document).ready(function () {
     });
 
 });
+function editImagePreview(existingImages = []) {
+
+    return {
+
+        images: [],
+        selectedFiles: [],
+        deletedImages: [],
+        primaryImage: 0,
+
+        init() {
+
+            this.images = existingImages;
+
+            let primaryIndex = existingImages.findIndex(
+                img => img.is_primary == 1
+            );
+
+            this.primaryImage = primaryIndex >= 0 ? primaryIndex : 0;
+        },
+
+        previewImages(event) {
+
+            let files = Array.from(event.target.files);
+
+            // Max 4
+            if ((this.images.length + files.length) > 4) {
+
+                alert('Maximum 4 images allowed');
+
+                return;
+            }
+
+            files.forEach(file => {
+
+                this.selectedFiles.push(file);
+
+                this.images.push({
+                    file: file,
+                    url: URL.createObjectURL(file),
+                    is_primary: 0
+                });
+
+            });
+
+            this.updateInputFiles();
+        },
+
+        removeImage(index) {
+
+            let image = this.images[index];
+
+            // Existing image
+            if (image.id) {
+                this.deletedImages.push(image.id);
+            } else {
+                // New image
+                this.selectedFiles.splice(index, 1);
+                this.updateInputFiles();
+            }
+
+            this.images.splice(index, 1);
+
+            // Reset primary
+            if (this.primaryImage >= this.images.length) {
+                this.primaryImage = 0;
+            }
+        },
+
+        updateInputFiles() {
+
+            let dataTransfer = new DataTransfer();
+
+            this.selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            this.$refs.fileInput.files = dataTransfer.files;
+        }
+    }
+}
 </script>
 @endpush
