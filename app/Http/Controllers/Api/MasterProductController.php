@@ -13,7 +13,7 @@ class MasterProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+   public function index()
     {
         $businessCategoryId = request()->filled('business_category_id')
             ? decodeIdOrFail(request()->business_category_id)
@@ -23,7 +23,9 @@ class MasterProductController extends Controller
                 'category',
                 'subCategory',
                 'subSubCategory',
-                'hsn'
+                'hsn',
+                'primaryImage',
+                'images'
             ])
 
             ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
@@ -34,13 +36,17 @@ class MasterProductController extends Controller
                         '=',
                         'master_products.category_id'
                     )
+
                     ->where(
                         'business_category_mappings.business_category_id',
                         $businessCategoryId
                     )
 
                     // IMPORTANT
-                    ->select('master_products.*');
+                    ->select('master_products.*')
+
+                    // Avoid duplicate products
+                    ->distinct();
             })
 
             ->latest('master_products.created_at')

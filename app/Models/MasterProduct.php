@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MasterProduct extends Model
 {
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
@@ -16,14 +17,18 @@ class MasterProduct extends Model
         'sub_sub_category_id',
         'hsn_id',
         'name',
-        'image',
         'product_price',
         'selling_price',
         'description',
         'status'
     ];
 
-    // Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
@@ -42,5 +47,31 @@ class MasterProduct extends Model
     public function hsn()
     {
         return $this->belongsTo(Hsn::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | All Images
+    |--------------------------------------------------------------------------
+    */
+    public function images()
+    {
+        return $this->hasMany(
+            MasterProductImage::class,
+            'master_product_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Primary Image
+    |--------------------------------------------------------------------------
+    */
+    public function primaryImage()
+    {
+        return $this->hasOne(
+            MasterProductImage::class,
+            'master_product_id'
+        )->where('is_primary', 1);
     }
 }

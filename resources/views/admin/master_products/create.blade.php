@@ -134,17 +134,73 @@
                     @enderror
                 </div>
 
-                <!-- Image -->
-                <div>
-                    <label class="block mb-2 font-medium">Image</label>
-                    <input type="file" name="image"
-                        class="w-full border rounded-lg px-3 py-2">
+                <!-- Images -->
+                <div x-data="imagePreview()">
 
-                    @error('image')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <label class="block mb-2 font-medium">
+                        Upload Images (Maximum 4)
+                    </label>
+
+                    <input
+                        type="file"
+                        x-ref="fileInput"
+                        name="images[]"
+                        multiple
+                        accept="image/*"
+                        @change="previewImages"
+                        class="w-full border rounded-lg px-3 py-2"
+                    >
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        You can upload up to 4 images.
+                    </p>
+
+                    <!-- Preview -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+
+                        <template x-for="(image, index) in images" :key="index">
+
+                            <div class="relative border rounded-lg overflow-hidden p-2 bg-white">
+
+                                <!-- Image -->
+                                <img
+                                    :src="image.url"
+                                    class="w-full h-32 object-cover rounded"
+                                >
+
+                                <!-- Remove Button -->
+                                <button
+                                    type="button"
+                                    @click="removeImage(index)"
+                                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6"
+                                >
+                                    ×
+                                </button>
+
+                                <!-- Primary Checkbox -->
+                                <div class="mt-2 flex items-center gap-2">
+
+                                    <input
+                                        type="radio"
+                                        name="primary_image"
+                                        :value="index"
+                                        x-model="primaryImage"
+                                        class="text-blue-600"
+                                    >
+
+                                    <label class="text-sm font-medium">
+                                        Primary Image
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </template>
+
+                    </div>
+
                 </div>
-
                 <!-- Status -->
                 <div>
                     <label class="block mb-2 font-medium">Status</label>
@@ -176,6 +232,7 @@
 
 @endsection
 @push('scripts')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
 $(document).ready(function () {
 
@@ -227,5 +284,74 @@ $(document).ready(function () {
     });
 
 });
+
+function imagePreview() {
+
+    return {
+
+        images: [],
+        selectedFiles: [],
+        primaryImage: 0,
+
+        previewImages(event) {
+
+            let files = Array.from(event.target.files);
+
+            // Merge files
+            this.selectedFiles = [...this.selectedFiles, ...files];
+
+            // Max 4
+            if (this.selectedFiles.length > 4) {
+
+                alert('Maximum 4 images allowed');
+
+                this.selectedFiles = this.selectedFiles.slice(0, 4);
+            }
+
+            this.renderImages();
+
+            this.updateInputFiles();
+        },
+
+        renderImages() {
+
+            this.images = [];
+
+            this.selectedFiles.forEach(file => {
+
+                this.images.push({
+                    file: file,
+                    url: URL.createObjectURL(file)
+                });
+
+            });
+        },
+
+        removeImage(index) {
+
+            this.selectedFiles.splice(index, 1);
+
+            this.renderImages();
+
+            this.updateInputFiles();
+
+            // Reset primary image if deleted
+            if (this.primaryImage >= this.selectedFiles.length) {
+                this.primaryImage = 0;
+            }
+        },
+
+        updateInputFiles() {
+
+            let dataTransfer = new DataTransfer();
+
+            this.selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            this.$refs.fileInput.files = dataTransfer.files;
+        }
+    }
+}
 </script>
 @endpush
