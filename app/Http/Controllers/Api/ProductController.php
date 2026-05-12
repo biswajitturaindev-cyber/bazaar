@@ -552,195 +552,224 @@ class ProductController extends Controller
     }*/
 
     public function show(Request $request, $id)
-{
-    try {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Decode Product ID
-        |--------------------------------------------------------------------------
-        */
-        $decoded = Hashids::decode($id);
-
-        if (empty($decoded)) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Invalid Product ID'
-            ], 400);
-        }
-
-        $productId = $decoded[0];
-
-        /*
-        |--------------------------------------------------------------------------
-        | Decode Business Category ID
-        |--------------------------------------------------------------------------
-        */
-        $businessCategoryId = null;
-
-        if ($request->filled('business_category_id')) {
-
-            $decodedBusinessCategory = Hashids::decode(
-                $request->business_category_id
-            );
-
-            if (empty($decodedBusinessCategory)) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Invalid Business Category ID'
-                ], 400);
-            }
-
-            $businessCategoryId = $decodedBusinessCategory[0];
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Model Map
-        |--------------------------------------------------------------------------
-        */
-        $modelMap = config('product.model_map');
-
-        $product = null;
-
-        foreach ($modelMap as $type => $modelClass) {
-
-            $query = $modelClass::query()
-                ->select([
-                    'id',
-                    'name',
-                    'category_id',
-                    'sub_category_id',
-                    'sub_sub_category_id',
-                    'hsn_id',
-                    'status',
-                    'created_at'
-                ])
-                ->with([
-
-                    'category:id,name',
-
-                    'subCategory:id,name',
-
-                    'subSubCategory:id,name',
-
-                    'hsn:id,hsn_code,igst',
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Variants
-                    |--------------------------------------------------------------------------
-                    */
-'variants' => function ($q) use ($productId) {
-
-    $q->select([
-        'id',
-        'product_id',
-        'product_type',
-        'sku',
-        'barcode',
-        'mrp',
-        'cost_price',
-        'selling_price',
-        'discount',
-        'final_price',
-        'short_description',
-        'long_description',
-        'is_primary',
-        'manufacture_date',
-        'expiry_date'
-    ])
-    ->where('product_id', $productId)
-
-    ->with([
-
-        'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
-        'attributes' => function ($attr) {
-
-            $attr->select([
-                'id',
-                'product_variant_id',
-                'attribute_id',
-                'attribute_value_id'
-            ])->with([
-
-                'attribute:id,name',
-
-                'attributeValue:id,value'
-            ]);
-        },
-
-        'images' => function ($img) {
-
-            $img->select([
-                'id',
-                'product_variant_id',
-                'image_medium'
-            ]);
-        },
-
-        'stocks'
-    ]);
-}
-                ]);
-
-            $product = $query->find($productId);
+    {
+        try {
 
             /*
             |--------------------------------------------------------------------------
-            | Skip If No Matching Variant Found
+            | Decode Product ID
             |--------------------------------------------------------------------------
             */
-            if (
-                $product &&
-                $businessCategoryId &&
-                $product->variants->isEmpty()
-            ) {
-                $product = null;
-                continue;
+            $decoded = Hashids::decode($id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Invalid Product ID'
+                ], 400);
             }
 
-            if ($product) {
-                $product->product_type = $type;
-                break;
-            }
-        }
+            $productId = $decoded[0];
 
-        /*
-        |--------------------------------------------------------------------------
-        | Product Not Found
-        |--------------------------------------------------------------------------
-        */
-        if (!$product) {
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Business ID
+            |--------------------------------------------------------------------------
+            */
+            $businessId = null;
+
+            if ($request->filled('business_id')) {
+
+                $decodedBusiness = Hashids::decode(
+                    $request->business_id
+                );
+
+                if (empty($decodedBusiness)) {
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Invalid Business ID'
+                    ], 400);
+                }
+
+                $businessId = $decodedBusiness[0];
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Business Category ID
+            |--------------------------------------------------------------------------
+            */
+            $businessCategoryId = null;
+
+            if ($request->filled('business_category_id')) {
+
+                $decodedBusinessCategory = Hashids::decode(
+                    $request->business_category_id
+                );
+
+                if (empty($decodedBusinessCategory)) {
+                    return response()->json([
+                        'status'  => false,
+                        'message' => 'Invalid Business Category ID'
+                    ], 400);
+                }
+
+                $businessCategoryId = $decodedBusinessCategory[0];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Model Map
+            |--------------------------------------------------------------------------
+            */
+            $modelMap = config('product.model_map');
+
+            $product = null;
+
+            foreach ($modelMap as $type => $modelClass) {
+
+                $query = $modelClass::query()
+                    ->select([
+                        'id',
+                        'business_id',
+                        'business_category_id',
+                        'name',
+                        'category_id',
+                        'sub_category_id',
+                        'sub_sub_category_id',
+                        'hsn_id',
+                        'status',
+                        'created_at'
+                    ])
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Product ID + Business ID Uniqueness
+                    |--------------------------------------------------------------------------
+                    */
+                    ->where('id', $productId)
+
+                    ->when($businessId, function ($q) use ($businessId) {
+                        $q->where('business_id', $businessId);
+                    })
+
+                    ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
+                        $q->where('business_category_id', $businessCategoryId);
+                    })
+
+                    ->with([
+
+                        'category:id,name',
+
+                        'subCategory:id,name',
+
+                        'subSubCategory:id,name',
+
+                        'hsn:id,hsn_code,igst',
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Variants
+                        |--------------------------------------------------------------------------
+                        */
+                        'variants' => function ($q) use ($productId) {
+
+                            $q->select([
+                                'id',
+                                'product_id',
+                                'product_type',
+                                'sku',
+                                'barcode',
+                                'mrp',
+                                'cost_price',
+                                'selling_price',
+                                'discount',
+                                'final_price',
+                                'short_description',
+                                'long_description',
+                                'is_primary',
+                                'manufacture_date',
+                                'expiry_date'
+                            ])
+
+                            ->where('product_id', $productId)
+
+                            ->with([
+
+                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
+                                'attributes' => function ($attr) {
+
+                                    $attr->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'attribute_id',
+                                        'attribute_value_id'
+                                    ])->with([
+
+                                        'attribute:id,name',
+
+                                        'attributeValue:id,value'
+                                    ]);
+                                },
+
+                                'images' => function ($img) {
+
+                                    $img->select([
+                                        'id',
+                                        'product_variant_id',
+                                        'image_medium'
+                                    ]);
+                                },
+
+                                'stocks'
+                            ]);
+                        }
+                    ]);
+
+                $product = $query->first();
+
+                if ($product) {
+                    $product->product_type = $type;
+                    break;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product Not Found
+            |--------------------------------------------------------------------------
+            */
+            if (!$product) {
+
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+            return response()->json([
+                'status' => true,
+                'data'   => new ProductResource($product)
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            Log::error('Product Show Error: ' . $e->getMessage());
 
             return response()->json([
                 'status'  => false,
-                'message' => 'Product not found'
-            ], 404);
+                'message' => 'Something went wrong',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Success Response
-        |--------------------------------------------------------------------------
-        */
-        return response()->json([
-            'status' => true,
-            'data'   => new ProductResource($product)
-        ], 200);
-
-    } catch (\Exception $e) {
-
-        Log::error('Product Show Error: ' . $e->getMessage());
-
-        return response()->json([
-            'status'  => false,
-            'message' => 'Something went wrong',
-            'error'   => $e->getMessage()
-        ], 500);
     }
-}
     /**
      * Update the specified resource in storage.
      */
