@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\v1\Member\ProductController;
 use App\Http\Controllers\Api\v1\Member\VendorController;
 use App\Http\Controllers\Api\v1\Member\CartController;
 use App\Http\Controllers\Api\v1\Member\OrderController;
+use App\Http\Controllers\Api\v1\Member\VendorBannerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -45,7 +46,7 @@ Route::prefix('member')->group(function () {
     Route::get('products/details',[ProductController::class, 'productDetails'])->name('products.details');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
-
+    Route::get('vendors.banners', [VendorBannerController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------
