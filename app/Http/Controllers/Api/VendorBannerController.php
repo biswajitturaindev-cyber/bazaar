@@ -12,9 +12,36 @@ class VendorBannerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try {
+
+            // Decode business id
+            $businessId = decodeIdOrFail(
+                $request->business_id,
+                'Invalid business ID'
+            );
+
+            // Get banners
+            $banners = VendorBanner::where('business_id', $businessId)
+                ->orderBy('sort_order', 'asc')
+                ->latest()
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Vendor banner list fetched successfully',
+                'data' => VendorBannerResource::collection($banners)
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch vendor banners',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -88,7 +115,31 @@ class VendorBannerController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+
+            // Decode banner id
+            $bannerId = decodeIdOrFail(
+                $id,
+                'Invalid banner ID'
+            );
+
+            // Find banner
+            $banner = VendorBanner::findOrFail($bannerId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Vendor banner details fetched successfully',
+                'data' => new VendorBannerResource($banner)
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch vendor banner details',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -104,7 +155,61 @@ class VendorBannerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+
+            // Decode banner id
+            $bannerId = decodeIdOrFail($id, 'Invalid banner ID');
+
+            // Find banner
+            $banner = VendorBanner::findOrFail($bannerId);
+
+            // Decode business id
+            $businessId = decodeIdOrFail(
+                $request->business_id,
+                'Invalid business ID'
+            );
+
+            $request->merge([
+                'business_id' => $businessId
+            ]);
+
+            // Validation
+            $data = $request->validate([
+                'business_id' => 'required|exists:businesses,id',
+                'banner_type' => 'required|in:main_banner,promotional_banner',
+                'title' => 'nullable|string|max:255',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'status' => 'nullable|boolean',
+                'sort_order' => 'nullable|integer',
+            ]);
+
+            // Upload image
+            if ($request->hasFile('image')) {
+
+                $path = $request->file('image')
+                    ->store('vendor_banners', 'public');
+
+                $data['image'] = 'storage/' . $path;
+            }
+
+            // Update
+            $banner->update($data);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Vendor banner updated successfully',
+                'data' => new VendorBannerResource($banner)
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update vendor banner',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
     }
 
     /**
@@ -112,6 +217,37 @@ class VendorBannerController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+
+            // Decode banner id
+            $bannerId = decodeIdOrFail(
+                $id,
+                'Invalid banner ID'
+            );
+
+            // Find banner
+            $banner = VendorBanner::findOrFail($bannerId);
+
+            // Delete image if exists
+            if ($banner->image && file_exists(public_path($banner->image))) {
+                unlink(public_path($banner->image));
+            }
+
+            // Delete banner
+            $banner->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Vendor banner deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete vendor banner',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
