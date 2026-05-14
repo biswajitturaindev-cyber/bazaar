@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VendorBannerController;
 use App\Http\Controllers\Api\VendorProductController;
 use Illuminate\Support\Str;
 
@@ -168,4 +169,10 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::post('add-master-product-to-vendor-products', [VendorProductController::class, 'store']);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Vendor Banners Master
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('vendor-banners', VendorBannerController::class);
 });
