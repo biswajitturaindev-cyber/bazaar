@@ -24,6 +24,10 @@ class VendorBannerController extends Controller
 
             // Get banners
             $banners = VendorBanner::where('business_id', $businessId)
+                ->where('status', 1)
+                ->when($request->banner_type, function ($query) use ($request) {
+                    $query->where('banner_type', $request->banner_type);
+                })
                 ->orderBy('sort_order', 'asc')
                 ->latest()
                 ->get();
@@ -38,8 +42,8 @@ class VendorBannerController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to fetch vendor banners',
-                'error' => $e->getMessage()
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

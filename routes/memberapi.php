@@ -14,13 +14,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 
-
 Route::prefix('member')->group(function () {
 
     Route::get('/captcha', function () {
-
         $code = strtoupper(Str::random(6));
-
         return response()->json([
             'image' => '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40">
                         <rect width="100%" height="100%" fill="#f2f2f2"/>
