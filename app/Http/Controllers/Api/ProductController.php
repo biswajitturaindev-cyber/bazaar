@@ -710,9 +710,9 @@ class ProductController extends Controller
 
             $data = $request->validate($rules);
 
-            // // =============================
-            // // PRE-CHECK SKU
-            // // =============================
+            // =============================
+            // PRE-CHECK SKU
+            // =============================
             // foreach ($data['variants'] as $index => $variantData) {
 
             //     $sku = $variantData['sku'];
@@ -731,43 +731,33 @@ class ProductController extends Controller
             //     }
             // }
 
-            // =============================
-            // PRE-CHECK SKU
-            // =============================
+            $productId = decodeIdOrFail($id);  // <-- move this up from DECODE IDS
+
             foreach ($data['variants'] as $index => $variantData) {
 
-                $sku = $variantData['sku'] ?? null;
-
-                if (!$sku) {
-                    continue;
-                }
+                $sku = $variantData['sku'];
 
                 $query = ProductVariant::where('sku', $sku);
 
-                // Ignore current variant
                 if (!empty($variantData['id'])) {
-
+                    // Exclude this specific variant by its own ID
                     $variantId = decodeIdOrFail($variantData['id']);
-
                     $query->where('id', '!=', $variantId);
+                } else {
+                    // No ID sent — exclude SKUs already belonging to THIS product
+                    // (they'll be matched by SKU and updated later, not treated as duplicates)
+                    $query->where('product_id', '!=', $productId);
                 }
 
-                // Only other products / variants
                 if ($query->exists()) {
-
                     throw ValidationException::withMessages([
-                        "variants.$index.sku" => [
-                            "SKU '{$sku}' already exists"
-                        ]
+                        "variants.$index.sku" => ["SKU '{$sku}' already exists"]
                     ]);
                 }
             }
-
-
             // =============================
             // DECODE IDS
             // =============================
-            $productId = decodeIdOrFail($id);
             $businessId = decodeIdOrFail($data['business_id']);
 
             $business = Business::findOrFail($businessId);
