@@ -744,7 +744,7 @@ class ProductController extends Controller
 
                 $query = ProductVariant::where('sku', $sku);
 
-                // Ignore current variant while updating
+                // Ignore current variant
                 if (!empty($variantData['id'])) {
 
                     $variantId = decodeIdOrFail($variantData['id']);
@@ -752,10 +752,7 @@ class ProductController extends Controller
                     $query->where('id', '!=', $variantId);
                 }
 
-                // OPTIONAL:
-                // Only block if SKU exists in another product
-                $query->where('product_id', '!=', $productId ?? 0);
-
+                // Only other products / variants
                 if ($query->exists()) {
 
                     throw ValidationException::withMessages([
@@ -765,7 +762,6 @@ class ProductController extends Controller
                     ]);
                 }
             }
-
 
 
             // =============================
