@@ -46,6 +46,7 @@ class VariantResource extends JsonResource
                 $this->whenLoaded('attributes')
             ),
 
+
             'images' => ProductImageResource::collection(
                 $this->whenLoaded('images')
             ),

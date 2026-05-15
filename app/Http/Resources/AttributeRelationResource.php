@@ -21,6 +21,8 @@ class AttributeRelationResource extends JsonResource
 
             'value_id' => Hashids::encode($this->attribute_value_id),
             'value' => $this->attributeValue->value ?? null,
+
+            'color_code' => $this->attributeValue->color_code ?? null,
         ];
     }
 }
