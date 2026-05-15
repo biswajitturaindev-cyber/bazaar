@@ -20,6 +20,15 @@ return new class extends Migration
 
             $table->unsignedBigInteger('sponsor_id')->nullable()->index();
 
+            $table->enum('business_type', [
+                'sales',
+                'service'
+            ])
+            ->nullable()
+            ->default(null)
+            ->comment('sales = Quick Pick, service = Magic Touch')
+            ->index();
+
             $table->string('business_name')->index();
 
             $table->foreignId('business_category_id')
