@@ -47,6 +47,7 @@ class AuthController extends Controller
             'confirm_info' => 'required|accepted',
 
             'sponsor_id' => 'nullable|numeric',
+            'business_type' => 'required|in:sales,service',
             'dob' => 'nullable|date',
             'gender' => 'nullable|numeric',
             'years_in_business' => 'nullable|numeric',
@@ -86,6 +87,9 @@ class AuthController extends Controller
 
             'agree_terms.accepted' => 'You must accept terms & conditions',
             'confirm_info.accepted' => 'You must confirm the information',
+
+            'business_type.required' => 'Business type is required',
+            'business_type.in' => 'Business type must be sales or service',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -143,6 +147,7 @@ class AuthController extends Controller
             $business = Business::create([
                 'user_id' => $user->id,
                 'sponsor_id' => $data['sponsor_id'] ?? null,
+                'business_type' => $data['business_type'] ?? null,
                 'business_name' => $data['business_name'],
                 'business_category_id' => $data['business_category_id'],
                 'business_sub_category_id' => $data['business_sub_category_id'],
