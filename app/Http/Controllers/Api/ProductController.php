@@ -93,7 +93,7 @@ class ProductController extends Controller
                                         'attribute_value_id'
                                     ])->with([
                                         'attribute:id,name',
-                                        'attributeValue:id,value'
+                                        'attributeValue:id,value,color_code'
                                     ]);
                                 },
 
@@ -435,122 +435,6 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    /*public function show($id)
-    {
-        echo "here"; die;
-        try {
-
-            $decoded = Hashids::decode($id);
-
-            if (empty($decoded)) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Invalid Product ID'
-                ], 400);
-            }
-
-            $id = $decoded[0];
-
-            $modelMap = config('product.model_map');
-            $product = null;
-
-            foreach ($modelMap as $type => $modelClass) {
-
-                $product = $modelClass::query()
-                    ->select([
-                        'id',
-                        'name',
-                        'category_id',
-                        'sub_category_id',
-                        'sub_sub_category_id',
-                        'hsn_id',
-                        'status',
-                        'created_at'
-                    ])
-                    ->with([
-                        'category:id,name',
-                        'subCategory:id,name',
-                        'subSubCategory:id,name',
-                        'hsn:id,hsn_code,igst',
-
-                        // ALL VARIANTS (optimized)
-                        'variants' => function ($q) {
-                            $q->select([
-                               'id',
-                                'sku',
-                                'barcode',
-                                'discount',
-                                'final_price',
-                                'product_id',
-                                'product_type',
-                                'selling_price',
-                                'mrp',
-                                'cost_price',
-                                'is_primary',
-                                'manufacture_date',
-                                'expiry_date',
-                                'short_description',
-                                'long_description'
-                            ])
-                            ->with([
-                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
-                                'attributes' => function ($attr) {
-                                    $attr->select([
-                                        'id',
-                                        'product_variant_id',
-                                        'attribute_id',
-                                        'attribute_value_id'
-                                    ])->with([
-                                        'attribute:id,name',
-                                        'attributeValue:id,value'
-                                    ]);
-                                },
-
-                                'images' => function ($img) {
-                                    $img->select([
-                                        'id',
-                                        'product_variant_id',
-                                        'image_medium'
-                                    ]);
-                                },
-
-                                'stocks'
-                            ]);
-                        }
-                    ])
-                    ->find($id);
-
-                if ($product) {
-                    $product->product_type = $type;
-                    break;
-                }
-            }
-
-            if (!$product) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Product not found'
-                ], 404);
-            }
-
-            return response()->json([
-                'status' => true,
-                'data'   => new ProductResource($product)
-            ], 200);
-
-        } catch (\Exception $e) {
-
-            Log::error('Product Show Error: ' . $e->getMessage());
-
-            return response()->json([
-                'status'  => false,
-                'message' => 'Something went wrong',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
-    }*/
-
     public function show(Request $request, $id)
     {
         try {
@@ -710,7 +594,7 @@ class ProductController extends Controller
 
                                         'attribute:id,name',
 
-                                        'attributeValue:id,value'
+                                        'attributeValue:id,value,color_code'
                                     ]);
                                 },
 
@@ -792,7 +676,7 @@ class ProductController extends Controller
                 'variants' => 'required|array|min:1',
 
                 'variants.*.id' => 'nullable',
-                'variants.*.sku' => 'required|string|distinct',
+                //'variants.*.sku' => 'required|string|distinct',
                 'variants.*.barcode' => 'nullable|string',
 
                 'variants.*.mrp' => 'required|numeric',
@@ -826,26 +710,63 @@ class ProductController extends Controller
 
             $data = $request->validate($rules);
 
+            // // =============================
+            // // PRE-CHECK SKU
+            // // =============================
+            // foreach ($data['variants'] as $index => $variantData) {
+
+            //     $sku = $variantData['sku'];
+
+            //     $query = ProductVariant::where('sku', $sku);
+
+            //     if (!empty($variantData['id'])) {
+            //         $variantId = decodeIdOrFail($variantData['id']);
+            //         $query->where('id', '!=', $variantId);
+            //     }
+
+            //     if ($query->exists()) {
+            //         throw ValidationException::withMessages([
+            //             "variants.$index.sku" => ["SKU '{$sku}' already exists"]
+            //         ]);
+            //     }
+            // }
+
             // =============================
             // PRE-CHECK SKU
             // =============================
             foreach ($data['variants'] as $index => $variantData) {
 
-                $sku = $variantData['sku'];
+                $sku = $variantData['sku'] ?? null;
+
+                if (!$sku) {
+                    continue;
+                }
 
                 $query = ProductVariant::where('sku', $sku);
 
+                // Ignore current variant while updating
                 if (!empty($variantData['id'])) {
+
                     $variantId = decodeIdOrFail($variantData['id']);
+
                     $query->where('id', '!=', $variantId);
                 }
 
+                // OPTIONAL:
+                // Only block if SKU exists in another product
+                $query->where('product_id', '!=', $productId ?? 0);
+
                 if ($query->exists()) {
+
                     throw ValidationException::withMessages([
-                        "variants.$index.sku" => ["SKU '{$sku}' already exists"]
+                        "variants.$index.sku" => [
+                            "SKU '{$sku}' already exists"
+                        ]
                     ]);
                 }
             }
+
+
 
             // =============================
             // DECODE IDS
