@@ -47,7 +47,7 @@ class AuthController extends Controller
             'confirm_info' => 'required|accepted',
 
             'sponsor_id' => 'nullable|numeric',
-            'business_type' => 'required|in:sales,service',
+            'business_type' => 'nullable|in:sales,service',
             'dob' => 'nullable|date',
             'gender' => 'nullable|numeric',
             'years_in_business' => 'nullable|numeric',
@@ -88,7 +88,6 @@ class AuthController extends Controller
             'agree_terms.accepted' => 'You must accept terms & conditions',
             'confirm_info.accepted' => 'You must confirm the information',
 
-            'business_type.required' => 'Business type is required',
             'business_type.in' => 'Business type must be sales or service',
         ];
 
