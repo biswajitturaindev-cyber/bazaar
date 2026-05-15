@@ -125,29 +125,17 @@ public function store(Request $request)
         $order = Order::create([
 
             'order_no' => $orderNo,
-
             'user_id' => $userId,
-
             'total_items' => $totalItems,
-
             'items_total' => $itemsTotal,
-
             'discount_amount' => $discountAmount,
-
             'platform_charge' => $platformCharge,
-
             'delivery_charge' => $deliveryCharge,
-
             'tax_amount' => $taxAmount,
-
             'grand_total' => $grandTotal,
-
             'payment_status' => 'Pending',
-
             'payment_method' => 'COD',
-
             'order_status' => 'Pending',
-
             'placed_at' => now(),
         ]);
 
@@ -190,29 +178,17 @@ public function store(Request $request)
             $orderItem = $order->items()->create([
 
                 'business_id' => $cart->business_id,
-
                 'business_category_id' => $cart->business_category_id,
-
                 'product_id' => $cart->product_id,
-
                 'product_variant_id' => $cart->product_variant_id,
-
                 'product_name' => $cart->product_name,
-
                 'sku' => $cart->productVariant->sku ?? null,
-
                 'quantity' => $cart->quantity,
-
                 'mrp' => $cart->productVariant->mrp ?? 0,
-
                 'selling_price' => $cart->productVariant->selling_price ?? 0,
-
                 'discount_amount' => $cart->productVariant->discount ?? 0,
-
                 'final_price' => $price,
-
                 'subtotal' => ($price * $cart->quantity),
-
                 'loyalty_points' => 0,
 
                 /*
