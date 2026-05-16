@@ -12,6 +12,7 @@
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+    @import url('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5/dist/fancybox/fancybox.css');
 
     :root {
         --accent: #4f46e5;
@@ -257,6 +258,42 @@
         border: 1px solid var(--border);
         box-shadow: 0 1px 4px rgba(0,0,0,0.07);
         display: block;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .pd-variant-img:hover {
+        transform: scale(1.06);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .pd-img-thumb-wrap {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .pd-img-thumb-wrap:hover .pd-img-zoom-icon {
+        opacity: 1;
+    }
+
+    .pd-img-zoom-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.35);
+        border-radius: var(--radius-xs);
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        pointer-events: none;
+    }
+
+    .pd-img-zoom-icon svg {
+        width: 16px;
+        height: 16px;
+        color: #fff;
     }
 
     .pd-img-placeholder {
@@ -480,10 +517,50 @@
                                 {{-- IMAGE --}}
                                 <td>
                                     @if ($variant->images->first())
-                                        <img
-                                            src="{{ asset($variant->images->first()->image) }}"
-                                            alt="{{ $variant->name }}"
-                                            class="pd-variant-img">
+                                        @php
+                                            $img       = $variant->images->first();
+                                            $thumbSrc  = $img->image_small ?? $img->image_medium ?? $img->image_large ?? null;
+                                            $galleryId = 'gallery-variant-' . $variant->id;
+                                        @endphp
+                                        @if ($thumbSrc)
+
+                                            {{-- Hidden gallery links for all sizes --}}
+                                            @foreach ($variant->images as $varImg)
+                                                @foreach (['image_large', 'image_medium', 'image_small'] as $sizeKey)
+                                                    @if (!empty($varImg->$sizeKey))
+                                                        <a
+                                                            href="{{ asset($varImg->$sizeKey) }}"
+                                                            data-fancybox="{{ $galleryId }}"
+                                                            data-caption="{{ $variant->name }} — {{ ucfirst(str_replace('image_', '', $sizeKey)) }}"
+                                                            style="display:none">
+                                                        </a>
+                                                    @endif
+                                                @endforeach
+                                            @endforeach
+
+                                            {{-- Visible thumbnail triggers first gallery item --}}
+                                            <div class="pd-img-thumb-wrap" onclick="openVariantGallery('{{ $galleryId }}')">
+                                                <img
+                                                    src="{{ asset($thumbSrc) }}"
+                                                    alt="{{ $variant->name }}"
+                                                    class="pd-variant-img">
+                                                <div class="pd-img-zoom-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="11" cy="11" r="7"/>
+                                                        <path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                        @else
+                                            <div class="pd-img-placeholder">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                    <path d="M21 15l-5-5L5 21"/>
+                                                </svg>
+                                            </div>
+                                        @endif
                                     @else
                                         <div class="pd-img-placeholder">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -573,5 +650,27 @@
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5/dist/fancybox/fancybox.umd.js"></script>
+<script>
+    Fancybox.bind('[data-fancybox]', {
+        animated: true,
+        Toolbar: {
+            display: {
+                left:   ['infobar'],
+                middle: [],
+                right:  ['slideshow', 'download', 'close'],
+            },
+        },
+        Images: {
+            zoom: true,
+        },
+    });
+
+    function openVariantGallery(galleryId) {
+        const firstLink = document.querySelector('[data-fancybox="' + galleryId + '"]');
+        if (firstLink) firstLink.click();
+    }
+</script>
 
 @endsection
