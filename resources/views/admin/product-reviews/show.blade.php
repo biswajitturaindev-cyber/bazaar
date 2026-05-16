@@ -526,7 +526,7 @@
 
                                             {{-- Hidden gallery links for all sizes --}}
                                             @foreach ($variant->images as $varImg)
-                                                @foreach (['image_large', 'image_medium', 'image_small'] as $sizeKey)
+                                                @foreach (['image_large'] as $sizeKey)
                                                     @if (!empty($varImg->$sizeKey))
                                                         <a
                                                             href="{{ \Storage::url($varImg->$sizeKey) }}"
