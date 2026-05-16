@@ -501,7 +501,8 @@
                             <th>Image</th>
                             <th>Variant</th>
                             <th>SKU</th>
-                            <th>Price</th>
+                            <th>Selling Price</th>
+                            <th>Final Price</th>
                             <th>Stock</th>
                             <th>Business</th>
                         </tr>
@@ -600,16 +601,30 @@
 
                                 {{-- PRICE --}}
                                 <td>
-                                    <span class="pd-price">₹{{ number_format($variant->sale_price ?? 0, 2) }}</span>
+                                    <span class="pd-price">₹{{ number_format($variant->selling_price ?? 0, 2) }}</span>
+                                </td>
+
+                                {{-- PRICE --}}
+                                <td>
+                                    <span class="pd-price">₹{{ number_format($variant->final_price ?? 0, 2) }}</span>
                                 </td>
 
                                 {{-- STOCK --}}
                                 <td>
                                     @php
-                                        $totalStock = $variant->stocks->sum('quantity');
-                                        $stockClass = $totalStock > 10 ? 'in-stock' : ($totalStock > 0 ? 'low-stock' : 'out-stock');
+                                        $totalStock = $variant->stocks->sum('stock');
+
+                                        $stockClass =
+                                            $totalStock > 10
+                                                ? 'in-stock'
+                                                : ($totalStock > 0
+                                                    ? 'low-stock'
+                                                    : 'out-stock');
                                     @endphp
-                                    <span class="pd-stock {{ $stockClass }}">{{ $totalStock }}</span>
+
+                                    <span class="pd-stock {{ $stockClass }}">
+                                        {{ $totalStock }}
+                                    </span>
                                 </td>
 
                                 {{-- BUSINESS --}}
