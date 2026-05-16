@@ -24,6 +24,8 @@
 
                             <th class="px-3 py-2">Sl.No</th>
 
+                            <th class="px-3 py-4">Vendor Name</th>
+
                             <th class="px-3 py-4">Category</th>
 
                             <th class="px-3 py-4">Product Name</th>
@@ -80,6 +82,13 @@
                                 {{-- SERIAL --}}
                                 <td class="px-3 py-2">
                                     {{ $loop->iteration }}
+                                </td>
+
+                                {{-- Business --}}
+                                <td class="px-3 py-4">
+                                    <a href="" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                        {{ $product->business?->business_name ?? '-' }}
+                                    </a>
                                 </td>
 
                                 {{-- CATEGORY --}}
@@ -154,7 +163,6 @@
                                         {{-- VIEW PRODUCT DETAILS --}}
                                         <a href="{{ route('product-reviews.show', $product->id) }}"
                                             class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs">
-
                                             View Details
                                         </a>
 
@@ -167,16 +175,11 @@
                         @empty
 
                             <tr>
-
                                 <td colspan="11" class="text-center py-6 text-gray-500">
-
                                     No products found
-
                                 </td>
-
                             </tr>
                         @endforelse
-
                     </tbody>
 
                 </table>
