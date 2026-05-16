@@ -45,6 +45,7 @@ class ProductReviewController extends Controller
                     ->select([
                         'id',
                         'name',
+                        'business_id',
                         'category_id',
                         'sub_category_id',
                         'sub_sub_category_id',
@@ -54,15 +55,11 @@ class ProductReviewController extends Controller
                     ])
                     ->where('status',2)
                     ->with([
-
+                        'business:id,business_name',
                         'category:id,name',
-
                         'subCategory:id,name',
-
                         'subSubCategory:id,name',
-
                         'hsn:id,hsn_code,igst',
-
                         // =============================
                         // PRIMARY VARIANT ONLY
                         // =============================
@@ -182,6 +179,7 @@ class ProductReviewController extends Controller
      */
     public function show($id)
     {
+
         try {
 
             // =============================
@@ -212,7 +210,7 @@ class ProductReviewController extends Controller
 
                     'variants.stocks.business'
 
-                ])->find($productId);
+                ])->find($id);
 
                 if ($product) {
                     break;
