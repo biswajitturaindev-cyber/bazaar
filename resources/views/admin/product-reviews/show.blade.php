@@ -501,7 +501,6 @@
                             <th>Image</th>
                             <th>Variant</th>
                             <th>SKU</th>
-                            <th>Attributes</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Business</th>
@@ -526,7 +525,7 @@
 
                                             {{-- Hidden gallery links for all sizes --}}
                                             @foreach ($variant->images as $varImg)
-                                                @foreach (['image_large'] as $sizeKey)
+                                                @foreach (['image_large', 'image_medium', 'image_small'] as $sizeKey)
                                                     @if (!empty($varImg->$sizeKey))
                                                         <a
                                                             href="{{ \Storage::url($varImg->$sizeKey) }}"
@@ -574,7 +573,19 @@
 
                                 {{-- VARIANT --}}
                                 <td>
-                                    <span class="pd-variant-name">{{ $variant->name ?? '—' }}</span>
+                                    @php
+                                        $variantName = $variant->name;
+                                        if (empty($variantName) && $variant->attributes->isNotEmpty()) {
+                                            $variantName = $variant->attributes->map(function($a) {
+                                                $attrName  = $a->attribute?->name ?? '';
+                                                $attrValue = $a->attributeValue?->value ?? '';
+                                                return $attrName && $attrValue
+                                                    ? "{$attrName}: {$attrValue}"
+                                                    : ($attrValue ?: null);
+                                            })->filter()->implode(' / ');
+                                        }
+                                    @endphp
+                                    <span class="pd-variant-name">{{ $variantName ?: '—' }}</span>
                                 </td>
 
                                 {{-- SKU --}}
@@ -586,17 +597,6 @@
                                     @endif
                                 </td>
 
-                                {{-- ATTRIBUTES --}}
-                                <td>
-                                    <div class="pd-attr-list">
-                                        @foreach ($variant->attributes as $attribute)
-                                            <span class="pd-attr-tag">
-                                                <span class="pd-attr-key">{{ $attribute->attribute?->name ?? '' }}:</span>
-                                                {{ $attribute->attributeValue?->value ?? '' }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </td>
 
                                 {{-- PRICE --}}
                                 <td>
