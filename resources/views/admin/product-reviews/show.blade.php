@@ -529,7 +529,7 @@
                                                 @foreach (['image_large', 'image_medium', 'image_small'] as $sizeKey)
                                                     @if (!empty($varImg->$sizeKey))
                                                         <a
-                                                            href="{{ asset($varImg->$sizeKey) }}"
+                                                            href="{{ \Storage::url($varImg->$sizeKey) }}"
                                                             data-fancybox="{{ $galleryId }}"
                                                             data-caption="{{ $variant->name }} — {{ ucfirst(str_replace('image_', '', $sizeKey)) }}"
                                                             style="display:none">
@@ -541,7 +541,7 @@
                                             {{-- Visible thumbnail triggers first gallery item --}}
                                             <div class="pd-img-thumb-wrap" onclick="openVariantGallery('{{ $galleryId }}')">
                                                 <img
-                                                    src="{{ asset($thumbSrc) }}"
+                                                    src="{{ \Storage::url($thumbSrc) }}"
                                                     alt="{{ $variant->name }}"
                                                     class="pd-variant-img">
                                                 <div class="pd-img-zoom-icon">
