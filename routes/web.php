@@ -166,6 +166,10 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('product-reviews', ProductReviewController::class);
+        Route::put(
+            '/admin/product-review/update-status/{type}/{id}',
+            [ProductReviewController::class, 'updateStatus']
+        )->name('admin.product-review.update-status');
 
         /*
         |--------------------------------------------------------------------------

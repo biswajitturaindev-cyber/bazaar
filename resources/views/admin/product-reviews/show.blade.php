@@ -380,6 +380,50 @@
 </style>
 
 <div class="grid grid-cols-1 lg:gap-16 md:gap-10">
+    {{-- SUCCESS MESSAGE --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            {{ session('success') }}
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    @endif
+
+    {{-- ERROR MESSAGE --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            {{ session('error') }}
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    @endif
+
+    {{-- VALIDATION ERRORS --}}
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    @endif
+
 
     <div class="pd-card">
 
@@ -406,12 +450,16 @@
                         Rejected
                     </span>
                 @endif
+
+
+
+
             </div>
 
             <div class="pd-actions">
 
-                {{-- APPROVE --}}
-                @if($product->status != 1)
+
+                {{-- @if($product->status != 1)
                     <a href="" class="pd-btn pd-btn-approve">
                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M13.5 4.5L6 12 2.5 8.5"/>
@@ -420,7 +468,7 @@
                     </a>
                 @endif
 
-                {{-- REJECT --}}
+
                 @if($product->status != 0)
                     <a href="" class="pd-btn pd-btn-reject">
                         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -430,13 +478,49 @@
                     </a>
                 @endif
 
-                {{-- BACK --}}
+
                 <a href="{{ url()->previous() }}" class="pd-btn pd-btn-back">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M10 3L5 8l5 5"/>
                     </svg>
                     Back
-                </a>
+                </a> --}}
+
+                <div class="pd-status-update">
+
+                    <form
+                        action="{{ route('admin.product-review.update-status', [$product->business_category_id, $product->id]) }}"
+                        method="POST"
+                        class="d-flex align-items-center gap-2"
+                    >
+                        @csrf
+                        @method('PUT')
+
+                        <select name="status" class="form-select pd-status-select">
+
+                            <option value="2" {{ $product->status == 2 ? 'selected' : '' }}>
+                                Pending
+                            </option>
+
+                            <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>
+                                Approved
+                            </option>
+
+                            <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>
+                                Rejected
+                            </option>
+
+                        </select>
+
+                        <button type="submit" class="pd-btn pd-btn-approve">
+                            Update
+                        </button>
+
+                    </form>
+
+                </div>
+
+
 
             </div>
 
@@ -613,13 +697,7 @@
                                 <td>
                                     @php
                                         $totalStock = $variant->stocks->sum('stock');
-
-                                        $stockClass =
-                                            $totalStock > 10
-                                                ? 'in-stock'
-                                                : ($totalStock > 0
-                                                    ? 'low-stock'
-                                                    : 'out-stock');
+                                        $stockClass = $totalStock > 10 ? 'in-stock': ($totalStock > 0 ? 'low-stock' : 'out-stock');
                                     @endphp
 
                                     <span class="pd-stock {{ $stockClass }}">
@@ -658,6 +736,7 @@
                     </tbody>
 
                 </table>
+
             </div>
 
         </div>
