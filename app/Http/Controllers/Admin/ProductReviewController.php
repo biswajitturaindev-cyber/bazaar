@@ -423,4 +423,48 @@ class ProductReviewController extends Controller
             return back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
+
+    public function updateStatus(Request $request, $type, $id)
+    {
+        try {
+
+            $request->validate([
+                'status' => 'required|in:0,1,2',
+            ]);
+
+            $modelMap = config('product.model_map');
+
+            if (!isset($modelMap[$type])) {
+
+                return back()->with(
+                    'error',
+                    'Invalid product type.'
+                );
+            }
+
+            $modelClass = $modelMap[$type];
+
+            $product = $modelClass::findOrFail($id);
+
+            $product->status = $request->status;
+
+            $product->save();
+
+            return back()->with(
+                'success',
+                'Product status updated successfully.'
+            );
+
+        } catch (\Exception $e) {
+
+            \Log::error(
+                'Product Status Update Error: ' . $e->getMessage()
+            );
+
+            return back()->with(
+                'error',
+                'Something went wrong.'
+            );
+        }
+    }
 }
