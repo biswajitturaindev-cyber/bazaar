@@ -443,9 +443,7 @@ class ProductReviewController extends Controller
             }
 
             $modelClass = $modelMap[$type];
-
             $product = $modelClass::findOrFail($id);
-
             $product->status = $request->status;
 
             $product->save();
