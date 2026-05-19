@@ -21,20 +21,7 @@ return new class extends Migration
             */
             $table->string('order_no')->unique();
 
-            $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Address
-            |--------------------------------------------------------------------------
-            */
-
-            $table->foreignId('shipping_address_id')
-                ->nullable()
-                ->constrained('user_addresses')
-                ->nullOnDelete();
+            $table->unsignedBigInteger('user_id');
 
             /*
             |--------------------------------------------------------------------------
