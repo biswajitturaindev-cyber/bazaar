@@ -20,15 +20,14 @@ return new class extends Migration
             | Order
             |--------------------------------------------------------------------------
             */
-            $table->foreignId('order_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('order_id');
 
             /*
             |--------------------------------------------------------------------------
             | Billing Address
             |--------------------------------------------------------------------------
             */
+            $table->unsignedBigInteger('billing_address_id')->nullable();
             $table->text('billing_address');
             $table->unsignedBigInteger('billing_city_id')->nullable();
             $table->unsignedBigInteger('billing_state_id')->nullable();
@@ -39,11 +38,11 @@ return new class extends Migration
             | Shipping Address
             |--------------------------------------------------------------------------
             */
+            $table->unsignedBigInteger('shipping_address_id')->nullable();
             $table->text('shipping_address');
             $table->unsignedBigInteger('shipping_city_id')->nullable();
             $table->unsignedBigInteger('shipping_state_id')->nullable();
             $table->string('shipping_pincode', 20)->nullable();
-
 
             $table->timestamps();
 

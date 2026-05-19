@@ -8,9 +8,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class VerifyMemberApiToken
 {
+
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->bearerToken();
+        $token = $request->header('X-API-TOKEN');
 
         if (blank($token)) {
 
