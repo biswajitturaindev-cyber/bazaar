@@ -26,75 +26,27 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | Address Type
+            | Billing Address
             |--------------------------------------------------------------------------
             */
-            $table->enum('type', [
-                'Billing',
-                'Shipping',
-            ]);
+            $table->text('billing_address');
+            $table->unsignedBigInteger('billing_city_id')->nullable();
+            $table->unsignedBigInteger('billing_state_id')->nullable();
+            $table->string('billing_pincode', 20)->nullable();
 
             /*
             |--------------------------------------------------------------------------
-            | Customer Details
+            | Shipping Address
             |--------------------------------------------------------------------------
             */
-            $table->string('full_name');
+            $table->text('shipping_address');
+            $table->unsignedBigInteger('shipping_city_id')->nullable();
+            $table->unsignedBigInteger('shipping_state_id')->nullable();
+            $table->string('shipping_pincode', 20)->nullable();
 
-            $table->string('phone');
-
-            $table->string('email')
-                ->nullable();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Address
-            |--------------------------------------------------------------------------
-            */
-            $table->text('address_line_1');
-
-            $table->text('address_line_2')
-                ->nullable();
-
-            $table->string('landmark')
-                ->nullable();
-
-            $table->string('city');
-
-            $table->string('state');
-
-            $table->string('country');
-
-            $table->string('postal_code');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Geo Location
-            |--------------------------------------------------------------------------
-            */
-            $table->string('latitude')
-                ->nullable();
-
-            $table->string('longitude')
-                ->nullable();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Default Address
-            |--------------------------------------------------------------------------
-            */
-            $table->boolean('is_default')
-                ->default(false);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Extra
-            |--------------------------------------------------------------------------
-            */
-            $table->text('notes')
-                ->nullable();
 
             $table->timestamps();
+
         });
     }
 

@@ -30,10 +30,6 @@ return new class extends Migration
             | Address
             |--------------------------------------------------------------------------
             */
-            $table->foreignId('billing_address_id')
-                ->nullable()
-                ->constrained('user_addresses')
-                ->nullOnDelete();
 
             $table->foreignId('shipping_address_id')
                 ->nullable()

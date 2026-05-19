@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class VerifyMemberApiToken
 {
-    
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->bearerToken();
 
-        if (!$token) {
+        if (blank($token)) {
+
             return response()->json([
                 'status' => false,
                 'message' => 'Token not provided'
@@ -22,17 +22,19 @@ class VerifyMemberApiToken
 
         $expectedToken = config('services.member_api.token');
 
-        if (!$expectedToken) {
+        if (blank($expectedToken)) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Server configuration error'
+                'message' => 'API token not configured'
             ], 500);
         }
 
         if (!hash_equals($expectedToken, $token)) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Invalid API token'
             ], 401);
         }
 
