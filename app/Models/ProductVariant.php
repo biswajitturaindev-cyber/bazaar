@@ -107,4 +107,32 @@ class ProductVariant extends Model
     {
         return $this->hasMany(ProductImage::class, 'product_variant_id');
     }
+    /*
+    |--------------------------------------------------------------------------
+    | Cart Items
+    |--------------------------------------------------------------------------
+    */
+
+    public function carts()
+    {
+        return $this->hasMany(
+            Cart::class,
+            'product_variant_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Order Items
+    |--------------------------------------------------------------------------
+    */
+
+    public function orderItems()
+    {
+        return $this->hasMany(
+            OrderItem::class,
+            'product_variant_id'
+        );
+    }
+
 }

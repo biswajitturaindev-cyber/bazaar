@@ -10,282 +10,376 @@ use App\Models\OrderItemAttribute;
 use App\Models\Cart;
 use Illuminate\Support\Str;
 use App\Http\Resources\OrderResource;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     /**
      *  Place Order (Cart → Order)
      */
-public function store(Request $request)
-{
-    try {
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Validate Request
-        |--------------------------------------------------------------------------
-        */
-        $request->validate([
-            'user_id' => 'required',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Decode User ID
-        |--------------------------------------------------------------------------
-        */
-        $userId = decodeIdOrFail(
-            $request->user_id,
-            'Invalid user ID'
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get Cart Items
-        |--------------------------------------------------------------------------
-        */
-        $cartItems = Cart::with([
-                'productVariant',
-                'productVariant.stocks',
-                'cartAttributes',
-                'cartAttributes.attribute',
-                'cartAttributes.attributeValue',
-            ])
-            ->where('user_id', $userId)
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Empty Cart Check
-        |--------------------------------------------------------------------------
-        */
-        if ($cartItems->isEmpty()) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Cart is empty',
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate Totals
-        |--------------------------------------------------------------------------
-        */
-        $itemsTotal = 0;
-        $totalItems = 0;
-
-        foreach ($cartItems as $cart) {
-
-            $price = $cart->productVariant->final_price ?? 0;
-
-            $itemsTotal += ($price * $cart->quantity);
-
-            $totalItems += $cart->quantity;
-        }
-
-        $discountAmount = 0;
-
-        $platformCharge = 5;
-
-        $deliveryCharge = $itemsTotal >= 100
-            ? 0
-            : 30;
-
-        $taxAmount = 0;
-
-        $grandTotal = (
-            $itemsTotal
-            + $platformCharge
-            + $deliveryCharge
-            + $taxAmount
-        ) - $discountAmount;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Generate Order Number
-        |--------------------------------------------------------------------------
-        */
-        $lastOrder = Order::latest()->first();
-
-        $nextId = $lastOrder
-            ? $lastOrder->id + 1
-            : 1;
-
-        $orderNo = 'ORD-'
-            . now()->format('Ymd')
-            . '-'
-            . str_pad($nextId, 4, '0', STR_PAD_LEFT);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create Order
-        |--------------------------------------------------------------------------
-        */
-        $order = Order::create([
-
-            'order_no' => $orderNo,
-            'user_id' => $userId,
-            'total_items' => $totalItems,
-            'items_total' => $itemsTotal,
-            'discount_amount' => $discountAmount,
-            'platform_charge' => $platformCharge,
-            'delivery_charge' => $deliveryCharge,
-            'tax_amount' => $taxAmount,
-            'grand_total' => $grandTotal,
-            'payment_status' => 'Pending',
-            'payment_method' => 'COD',
-            'order_status' => 'Pending',
-            'placed_at' => now(),
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create Order Items
-        |--------------------------------------------------------------------------
-        */
-        foreach ($cartItems as $cart) {
+        try {
 
             /*
             |--------------------------------------------------------------------------
-            | Stock Check
+            | Validate Request
             |--------------------------------------------------------------------------
             */
-            $availableStock = $cart->productVariant
-                ? $cart->productVariant->stocks->sum('stock')
-                : 0;
+            $request->validate([
+                'user_id' => 'required|integer',
+            ]);
 
-            if ($cart->quantity > $availableStock) {
+            $userId = (int) $request->user_id;
 
-                throw new \Exception(
-                    $cart->product_name
-                    . ' stock unavailable'
-                );
+            /*
+            |--------------------------------------------------------------------------
+            | Get Cart Items
+            |--------------------------------------------------------------------------
+            */
+            $cartItems = Cart::with([
+                    'productVariant',
+                    'productVariant.stocks',
+                    'cartAttributes',
+                    'cartAttributes.attribute',
+                    'cartAttributes.attributeValue',
+                ])
+                ->where('user_id', $userId)
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Empty Cart Check
+            |--------------------------------------------------------------------------
+            */
+            if ($cartItems->isEmpty()) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cart is empty',
+                ], 422);
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Variant Price
+            | Calculate Totals
             |--------------------------------------------------------------------------
             */
-            $price = $cart->productVariant->final_price ?? 0;
+            $itemsTotal = 0;
+
+            $totalItems = 0;
+
+            foreach ($cartItems as $cart) {
+
+                $price = $cart->productVariant->final_price ?? 0;
+
+                $itemsTotal += (
+                    $price * $cart->quantity
+                );
+
+                $totalItems += $cart->quantity;
+            }
+
+            $discountAmount = 0;
+
+            $platformCharge = 5;
+
+            $deliveryCharge = $itemsTotal >= 100
+                ? 0
+                : 30;
+
+            $taxAmount = 0;
+
+            $grandTotal = (
+                $itemsTotal
+                + $platformCharge
+                + $deliveryCharge
+                + $taxAmount
+            ) - $discountAmount;
 
             /*
             |--------------------------------------------------------------------------
-            | Create Order Item
+            | Generate Order Number
             |--------------------------------------------------------------------------
             */
-            $orderItem = $order->items()->create([
+            $lastOrder = Order::latest()->first();
 
-                'business_id' => $cart->business_id,
-                'business_category_id' => $cart->business_category_id,
-                'product_id' => $cart->product_id,
-                'product_variant_id' => $cart->product_variant_id,
-                'product_name' => $cart->product_name,
-                'sku' => $cart->productVariant->sku ?? null,
-                'quantity' => $cart->quantity,
-                'mrp' => $cart->productVariant->mrp ?? 0,
-                'selling_price' => $cart->productVariant->selling_price ?? 0,
-                'discount_amount' => $cart->productVariant->discount ?? 0,
-                'final_price' => $price,
-                'subtotal' => ($price * $cart->quantity),
-                'loyalty_points' => 0,
+            $nextId = $lastOrder
+                ? ($lastOrder->id + 1)
+                : 1;
 
-                /*
-                |--------------------------------------------------------------------------
-                | Product Snapshot
-                |--------------------------------------------------------------------------
-                */
-                'product_snapshot' => [
-                    'product_name' => $cart->product_name,
-                    'sku' => $cart->productVariant->sku ?? null,
-                    'mrp' => $cart->productVariant->mrp ?? 0,
-                    'selling_price' => $cart->productVariant->selling_price ?? 0,
-                    'final_price' => $price,
-                ],
+            $orderNo = 'ORD-'
+                . now()->format('Ymd')
+                . '-'
+                . str_pad(
+                    $nextId,
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Order
+            |--------------------------------------------------------------------------
+            */
+            $order = Order::create([
+
+                'order_no' => $orderNo,
+
+                'user_id' => $userId,
+
+                'business_category_id' => $cartItems
+                    ->first()
+                    ->business_category_id,
+
+                'total_items' => $totalItems,
+
+                'items_total' => $itemsTotal,
+
+                'discount_amount' => $discountAmount,
+
+                'platform_charge' => $platformCharge,
+
+                'delivery_charge' => $deliveryCharge,
+
+                'tax_amount' => $taxAmount,
+
+                'grand_total' => $grandTotal,
+
+                'payment_status' => Order::PAYMENT_PENDING,
+
+                'payment_method' => Order::METHOD_COD,
+
+                'order_status' => Order::STATUS_PENDING,
+
+                'placed_at' => now(),
             ]);
 
             /*
             |--------------------------------------------------------------------------
-            | Create Order Item Attributes
+            | Create Order Items
             |--------------------------------------------------------------------------
             */
-            foreach ($cart->cartAttributes as $attribute) {
+            foreach ($cartItems as $cart) {
 
-                $orderItem->attributes()->create([
-                    'attribute_id' => $attribute->attribute_id,
-                    'attribute_value_id' => $attribute->attribute_value_id,
-                    'attribute_name' => $attribute->attribute->name ?? null,
-                    'attribute_value' => $attribute->attributeValue->value ?? null,
+                /*
+                |--------------------------------------------------------------------------
+                | Product Variant Check
+                |--------------------------------------------------------------------------
+                */
+                if (!$cart->productVariant) {
+
+                    throw new \Exception(
+                        $cart->product_name
+                        . ' variant not found'
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Stock Check
+                |--------------------------------------------------------------------------
+                */
+                $availableStock = $cart->productVariant
+                    ->stocks
+                    ->sum('stock');
+
+                if ($cart->quantity > $availableStock) {
+
+                    throw new \Exception(
+                        $cart->product_name
+                        . ' stock unavailable'
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Variant Price
+                |--------------------------------------------------------------------------
+                */
+                $price = $cart->productVariant
+                    ->final_price ?? 0;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Order Item
+                |--------------------------------------------------------------------------
+                */
+                $orderItem = $order->items()->create([
+
+                    'product_id' => $cart->product_id,
+
+                    'product_variant_id' => $cart->product_variant_id,
+
+                    'product_name' => $cart->product_name,
+
+                    'sku' => $cart->productVariant->sku ?? null,
+
+                    'quantity' => $cart->quantity,
+
+                    'mrp' => $cart->productVariant->mrp ?? 0,
+
+                    'selling_price' => $cart->productVariant->selling_price ?? 0,
+
+                    'discount_amount' => $cart->productVariant->discount ?? 0,
+
+                    'final_price' => $price,
+
+                    'subtotal' => (
+                        $price * $cart->quantity
+                    ),
+
+                    'loyalty_points' => 0,
+
+                    'product_snapshot' => [
+                        'product_name' => $cart->product_name,
+
+                        'sku' => $cart->productVariant->sku ?? null,
+
+                        'mrp' => $cart->productVariant->mrp ?? 0,
+
+                        'selling_price' => $cart->productVariant->selling_price ?? 0,
+
+                        'final_price' => $price,
+                    ],
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Order Item Attributes
+                |--------------------------------------------------------------------------
+                */
+                foreach ($cart->cartAttributes as $attribute) {
+
+                    $orderItem->attributes()->create([
+
+                        'attribute_id' => $attribute->attribute_id,
+
+                        'attribute_value_id' => $attribute->attribute_value_id,
+
+                        'attribute_name' => $attribute->attribute_name,
+
+                        'attribute_value' => $attribute->attribute_value,
+                    ]);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Deduct Stock
+                |--------------------------------------------------------------------------
+                */
+                $remainingQty = $cart->quantity;
+
+                foreach (
+                    $cart->productVariant->stocks
+                    as $stock
+                ) {
+
+                    if ($remainingQty <= 0) {
+                        break;
+                    }
+
+                    if ($stock->stock <= 0) {
+                        continue;
+                    }
+
+                    $deductQty = min(
+                        $stock->stock,
+                        $remainingQty
+                    );
+
+                    $stock->decrement(
+                        'stock',
+                        $deductQty
+                    );
+
+                    $remainingQty -= $deductQty;
+                }
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Deduct Stock
+            | Create Initial Status History
             |--------------------------------------------------------------------------
             */
-            foreach ($cart->productVariant->stocks as $stock) {
+            $order->statusHistories()->create([
 
-                if ($stock->stock >= $cart->quantity) {
+                'status' => Order::STATUS_PENDING,
 
-                    $stock->decrement(
-                        'stock',
-                        $cart->quantity
-                    );
+                'remarks' => 'Order placed successfully',
 
-                    break;
-                }
-            }
+                'changed_by' => $userId,
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Clear Cart
+            |--------------------------------------------------------------------------
+            */
+            Cart::where(
+                'user_id',
+                $userId
+            )->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Commit Transaction
+            |--------------------------------------------------------------------------
+            */
+            DB::commit();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Relationships
+            |--------------------------------------------------------------------------
+            */
+            $order->load([
+                'items',
+                'items.attributes',
+                'addresses',
+                'payments',
+                'statusHistories',
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success Response
+            |--------------------------------------------------------------------------
+            */
+            return response()->json([
+                'success' => true,
+                'message' => 'Order placed successfully',
+                'data' => new OrderResource($order),
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator
+                    ->errors()
+                    ->first(),
+
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+            ], 500);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Clear Cart
-        |--------------------------------------------------------------------------
-        */
-        Cart::where('user_id', $userId)->delete();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load Relationships
-        |--------------------------------------------------------------------------
-        */
-        $order->load([
-            'items',
-            'items.attributes',
-            'addresses',
-            'payments',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Success Response
-        |--------------------------------------------------------------------------
-        */
-        return response()->json([
-            'success' => true,
-            'message' => 'Order placed successfully',
-            'data' => new OrderResource($order),
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->validator->errors()->first(),
-            'errors' => $e->errors(),
-        ], 422);
-
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-            'line' => $e->getLine(),
-        ], 500);
     }
-}
+
 
     /**
      * Order List

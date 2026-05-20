@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Cart extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'business_category_id',
@@ -16,23 +19,17 @@ class Cart extends Model
         'attribute_hash',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
-
-    // public function user()
-    // {
-    //     return $this->belongsTo(
-    //         User::class,
-    //         'user_id'
-    //     );
-    // }
+    protected $casts = [
+        'user_id'              => 'integer',
+        'business_category_id' => 'integer',
+        'product_id'           => 'integer',
+        'product_variant_id'   => 'integer',
+        'quantity'             => 'integer',
+    ];
 
     /*
     |--------------------------------------------------------------------------
-    | Relationships
+    | Cart Attributes
     |--------------------------------------------------------------------------
     */
 
@@ -58,8 +55,6 @@ class Cart extends Model
         );
     }
 
-
-
     /*
     |--------------------------------------------------------------------------
     | Dynamic Product Resolver
@@ -73,6 +68,12 @@ class Cart extends Model
         ] ?? null;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Dynamic Product
+    |--------------------------------------------------------------------------
+    */
+
     public function product()
     {
         $modelClass = $this->getProductModelClass();
@@ -81,7 +82,45 @@ class Cart extends Model
             return null;
         }
 
-        return $modelClass::find($this->product_id);
+        return $modelClass::find(
+            $this->product_id
+        );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function getFinalPriceAttribute()
+    {
+        return $this->productVariant?->final_price ?? 0;
+    }
+
+    public function getSubtotalAttribute()
+    {
+        return (
+            $this->final_price
+            * $this->quantity
+        );
+    }
+
+    public function getTotalAttribute()
+    {
+        return $this->subtotal;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Variant Attributes Helper
+    |--------------------------------------------------------------------------
+    */
+
+    public function getVariantAttributesAttribute()
+    {
+        return $this->productVariant?->attributes ?? [];
+    }
+
 
 }
