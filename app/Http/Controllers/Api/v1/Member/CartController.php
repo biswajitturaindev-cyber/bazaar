@@ -64,12 +64,12 @@ class CartController extends Controller
         try {
 
             $request->validate([
-                'user_id'               => 'required',
-                'business_category_id' => 'required',
-                'product_id'           => 'required',
-                'product_variant_id'   => 'nullable',
-                'quantity'             => 'required|integer|min:1',
-                'attributes'           => 'required|array|min:1',
+                'user_id'               => 'required|integer',
+                'business_category_id'  => 'required',
+                'product_id'            => 'required',
+                'product_variant_id'    => 'nullable',
+                'quantity'              => 'required|integer|min:1',
+                'attributes'            => 'required|array|min:1',
             ]);
 
 
