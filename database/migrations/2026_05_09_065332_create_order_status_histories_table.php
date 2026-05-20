@@ -30,10 +30,8 @@ return new class extends Migration
 
             $table->text('remarks')->nullable();
 
-            $table->foreignId('changed_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+            $table->unsignedBigInteger('changed_by')->nullable();
+
 
             $table->timestamps();
         });
