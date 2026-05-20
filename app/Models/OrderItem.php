@@ -38,6 +38,8 @@ class OrderItem extends Model
      * Attribute Casting
      */
     protected $casts = [
+        'quantity'          => 'integer',
+
         'mrp'               => 'decimal:2',
         'selling_price'     => 'decimal:2',
         'discount_amount'   => 'decimal:2',
@@ -56,18 +58,16 @@ class OrderItem extends Model
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
-    }
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(
+            Order::class,
+            'order_id'
+        );
     }
 
     public function variant()
     {
         return $this->belongsTo(
-            ProductAttributeValue::class,
+            ProductVariant::class,
             'product_variant_id'
         );
     }
@@ -75,7 +75,27 @@ class OrderItem extends Model
     public function attributes()
     {
         return $this->hasMany(
-            OrderItemAttribute::class
+            OrderItemAttribute::class,
+            'order_item_id'
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function getTotalAttribute()
+    {
+        return (
+            $this->final_price
+            * $this->quantity
+        );
+    }
+
+    public function getProductAttributeDataAttribute()
+    {
+        return $this->variant?->attributes ?? [];
     }
 }
