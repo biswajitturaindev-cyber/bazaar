@@ -3,14 +3,55 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
+    use HasFactory;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Status
+    |--------------------------------------------------------------------------
+    */
+    const PAYMENT_PENDING  = 0;
+    const PAYMENT_PAID     = 1;
+    const PAYMENT_FAILED   = 2;
+    const PAYMENT_REFUNDED = 3;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Method
+    |--------------------------------------------------------------------------
+    */
+    const METHOD_WALLET = 0;
+    const METHOD_ONLINE = 1;
+    const METHOD_COD    = 2;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Order Status
+    |--------------------------------------------------------------------------
+    */
+    const STATUS_PENDING    = 0;
+    const STATUS_CONFIRMED  = 1;
+    const STATUS_PROCESSING = 2;
+    const STATUS_SHIPPED    = 3;
+    const STATUS_DELIVERED  = 4;
+    const STATUS_CANCELLED  = 5;
+
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'order_no',
+        'invoice_no',
+
+        'business_id',
+        'business_category_id',
+
         'user_id',
-        'billing_address_id',
-        'shipping_address_id',
+
         'total_items',
         'items_total',
         'discount_amount',
@@ -18,15 +59,36 @@ class Order extends Model
         'delivery_charge',
         'tax_amount',
         'grand_total',
+
         'loyalty_used',
         'loyalty_earned',
         'wallet_used',
         'online_paid',
+
         'payment_status',
         'payment_method',
+
         'order_status',
+
         'notes',
         'placed_at',
+    ];
+
+    /**
+     * Attribute Casting
+     */
+    protected $casts = [
+        'items_total'       => 'decimal:2',
+        'discount_amount'   => 'decimal:2',
+        'platform_charge'   => 'decimal:2',
+        'delivery_charge'   => 'decimal:2',
+        'tax_amount'        => 'decimal:2',
+        'grand_total'       => 'decimal:2',
+        'loyalty_used'      => 'decimal:2',
+        'loyalty_earned'    => 'decimal:2',
+        'wallet_used'       => 'decimal:2',
+        'online_paid'       => 'decimal:2',
+        'placed_at'         => 'datetime',
     ];
 
     /*
@@ -40,19 +102,16 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function billingAddress()
+    public function business()
     {
-        return $this->belongsTo(
-            UserAddress::class,
-            'billing_address_id'
-        );
+        return $this->belongsTo(Business::class);
     }
 
-    public function shippingAddress()
+    public function businessCategory()
     {
         return $this->belongsTo(
-            UserAddress::class,
-            'shipping_address_id'
+            BusinessCategory::class,
+            'business_category_id'
         );
     }
 
@@ -73,13 +132,48 @@ class Order extends Model
 
     public function statusHistories()
     {
-        return $this->hasMany(
-            OrderStatusHistory::class
-        );
+        return $this->hasMany(OrderStatusHistory::class);
     }
 
     public function shipment()
     {
         return $this->hasOne(Shipment::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getPaymentStatusTextAttribute()
+    {
+        return [
+            self::PAYMENT_PENDING  => 'Pending',
+            self::PAYMENT_PAID     => 'Paid',
+            self::PAYMENT_FAILED   => 'Failed',
+            self::PAYMENT_REFUNDED => 'Refunded',
+        ][$this->payment_status] ?? 'Unknown';
+    }
+
+    public function getPaymentMethodTextAttribute()
+    {
+        return [
+            self::METHOD_WALLET => 'Wallet',
+            self::METHOD_ONLINE => 'Online',
+            self::METHOD_COD    => 'COD',
+        ][$this->payment_method] ?? 'Unknown';
+    }
+
+    public function getOrderStatusTextAttribute()
+    {
+        return [
+            self::STATUS_PENDING    => 'Pending',
+            self::STATUS_CONFIRMED  => 'Confirmed',
+            self::STATUS_PROCESSING => 'Processing',
+            self::STATUS_SHIPPED    => 'Shipped',
+            self::STATUS_DELIVERED  => 'Delivered',
+            self::STATUS_CANCELLED  => 'Cancelled',
+        ][$this->order_status] ?? 'Unknown';
     }
 }

@@ -27,7 +27,6 @@ return new class extends Migration
             | Billing Address
             |--------------------------------------------------------------------------
             */
-            $table->unsignedBigInteger('billing_address_id')->nullable();
             $table->text('billing_address');
             $table->unsignedBigInteger('billing_city_id')->nullable();
             $table->unsignedBigInteger('billing_state_id')->nullable();

@@ -20,6 +20,23 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
             $table->string('order_no')->unique();
+            $table->string('invoice_no')->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Business
+            |--------------------------------------------------------------------------
+            */
+            $table->foreignId('business_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
+            $table->foreignId('business_category_id')
+                ->nullable()
+                ->constrained('business_categories')
+                ->nullOnDelete();
+
 
             $table->unsignedBigInteger('user_id');
 
@@ -51,33 +68,18 @@ return new class extends Migration
             | Payment
             |--------------------------------------------------------------------------
             */
-            $table->enum('payment_status', [
-                'Pending',
-                'Paid',
-                'Failed',
-                'Refunded',
-            ])->default('Pending');
+            $table->tinyInteger('payment_status')->default(0)->comment('0=Pending, 1=Paid, 2=Failed, 3=Refunded');
 
-            $table->enum('payment_method', [
-                'Wallet',
-                'Online',
-                'COD',
-                'Mixed',
-            ])->default('Online');
+            $table->tinyInteger('payment_method')->default(1)->comment('0=Wallet, 1=Online, 2=COD');
 
             /*
             |--------------------------------------------------------------------------
             | Order Status
             |--------------------------------------------------------------------------
             */
-            $table->enum('order_status', [
-                'Pending',
-                'Confirmed',
-                'Processing',
-                'Shipped',
-                'Delivered',
-                'Cancelled',
-            ])->default('Pending');
+            $table->tinyInteger('order_status')->default(0)->comment(
+                '0=Pending, 1=Confirmed, 2=Processing, 3=Shipped, 4=Delivered, 5=Cancelled'
+            );
 
             /*
             |--------------------------------------------------------------------------

@@ -20,24 +20,7 @@ return new class extends Migration
             | Order
             |--------------------------------------------------------------------------
             */
-            $table->foreignId('order_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Business
-            |--------------------------------------------------------------------------
-            */
-            $table->foreignId('business_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
-
-            $table->foreignId('business_category_id')
-                ->nullable()
-                ->constrained('business_categories')
-                ->nullOnDelete();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
 
             /*
             |--------------------------------------------------------------------------
@@ -53,8 +36,7 @@ return new class extends Migration
             | No foreign key because variant may later be deleted
             |--------------------------------------------------------------------------
             */
-            $table->unsignedBigInteger('product_variant_id')
-                ->nullable();
+            $table->foreignId('product_variant_id')->nullable()->constrained('product_attribute_values')->nullOnDelete();
 
             /*
             |--------------------------------------------------------------------------
@@ -63,52 +45,39 @@ return new class extends Migration
             */
             $table->string('product_name');
 
-            $table->string('sku')
-                ->nullable();
+            $table->string('sku')->nullable();
 
             /*
             |--------------------------------------------------------------------------
             | Quantity
             |--------------------------------------------------------------------------
             */
-            $table->integer('quantity')
-                ->default(1);
+            $table->smallInteger('quantity')->default(1);
 
             /*
             |--------------------------------------------------------------------------
             | Pricing
             |--------------------------------------------------------------------------
             */
-            $table->decimal('mrp', 12, 2)
-                ->default(0);
-
-            $table->decimal('selling_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('discount_amount', 12, 2)
-                ->default(0);
-
-            $table->decimal('final_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('subtotal', 12, 2)
-                ->default(0);
+            $table->decimal('mrp', 12, 2)->default(0);
+            $table->decimal('selling_price', 12, 2)->default(0);
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('final_price', 12, 2)->default(0);
+            $table->decimal('subtotal', 12, 2)->default(0);
 
             /*
             |--------------------------------------------------------------------------
             | Loyalty
             |--------------------------------------------------------------------------
             */
-            $table->decimal('loyalty_points', 12, 2)
-                ->default(0);
+            $table->decimal('loyalty_points', 12, 2)->default(0);
 
             /*
             |--------------------------------------------------------------------------
             | Product Snapshot JSON
             |--------------------------------------------------------------------------
             */
-            $table->json('product_snapshot')
-                ->nullable();
+            $table->json('product_snapshot')->nullable();
 
             $table->timestamps();
         });

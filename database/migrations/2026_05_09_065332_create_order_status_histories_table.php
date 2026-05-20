@@ -18,7 +18,15 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('status');
+            $table->tinyInteger('status')->default(0)->comment(
+                '0=Pending, 1=Confirmed, 2=Processing, 3=Shipped, 4=Delivered, 5=Cancelled'
+            );
+
+            $table->string('tracking_id')->nullable();
+
+            $table->unsignedBigInteger('delivery_partner_id')->nullable();
+            $table->string('delivery_partner_name')->nullable();
+            // Example: Delhivery, BlueDart, DTDC, Xpressbees
 
             $table->text('remarks')->nullable();
 
