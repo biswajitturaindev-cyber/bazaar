@@ -10,6 +10,7 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Models\CartAttribute;
+use Illuminate\Support\Facades\Crypt;
 
 class CartController extends Controller
 {
@@ -71,10 +72,12 @@ class CartController extends Controller
                 'attributes'           => 'required|array|min:1',
             ]);
 
-            $userId = decodeIdOrFail(
-                $request->user_id,
-                'Invalid user ID'
-            );
+            // $userId = decodeIdOrFail(
+            //     $request->user_id,
+            //     'Invalid user ID'
+            // );
+
+            $userId = Crypt::decryptString($request->user_id);
 
             $businessCategoryId = decodeIdOrFail(
                 $request->business_category_id,
