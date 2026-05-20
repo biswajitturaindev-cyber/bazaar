@@ -72,12 +72,13 @@ class CartController extends Controller
                 'attributes'           => 'required|array|min:1',
             ]);
 
+
             // $userId = decodeIdOrFail(
             //     $request->user_id,
             //     'Invalid user ID'
             // );
 
-            $userId = Crypt::decryptString($request->user_id);
+            $userId = $request->user_id;
 
             $businessCategoryId = decodeIdOrFail(
                 $request->business_category_id,
