@@ -29,7 +29,7 @@ class OrderResource extends JsonResource
 
             'invoice_no' => $this->invoice_no,
 
-            'business_id' => $this->business_id,
+            'business_id' => Hashids::encode($this->business_id),
 
             'business_category_id' => $this->business_category_id,
 
