@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -108,7 +109,71 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $orderId = decodeIdOrFail(
+                $id,
+                'Invalid order ID'
+            );
+
+            $data = $request->validate([
+                'order_status' => 'required|in:0,1,2,3,4,5',
+                'remarks' => 'nullable|string',
+                'tracking_id' => 'nullable|string',
+                'delivery_partner_id' => 'nullable|integer',
+                'delivery_partner_name' => 'nullable|string',
+            ]);
+
+            $order = Order::findOrFail($orderId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Order
+            |--------------------------------------------------------------------------
+            */
+
+            $order->update([
+                'order_status' => $data['order_status']
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Status History
+            |--------------------------------------------------------------------------
+            */
+
+            OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'status' => $data['order_status'],
+                'tracking_id' => $data['tracking_id'] ?? null,
+                'delivery_partner_id' => $data['delivery_partner_id'] ?? null,
+                'delivery_partner_name' => $data['delivery_partner_name'] ?? null,
+                'remarks' => $data['remarks'] ?? null,
+            ]);
+
+            $order->load([
+                'business',
+                'businessCategory',
+                'items',
+                'items.attributes',
+                'addresses',
+                'statusHistories',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated successfully',
+                'data' => new OrderResource($order),
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update order',
+                'error' => $e->getMessage()
+
+            ], 500);
+        }
     }
 
     /**
