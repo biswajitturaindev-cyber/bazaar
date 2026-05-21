@@ -116,23 +116,24 @@ class CartResource extends JsonResource
             | User Details
             |--------------------------------------------------------------------------
             */
+            'user' => $this->user_id,
 
-            'user' => [
+            // 'user' => [
 
-                'user_id' => $this->user
-                    ? Hashids::encode($this->user->id)
-                    : null,
+            //     'user_id' => $this->user
+            //         ? Hashids::encode($this->user->id)
+            //         : null,
 
-                'name' => $this->user->name ?? null,
+            //     'name' => $this->user->name ?? null,
 
-                'email' => $this->user->email ?? null,
+            //     'email' => $this->user->email ?? null,
 
-                'mobile' => $this->user->mobile ?? null,
+            //     'mobile' => $this->user->mobile ?? null,
 
-                'profile_image' => !empty($this->user?->image)
-                    ? asset('storage/' . $this->user->image)
-                    : null,
-            ],
+            //     'profile_image' => !empty($this->user?->image)
+            //         ? asset('storage/' . $this->user->image)
+            //         : null,
+            // ],
 
             /*
             |--------------------------------------------------------------------------
