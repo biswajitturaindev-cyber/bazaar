@@ -10,6 +10,7 @@ use App\Models\OrderItemAttribute;
 use App\Models\Cart;
 use Illuminate\Support\Str;
 use App\Http\Resources\OrderResource;
+use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -142,10 +143,38 @@ class OrderController extends Controller
             | Create Order
             |--------------------------------------------------------------------------
             */
+            $firstCartItem = $cartItems->first();
+
+            $modelMap = config('product.model_map');
+
+            $modelClass = $modelMap[
+                $firstCartItem->business_category_id
+            ] ?? null;
+
+            if (!$modelClass) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid business category'
+                ], 422);
+            }
+
+            $product = $modelClass::find(
+                $firstCartItem->product_id
+            );
+
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+
+
             $order = Order::create([
                 'order_no' => $orderNo,
                 'invoice_no' => $invoiceNo,
                 'user_id' => $userId,
+                'business_id' => $product->business_id,
                 'business_category_id' => $cartItems->first()->business_category_id,
                 'total_items' => $totalItems,
                 'items_total' => $itemsTotal,
@@ -210,6 +239,17 @@ class OrderController extends Controller
                 | Create Order Item
                 |--------------------------------------------------------------------------
                 */
+                $productImage = ProductImage::where(
+                    'product_id',
+                    $cart->product_id
+                )
+                ->where(
+                    'business_category_id',
+                    $cart->business_category_id
+                )
+                ->first();
+
+
                 $orderItem = $order->items()->create([
 
                     'product_id' => $cart->product_id,
@@ -231,6 +271,7 @@ class OrderController extends Controller
                         'mrp' => $cart->productVariant->mrp ?? 0,
                         'selling_price' => $cart->productVariant->selling_price ?? 0,
                         'final_price' => $price,
+                        'image' => $productImage?->image_medium,
                     ],
                 ]);
 
