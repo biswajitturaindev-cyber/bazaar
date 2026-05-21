@@ -11,38 +11,67 @@ class KycDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+
             'id' => Hashids::encode($this->id),
             'business_id' => Hashids::encode($this->business_id),
-
-            // Documents with status
-            'owner_photo' => $this->document($this->owner_photo, $this->owner_photo_status),
-            'shop_photo' => $this->document($this->shop_photo, $this->shop_photo_status),
-            'pan_card' => $this->document($this->pan_card, $this->pan_card_status),
-            'gst_certificate' => $this->document($this->gst_certificate, $this->gst_certificate_status),
-            'trade_license' => $this->document($this->trade_license, $this->trade_license_status),
-            'fssai_license' => $this->document($this->fssai_license, $this->fssai_license_status),
-            'address_proof' => $this->document($this->address_proof, $this->address_proof_status),
-
+            'owner_photo' => $this->document(
+                $this->owner_photo,
+                null,
+                $this->owner_photo_status
+            ),
+            'shop_photo' => $this->document(
+                $this->shop_photo,
+                null,
+                $this->shop_photo_status
+            ),
+            'pan_card' => $this->document(
+                $this->pan_card,
+                $this->pan_no,
+                $this->pan_card_status
+            ),
+            'gst_certificate' => $this->document(
+                $this->gst_certificate,
+                $this->gst_no,
+                $this->gst_certificate_status
+            ),
+            'trade_license' => $this->document(
+                $this->trade_license,
+                $this->trade_license_no,
+                $this->trade_license_status
+            ),
+            'fssai_license' => $this->document(
+                $this->fssai_license,
+                $this->fssai_license_no,
+                $this->fssai_license_status
+            ),
+            'address_proof' => $this->document(
+                $this->address_proof,
+                null,
+                $this->address_proof_status
+            ),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }
 
     /**
-     *  Format document with status
+     * Format document response
      */
-    private function document($path, $status)
+    private function document($path, $number, $status)
     {
         $status = (int) $status;
 
         return [
-            'url' => $path ? asset('storage/' . $path) : null,
+            'url' => $path
+                ? asset('storage/' . $path)
+                : null,
+            'number' => $number,
             'status' => $status,
             'status_label' => $this->statusLabel($status),
         ];
     }
 
     /**
-     * Status Label Helper
+     * Status Label
      */
     private function statusLabel($status)
     {

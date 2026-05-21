@@ -15,12 +15,16 @@ class KycDetail extends Model
         'shop_photo_status',
         'pan_card',
         'pan_card_status',
+        'pan_no',
         'gst_certificate',
         'gst_certificate_status',
+        'gst_no',
         'trade_license',
         'trade_license_status',
+        'trade_license_no',
         'fssai_license',
         'fssai_license_status',
+        'fssai_license_no',
         'address_proof',
         'address_proof_status'
     ];

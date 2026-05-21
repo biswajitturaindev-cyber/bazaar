@@ -26,15 +26,19 @@ return new class extends Migration
 
             $table->string('pan_card');
             $table->tinyInteger('pan_card_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
+            $table->string('pan_no');
 
             $table->string('gst_certificate')->nullable();
             $table->tinyInteger('gst_certificate_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
+            $table->string('gst_no');
 
             $table->string('trade_license')->nullable();
             $table->tinyInteger('trade_license_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
+            $table->string('trade_license_no');
 
             $table->string('fssai_license')->nullable();
             $table->tinyInteger('fssai_license_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
+            $table->string('fssai_license_no');
 
             $table->string('address_proof')->nullable();
             $table->tinyInteger('address_proof_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
