@@ -17,48 +17,119 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => Hashids::encode($this->id),
+
             'order_no' => $this->order_no,
 
-            'status' => $this->status,
-            'status_label' => match ($this->status) {
-                'pending' => 'Pending',
-                'processing' => 'Processing',
-                'delivered' => 'Delivered',
-                'cancelled' => 'Cancelled',
-                default => 'Unknown'
-            },
+            /*
+            |--------------------------------------------------------------------------
+            | Order Status
+            |--------------------------------------------------------------------------
+            */
 
-            'sub_total' => (float) $this->sub_total,
-            'handling_charge' => (float) $this->handling_charge,
+            'status' => $this->order_status,
+
+            'status_label' => $this->order_status_text,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Amounts
+            |--------------------------------------------------------------------------
+            */
+
+            'sub_total' => (float) $this->items_total,
+
+            'handling_charge' => (float) $this->platform_charge,
+
             'delivery_charge' => (float) $this->delivery_charge,
+
             'grand_total' => (float) $this->grand_total,
 
-            'total_items' => $this->total_items,
+            /*
+            |--------------------------------------------------------------------------
+            | Items
+            |--------------------------------------------------------------------------
+            */
 
-            'items' => $this->items->map(function ($item) {
-                return [
-                    'product_name' => $item->product_name,
+            'total_items' => (int) $this->total_items,
 
-                    // FULL IMAGE URL
-                    'image' => $item->image
-                        ? asset('storage/products/' . $item->image)
-                        : null,
+            'items' => $this->whenLoaded('items', function () {
 
-                    'quantity' => $item->quantity,
-                    'price' => (float) $item->price,
-                    'total' => (float) $item->total,
+                return $this->items->map(function ($item) {
 
-                    'attributes' => $item->attributes->map(function ($attr) {
-                        return [
-                            'name' => $attr->attribute_name,
-                            'value' => $attr->attribute_value,
-                            'price' => (float) $attr->price,
-                        ];
-                    })
-                ];
+                    return [
+
+                        'id' => Hashids::encode($item->id),
+
+                        'product_name' => $item->product_name,
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Product Image
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'image' => $item->product_snapshot['image'] ?? null,
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Pricing
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'quantity' => (int) $item->quantity,
+
+                        'price' => (float) $item->final_price,
+
+                        'total' => (float) $item->subtotal,
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Attributes
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'attributes' => $item->attributes
+                            ->unique(function ($attr) {
+                                return $attr->attribute_id . '-' . $attr->attribute_value_id;
+                            })
+                            ->values()
+                            ->map(function ($attr) {
+
+                                return [
+                                    'name' => $attr->attribute_name,
+
+                                    'value' => $attr->attribute_value,
+                                ];
+                            }),
+                    ];
+                });
             }),
 
-            'created_at' => optional($this->created_at)->format('Y-m-d H:i:s')
+            /*
+            |--------------------------------------------------------------------------
+            | Address
+            |--------------------------------------------------------------------------
+            */
+
+            'addresses' => $this->whenLoaded('addresses'),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Status History
+            |--------------------------------------------------------------------------
+            */
+
+            'status_histories' => $this->whenLoaded('statusHistories'),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Date
+            |--------------------------------------------------------------------------
+            */
+
+            'created_at' => optional(
+                $this->created_at
+            )->format('Y-m-d H:i:s'),
         ];
     }
 }
