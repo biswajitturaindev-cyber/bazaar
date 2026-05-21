@@ -79,6 +79,17 @@ class KycDetailController extends Controller
                 'fssai_license'   => 'nullable|file',
                 'address_proof'   => 'nullable|file',
 
+                /*
+                |--------------------------------------------------------------------------
+                | Document Numbers
+                |--------------------------------------------------------------------------
+                */
+
+                'pan_no' => 'required|string|max:255',
+                'gst_no' => 'nullable|string|max:255',
+                'trade_license_no' => 'nullable|string|max:255',
+                'fssai_license_no' => 'nullable|string|max:255',
+
                 // statuses
                 'owner_photo_status'     => 'nullable|in:0,1,2',
                 'shop_photo_status'      => 'nullable|in:0,1,2',
@@ -193,6 +204,16 @@ class KycDetailController extends Controller
                 'trade_license' => 'nullable|file',
                 'fssai_license' => 'nullable|file',
                 'address_proof' => 'nullable|file',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Document Numbers
+                |--------------------------------------------------------------------------
+                */
+                'pan_no' => 'nullable|string|max:255',
+                'gst_no' => 'nullable|string|max:255',
+                'trade_license_no' => 'nullable|string|max:255',
+                'fssai_license_no' => 'nullable|string|max:255',
 
                 // statuses
                 'owner_photo_status' => 'nullable|in:0,1,2',
