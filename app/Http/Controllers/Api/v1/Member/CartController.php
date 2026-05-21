@@ -19,18 +19,15 @@ class CartController extends Controller
      */
     public function index(Request $request)
     {
+
         try {
             $request->validate([
                 'user_id' => 'required',
             ]);
 
-            $userId = decodeIdOrFail(
-                $request->user_id,
-                'Invalid user ID'
-            );
+            $userId = $request->user_id;
 
             $cart = Cart::with([
-                'user',
                 'cartAttributes',
                 'cartAttributes.attribute',
                 'cartAttributes.attributeValue',
