@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
 use App\Http\Controllers\Api\MasterProductController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\StoreOperationalController;
@@ -175,4 +176,10 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('vendor-banners', VendorBannerController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Orders Master
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('orders', OrderController::class);
 });
