@@ -257,7 +257,6 @@ class CartController extends Controller
             |--------------------------------------------------------------------------
             */
             $cartItem = Cart::with([
-                    'user',
                     'productVariant',
                     'productVariant.stocks',
                     'cartAttributes',
@@ -317,7 +316,6 @@ class CartController extends Controller
             |--------------------------------------------------------------------------
             */
             $cartItem->load([
-                'user',
                 'productVariant',
                 'productVariant.stocks',
                 'cartAttributes',
