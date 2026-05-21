@@ -16,9 +16,38 @@ class OrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+
+            /*
+            |--------------------------------------------------------------------------
+            | Basic Information
+            |--------------------------------------------------------------------------
+            */
+
             'id' => Hashids::encode($this->id),
 
             'order_no' => $this->order_no,
+
+            'invoice_no' => $this->invoice_no,
+
+            'business_id' => $this->business_id,
+
+            'business_category_id' => $this->business_category_id,
+
+            'user_id' => $this->user_id,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Payment Information
+            |--------------------------------------------------------------------------
+            */
+
+            'payment_status' => $this->payment_status,
+
+            'payment_status_label' => $this->payment_status_text,
+
+            'payment_method' => $this->payment_method,
+
+            'payment_method_label' => $this->payment_method_text,
 
             /*
             |--------------------------------------------------------------------------
@@ -26,9 +55,9 @@ class OrderResource extends JsonResource
             |--------------------------------------------------------------------------
             */
 
-            'status' => $this->order_status,
+            'order_status' => $this->order_status,
 
-            'status_label' => $this->order_status_text,
+            'order_status_label' => $this->order_status_text,
 
             /*
             |--------------------------------------------------------------------------
@@ -36,21 +65,47 @@ class OrderResource extends JsonResource
             |--------------------------------------------------------------------------
             */
 
-            'sub_total' => (float) $this->items_total,
+            'total_items' => (int) $this->total_items,
 
-            'handling_charge' => (float) $this->platform_charge,
+            'items_total' => (float) $this->items_total,
+
+            'discount_amount' => (float) $this->discount_amount,
+
+            'platform_charge' => (float) $this->platform_charge,
 
             'delivery_charge' => (float) $this->delivery_charge,
 
+            'tax_amount' => (float) $this->tax_amount,
+
             'grand_total' => (float) $this->grand_total,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Loyalty / Wallet
+            |--------------------------------------------------------------------------
+            */
+
+            'loyalty_used' => (float) $this->loyalty_used,
+
+            'loyalty_earned' => (float) $this->loyalty_earned,
+
+            'wallet_used' => (float) $this->wallet_used,
+
+            'online_paid' => (float) $this->online_paid,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Notes
+            |--------------------------------------------------------------------------
+            */
+
+            'notes' => $this->notes,
 
             /*
             |--------------------------------------------------------------------------
             | Items
             |--------------------------------------------------------------------------
             */
-
-            'total_items' => (int) $this->total_items,
 
             'items' => $this->whenLoaded('items', function () {
 
@@ -60,7 +115,13 @@ class OrderResource extends JsonResource
 
                         'id' => Hashids::encode($item->id),
 
+                        'product_id' => $item->product_id,
+
+                        'product_variant_id' => $item->product_variant_id,
+
                         'product_name' => $item->product_name,
+
+                        'sku' => $item->sku,
 
                         /*
                         |--------------------------------------------------------------------------
@@ -68,19 +129,29 @@ class OrderResource extends JsonResource
                         |--------------------------------------------------------------------------
                         */
 
-                        'image' => $item->product_snapshot['image'] ?? null,
+                        'image' => isset($item->product_snapshot['image'])
+                                    ? asset('storage/' . $item->product_snapshot['image'])
+                                    : null,
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Pricing
+                        | Quantity & Pricing
                         |--------------------------------------------------------------------------
                         */
 
                         'quantity' => (int) $item->quantity,
 
-                        'price' => (float) $item->final_price,
+                        'mrp' => (float) $item->mrp,
 
-                        'total' => (float) $item->subtotal,
+                        'selling_price' => (float) $item->selling_price,
+
+                        'discount_amount' => (float) $item->discount_amount,
+
+                        'final_price' => (float) $item->final_price,
+
+                        'subtotal' => (float) $item->subtotal,
+
+                        'loyalty_points' => (float) $item->loyalty_points,
 
                         /*
                         |--------------------------------------------------------------------------
@@ -96,39 +167,84 @@ class OrderResource extends JsonResource
                             ->map(function ($attr) {
 
                                 return [
+
+                                    'attribute_id' => $attr->attribute_id,
+
+                                    'attribute_value_id' => $attr->attribute_value_id,
+
                                     'name' => $attr->attribute_name,
 
                                     'value' => $attr->attribute_value,
                                 ];
                             }),
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Product Snapshot
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'product_snapshot' => $item->product_snapshot,
                     ];
                 });
             }),
 
             /*
             |--------------------------------------------------------------------------
-            | Address
+            | Addresses
             |--------------------------------------------------------------------------
             */
 
-            'addresses' => $this->whenLoaded('addresses'),
+            'addresses' => $this->whenLoaded(
+                'addresses'
+            ),
 
             /*
             |--------------------------------------------------------------------------
-            | Status History
+            | Status Histories
             |--------------------------------------------------------------------------
             */
 
-            'status_histories' => $this->whenLoaded('statusHistories'),
+            'status_histories' => $this->whenLoaded(
+                'statusHistories'
+            ),
 
             /*
             |--------------------------------------------------------------------------
-            | Date
+            | Business
             |--------------------------------------------------------------------------
             */
+
+            'business' => $this->whenLoaded(
+                'business'
+            ),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Business Category
+            |--------------------------------------------------------------------------
+            */
+
+            'business_category' => $this->whenLoaded(
+                'businessCategory'
+            ),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dates
+            |--------------------------------------------------------------------------
+            */
+
+            'placed_at' => optional(
+                $this->placed_at
+            )->format('Y-m-d H:i:s'),
 
             'created_at' => optional(
                 $this->created_at
+            )->format('Y-m-d H:i:s'),
+
+            'updated_at' => optional(
+                $this->updated_at
             )->format('Y-m-d H:i:s'),
         ];
     }
