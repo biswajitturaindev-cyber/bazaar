@@ -24,15 +24,10 @@ class OrderResource extends JsonResource
             */
 
             'id' => Hashids::encode($this->id),
-
             'order_no' => $this->order_no,
-
             'invoice_no' => $this->invoice_no,
-
             'business_id' => Hashids::encode($this->business_id),
-
             'business_category_id' => $this->business_category_id,
-
             'user_id' => $this->user_id,
 
             /*
@@ -42,11 +37,8 @@ class OrderResource extends JsonResource
             */
 
             'payment_status' => $this->payment_status,
-
             'payment_status_label' => $this->payment_status_text,
-
             'payment_method' => $this->payment_method,
-
             'payment_method_label' => $this->payment_method_text,
 
             /*
@@ -56,7 +48,6 @@ class OrderResource extends JsonResource
             */
 
             'order_status' => $this->order_status,
-
             'order_status_label' => $this->order_status_text,
 
             /*
@@ -66,17 +57,11 @@ class OrderResource extends JsonResource
             */
 
             'total_items' => (int) $this->total_items,
-
             'items_total' => (float) $this->items_total,
-
             'discount_amount' => (float) $this->discount_amount,
-
             'platform_charge' => (float) $this->platform_charge,
-
             'delivery_charge' => (float) $this->delivery_charge,
-
             'tax_amount' => (float) $this->tax_amount,
-
             'grand_total' => (float) $this->grand_total,
 
             /*
@@ -86,11 +71,8 @@ class OrderResource extends JsonResource
             */
 
             'loyalty_used' => (float) $this->loyalty_used,
-
             'loyalty_earned' => (float) $this->loyalty_earned,
-
             'wallet_used' => (float) $this->wallet_used,
-
             'online_paid' => (float) $this->online_paid,
 
             /*
@@ -114,13 +96,9 @@ class OrderResource extends JsonResource
                     return [
 
                         'id' => Hashids::encode($item->id),
-
                         'product_id' => $item->product_id,
-
                         'product_variant_id' => $item->product_variant_id,
-
                         'product_name' => $item->product_name,
-
                         'sku' => $item->sku,
 
                         /*
@@ -140,17 +118,11 @@ class OrderResource extends JsonResource
                         */
 
                         'quantity' => (int) $item->quantity,
-
                         'mrp' => (float) $item->mrp,
-
                         'selling_price' => (float) $item->selling_price,
-
                         'discount_amount' => (float) $item->discount_amount,
-
                         'final_price' => (float) $item->final_price,
-
                         'subtotal' => (float) $item->subtotal,
-
                         'loyalty_points' => (float) $item->loyalty_points,
 
                         /*
