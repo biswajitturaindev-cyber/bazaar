@@ -45,8 +45,7 @@ Route::prefix('member')->middleware('member.api')->group(function () {
 
     // Auth
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-
+    
     // Business
     Route::get('/business-categories', [BusinessCategoryController::class, 'index']);
     Route::get('/business-subcategories', [BusinessSubCategoryController::class, 'index']);

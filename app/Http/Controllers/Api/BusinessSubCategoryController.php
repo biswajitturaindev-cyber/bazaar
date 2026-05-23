@@ -28,7 +28,7 @@ class BusinessSubCategoryController extends Controller
 
         // Filter
         if ($request->business_category_id) {
-            $query->where('business_category_id', $request->business_category_id);
+            $query->where('business_category_id', Hashids::decode($request->business_category_id)[0]);
         }
 
         $subcategories = $query->latest()->paginate(10);

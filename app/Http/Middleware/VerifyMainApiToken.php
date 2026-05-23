@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class VerifyMemberApiToken
+class VerifyMainApiToken
 {
 
     public function handle(Request $request, Closure $next): Response
@@ -21,7 +21,7 @@ class VerifyMemberApiToken
             ], 401);
         }
 
-        $expectedToken = config('services.member_api.token');
+        $expectedToken = config('services.mainpanel_api.token');
 
         if (blank($expectedToken)) {
 
