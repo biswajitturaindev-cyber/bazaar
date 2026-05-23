@@ -34,5 +34,8 @@ return [
     'member_api' => [ 
         'token' => env('MEMBER_API_TOKEN')
     ],
+    'mainpanel_api' => [ 
+        'token' => env('MAIN_PANEL_API_TOKEN')
+    ],
 
 ];

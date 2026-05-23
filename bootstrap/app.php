@@ -20,10 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'member.api' => \App\Http\Middleware\VerifyMemberApiToken::class,
+            'main.api'   => \App\Http\Middleware\VerifyMainApiToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // ✅ Handle API 404 (Route not found)
+        
         $exceptions->render(function (NotFoundHttpException $e, $request) {
 
             if ($request->is('api/*')) {
@@ -34,7 +35,6 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // ✅ Handle all other API errors
         $exceptions->render(function (Throwable $e, $request) {
 
             if ($request->is('api/*')) {

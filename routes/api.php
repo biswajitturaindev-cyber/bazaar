@@ -183,3 +183,11 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::resource('orders', OrderController::class);
 });
+
+Route::prefix('main')->middleware('main.api')->group(function () {
+    
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::apiResource('business-categories', BusinessCategoryController::class);
+    Route::apiResource('business-subcategories', BusinessSubCategoryController::class);
+    
+});
