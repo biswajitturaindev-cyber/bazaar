@@ -29,6 +29,7 @@ class UserResource extends JsonResource
             'wallet3' => $this->wallet3,
 
             'kyc_status' => $this->statusLabel($this->kyc_status),
+            'profile_status' => $this->profileStatusLabel($this->profile_status),
 
             'business' => new BusinessResource(
                 $this->whenLoaded('business')
@@ -48,4 +49,16 @@ class UserResource extends JsonResource
             default => 'not submitted',
         };
     }
+
+    /**
+     * Profile Status Label
+     */
+    private function profileStatusLabel($status)
+    {
+        return match ((int) $status) {
+            1 => 'submitted',
+            default => 'incomplete',
+        };
+    }
+
 }

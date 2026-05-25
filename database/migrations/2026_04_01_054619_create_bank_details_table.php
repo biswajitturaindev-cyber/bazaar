@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('account_number');
             $table->string('ifsc_code');
             $table->string('upi_id')->nullable();
+            $table->string('qr_code')->nullable();
 
             $table->string('cancelled_cheque');
 

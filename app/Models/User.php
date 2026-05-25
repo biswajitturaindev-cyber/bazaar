@@ -30,7 +30,8 @@ class User extends Authenticatable
         'wallet1',
         'wallet2',
         'wallet3',
-        'kyc_status'
+        'kyc_status',
+        'profile_status'
     ];
 
     /**

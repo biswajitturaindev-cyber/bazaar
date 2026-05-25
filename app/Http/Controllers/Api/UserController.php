@@ -83,6 +83,7 @@ class UserController extends Controller
                 'wallet1' => $request->wallet1,
                 'wallet2' => $request->wallet2,
                 'wallet3' => $request->wallet3,
+                'profile_status' => $request->profile_status,
             ]);
 
             // Update Password if exists

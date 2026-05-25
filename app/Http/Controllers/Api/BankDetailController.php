@@ -61,6 +61,7 @@ class BankDetailController extends Controller
                 'account_number' => 'required',
                 'ifsc_code' => 'required',
                 'upi_id' => 'nullable',
+                'qr_code' => 'nullable',
                 'cancelled_cheque' => 'required|file',
             ]);
 
@@ -166,6 +167,7 @@ class BankDetailController extends Controller
                 'account_number' => 'required',
                 'ifsc_code' => 'required',
                 'upi_id' => 'nullable',
+                'qr_code' => 'nullable',
                 'cancelled_cheque' => 'nullable|file',
             ]);
 
