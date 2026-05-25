@@ -29,6 +29,7 @@ return new class extends Migration
 
             $table->tinyInteger('status')->default(1)->index()->comment('1=active, 0=inactive');
             $table->tinyInteger('kyc_status')->default(0)->index()->comment('0=not submitted, 1=approved, 2=pending, 3=cancel');
+            $table->tinyInteger('profile_status')->default(0)->index()->comment('0=incomplete, 1=submitted');
 
             $table->rememberToken();
             $table->timestamps();

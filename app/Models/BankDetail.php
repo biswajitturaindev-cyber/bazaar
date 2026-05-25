@@ -14,6 +14,7 @@ class BankDetail extends Model
         'account_number',
         'ifsc_code',
         'upi_id',
+        'qr_code',
         'cancelled_cheque',
     ];
 

@@ -23,6 +23,7 @@ class BankDetailResource extends JsonResource
             'account_number' => $this->account_number,
             'ifsc_code' => $this->ifsc_code,
             'upi_id' => $this->upi_id,
+            'qr_code' => $this->qr_code,
 
             'cancelled_cheque' => $this->cancelled_cheque
                 ? asset('storage/' . $this->cancelled_cheque)
