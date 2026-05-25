@@ -61,7 +61,7 @@ class BankDetailController extends Controller
                 'account_number' => 'required',
                 'ifsc_code' => 'required',
                 'upi_id' => 'nullable',
-                'qr_code' => 'nullable',
+                'qr_code' => 'nullable|file|image',
                 'cancelled_cheque' => 'required|file',
             ]);
 
@@ -93,6 +93,33 @@ class BankDetailController extends Controller
                 // save path in DB
                 $data['cancelled_cheque'] = "bank/{$filename}.webp";
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | QR Code Upload
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->hasFile('qr_code')) {
+
+                $file = $request->file('qr_code');
+
+                $filename = Str::uuid();
+
+                $image = $manager->read($file);
+
+                $resized = $image->cover(300, 300);
+
+                $webp = compressToTargetSize($resized, 60);
+
+                Storage::disk('public')->put(
+                    "qr-code/{$filename}.webp",
+                    $webp
+                );
+
+                $data['qr_code'] = "qr-code/{$filename}.webp";
+            }
+
 
             $bank = BankDetail::create($data);
 
@@ -167,7 +194,7 @@ class BankDetailController extends Controller
                 'account_number' => 'required',
                 'ifsc_code' => 'required',
                 'upi_id' => 'nullable',
-                'qr_code' => 'nullable',
+                'qr_code' => 'nullable|file|image',
                 'cancelled_cheque' => 'nullable|file',
             ]);
 
@@ -199,6 +226,32 @@ class BankDetailController extends Controller
                 // save path in DB
                 $data['cancelled_cheque'] = "bank/{$filename}.webp";
             }
+
+        /*
+        |--------------------------------------------------------------------------
+        | QR Code Upload
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->hasFile('qr_code')) {
+
+            $file = $request->file('qr_code');
+
+            $filename = Str::uuid();
+
+            $image = $manager->read($file);
+
+            $resized = $image->cover(300, 300);
+
+            $webp = compressToTargetSize($resized, 60);
+
+            Storage::disk('public')->put(
+                "qr-code/{$filename}.webp",
+                $webp
+            );
+
+            $data['qr_code'] = "qr-code/{$filename}.webp";
+        }
 
             $bank->update($data);
 
