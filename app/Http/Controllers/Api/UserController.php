@@ -67,6 +67,8 @@ class UserController extends Controller
 
             'agree_terms' => 'required',
             'confirm_info' => 'required',
+
+            'profile_status' => 'required',
         ]);
 
         DB::beginTransaction();
