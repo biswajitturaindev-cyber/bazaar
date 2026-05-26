@@ -31,7 +31,9 @@ return new class extends Migration
 
             $table->boolean('is_primary')->default(false);
 
-            $table->enum('variant_status', ['active', 'inactive'])->default('active');
+            $table->tinyInteger('variant_status')
+                ->default(1)
+                ->comment('1 = Active, 0 = Inactive');
 
             $table->date('manufacture_date')->nullable();
             $table->date('expiry_date')->nullable();

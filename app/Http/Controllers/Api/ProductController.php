@@ -191,6 +191,7 @@ class ProductController extends Controller
 
 
                 'variants.*.stock' => 'nullable|integer',
+                'variants.*.variant_status' => 'nullable|integer',
                 'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
 
@@ -281,6 +282,8 @@ class ProductController extends Controller
 
                     'short_description' => $variantData['short_description'] ?? null,
                     'long_description' => $variantData['long_description'] ?? null,
+
+                    'variant_status' => $variantData['variant_status'] ?? null,
 
                     'manufacture_date' => $variantData['manufacture_date'] ?? null,
                     'expiry_date' => $variantData['expiry_date'] ?? null,
@@ -686,6 +689,7 @@ class ProductController extends Controller
                 'variants.*.final_price' => 'nullable|numeric',
                 'variants.*.stock' => 'nullable|integer',
                 'variants.*.manufacture_date' => 'nullable|date',
+                'variants.*.variant_status' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
 
                 'variants.*.short_description' => 'nullable|string|max:1000',
@@ -870,6 +874,7 @@ class ProductController extends Controller
                         'final_price' => $variantData['final_price'],
                         'short_description' => $variantData['short_description'] ?? null,
                         'long_description' => $variantData['long_description'] ?? null,
+                        'variant_status' => $variantData['variant_status'] ?? 0,
                         'manufacture_date' => $manufactureDate,
                         'expiry_date' => $expiryDate,
                         'is_primary' => !empty($variantData['is_primary']) ? true : false,
