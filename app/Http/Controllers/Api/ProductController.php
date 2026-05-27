@@ -690,7 +690,7 @@ class ProductController extends Controller
                 'variants.*.final_price' => 'nullable|numeric',
                 'variants.*.stock' => 'nullable|integer',
                 'variants.*.manufacture_date' => 'nullable|date',
-                'variants.*.variant_status' => 'nullable|date',
+                'variants.*.variant_status' => 'nullable|integer',
                 'variants.*.expiry_date' => 'nullable|date',
 
                 'variants.*.short_description' => 'nullable|string|max:1000',
