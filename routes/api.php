@@ -140,8 +140,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
      Route::apiResource('products', ProductController::class);
+     Route::patch('product-variants/{variant_id}/status', [ProductController::class, 'updateVariantStatus']);
      Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
-
     /*
     |--------------------------------------------------------------------------
     | Review Products
@@ -185,9 +185,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {
-    
+
     Route::post('/register', [AuthController::class, 'register']);
     Route::apiResource('business-categories', BusinessCategoryController::class);
     Route::apiResource('business-subcategories', BusinessSubCategoryController::class);
-    
+
 });
