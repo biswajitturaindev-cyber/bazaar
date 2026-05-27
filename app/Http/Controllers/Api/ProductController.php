@@ -1119,4 +1119,58 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function updateVariantStatus(Request $request, $variant_id)
+    {
+        $request->validate([
+            'variant_status' => 'required|in:0,1',
+            'stock' => 'nullable|numeric|min:0'
+        ]);
+
+        try {
+
+            // Decode Variant ID
+            $decode_variant_id = decodeIdOrFail($variant_id);
+
+            // Find Variant
+            $variant = ProductVariant::findOrFail($decode_variant_id);
+
+            // Update Variant Status
+            $variant->variant_status = $request->variant_status;
+            $variant->save();
+
+            // Update Vendor Stock
+            ProductVendorStock::where('product_variant_id', $variant->id)
+                ->update([
+                    'stock' => $request->variant_status == 0
+                        ? 0
+                        : ($request->stock ?? 100)
+                ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Variant status updated successfully',
+                'data' => [
+                    'variant_id' => $variant->id,
+                    'variant_status' => $variant->variant_status,
+                    'stock' => $request->variant_status == 0
+                        ? 0
+                        : ($request->stock ?? 100)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
+    }
+
 }
