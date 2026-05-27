@@ -278,7 +278,7 @@ class ProductController extends Controller
                     'cost_price' => $variantData['cost_price'] ?? null,
                     'selling_price' => $variantData['selling_price'] ?? null,
                     'discount' => $variantData['discount'] ?? 0,
-                    'final_price' => ($variantData['selling_price'] ?? $variantData['mrp']) - ($variantData['discount'] ?? 0),
+                    'final_price' => $variantData['final_price'] ?? null,
 
                     'short_description' => $variantData['short_description'] ?? null,
                     'long_description' => $variantData['long_description'] ?? null,
