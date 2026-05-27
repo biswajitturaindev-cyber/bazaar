@@ -45,7 +45,7 @@ Route::prefix('member')->middleware('member.api')->group(function () {
 
     // Auth
     Route::post('/login', [AuthController::class, 'login']);
-    
+
     // Business
     Route::get('/business-categories', [BusinessCategoryController::class, 'index']);
     Route::get('/business-subcategories', [BusinessSubCategoryController::class, 'index']);
@@ -79,7 +79,7 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         | Cart
         |--------------------------------------------------------------------------
         */
-        Route::get('/cart', [CartController::class, 'index']);  
+        Route::get('/cart', [CartController::class, 'index']);
         Route::post('/cart', [CartController::class, 'store']);
         Route::put('/cart/{id}', [CartController::class, 'update']);
         Route::delete('/cart/{id}', [CartController::class, 'destroy']);
@@ -93,5 +93,9 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+        Route::get('orders/{encoded_id}/invoice', [OrderController::class, 'invoice']);
+
+
+
     //});
 });
