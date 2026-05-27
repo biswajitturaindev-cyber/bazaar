@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use App\Http\Resources\OrderResource;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -564,7 +565,6 @@ class OrderController extends Controller
             }
 
             $order = Order::create([
-
                 'order_no' => $orderNo,
                 'invoice_no' => $invoiceNo,
                 'business_id' => $product->business_id,
@@ -671,7 +671,6 @@ class OrderController extends Controller
                     ],
                 ]);
 
-
                 foreach ($cart->cartAttributes as $attribute) {
                     $orderItem->attributes()->create([
                         'attribute_id' => $attribute->attribute_id,
@@ -680,7 +679,6 @@ class OrderController extends Controller
                         'attribute_value' => $attribute->attribute_value,
                     ]);
                 }
-
 
                 $remainingQty = $cart->quantity;
                 foreach (
@@ -705,11 +703,8 @@ class OrderController extends Controller
                 }
             }
 
-
             $order->statusHistories()->create([
-
                 'status' => Order::STATUS_PENDING,
-
                 'remarks' => 'Order placed successfully',
             ]);
 
@@ -735,11 +730,8 @@ class OrderController extends Controller
             |--------------------------------------------------------------------------
             */
             return response()->json([
-
                 'success' => true,
-
                 'message' => 'Order placed successfully',
-
                 'data' => $order,
             ]);
 
@@ -748,34 +740,24 @@ class OrderController extends Controller
             DB::rollBack();
 
             return response()->json([
-
                 'success' => false,
-
                 'message' => $e->validator
                     ->errors()
                     ->first(),
-
                 'errors' => $e->errors(),
-
             ], 422);
 
         } catch (\Exception $e) {
 
             DB::rollBack();
-
             return response()->json([
-
                 'success' => false,
-
                 'message' => $e->getMessage(),
-
                 'line' => $e->getLine(),
 
             ], 500);
         }
     }
-
-
 
     /**
      * Order Details
@@ -836,5 +818,68 @@ class OrderController extends Controller
             'message' => 'Order status updated',
             'data' => new OrderResource($order)
         ]);
+    }
+
+    public function invoice($encoded_id)
+    {
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Order ID
+            |--------------------------------------------------------------------------
+            */
+            $orderId = decodeIdOrFail($encoded_id);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Order
+            |--------------------------------------------------------------------------
+            */
+            $order = Order::with([
+                'items',
+                'addresses',
+                'business',
+            ])->findOrFail($orderId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Address & Business
+            |--------------------------------------------------------------------------
+            */
+            $address = $order->addresses->first();
+
+            $business = $order->business;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate PDF
+            |--------------------------------------------------------------------------
+            */
+            $pdf = Pdf::loadView(
+                'pdf.order-invoice',
+                compact(
+                    'order',
+                    'address',
+                    'business'
+                )
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stream PDF
+            |--------------------------------------------------------------------------
+            */
+            return $pdf->stream(
+                $order->invoice_no . '.pdf'
+            );
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
