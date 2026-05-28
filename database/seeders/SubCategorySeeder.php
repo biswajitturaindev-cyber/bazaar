@@ -211,8 +211,41 @@ class SubCategorySeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
-
+            [
+                'category_id' => 11,
+                'name' => 'Tyres',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'category_id' => 11,
+                'name' => 'Batteries',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'category_id' => 11,
+                'name' => 'Oils',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'category_id' => 11,
+                'name' => 'Helmets',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'category_id' => 11,
+                'name' => 'Seat Covers',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
 
         ]);
     }
