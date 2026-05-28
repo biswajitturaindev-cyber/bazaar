@@ -348,13 +348,7 @@ class CategorySeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $category = Category::create([
-            'name' => 'Automobile',
-            'description' => 'Automobile category',
-            'status' => 1,
-        ]);
-
-        $subCategories = [
+        $data = [
 
             'Hatchback' => [
                 'Compact Hatchback',
@@ -377,51 +371,40 @@ class CategorySeeder extends Seeder
                 'Off-Road SUV',
                 'Luxury SUV',
                 'Electric SUV',
-
-                // Sub-sub style items
                 'Urban SUV',
                 'Mini SUV',
                 '4x4 SUV',
                 'Adventure SUV',
             ],
 
-            'MUV (Multi Utility Vehicle)' => [
+            'MUV' => [
                 'Family MUV',
                 'Premium MUV',
                 'Luxury MUV',
-                'Toyota Innova Crysta',
-                'Kia Carens',
             ],
 
             'Coupe' => [
                 'Sports Coupe',
                 'Luxury Coupe',
                 'Performance Coupe',
-                'BMW 2 Series Coupe',
-                'Audi RS5',
             ],
 
             'Convertible' => [
                 'Soft Top Convertible',
                 'Hard Top Convertible',
                 'Luxury Convertible',
-                'BMW Z4',
-                'Mazda MX-5 Miata',
             ],
 
             'Wagon' => [
                 'Estate Wagon',
                 'Luxury Wagon',
                 'Cross Wagon',
-                'Volvo V90',
             ],
 
             'Pickup Truck' => [
                 'Lifestyle Pickup',
                 'Commercial Pickup',
                 'Off-Road Pickup',
-                'Toyota Hilux',
-                'Isuzu D-Max',
             ],
 
             'Sports Car' => [
@@ -429,9 +412,6 @@ class CategorySeeder extends Seeder
                 'Hypercar',
                 'Muscle Car',
                 'Track Car',
-                'Porsche 911',
-                'Ferrari SF90 Stradale',
-                'Lamborghini Huracán',
             ],
 
             'Luxury Car' => [
@@ -439,8 +419,6 @@ class CategorySeeder extends Seeder
                 'Luxury SUV',
                 'Executive Car',
                 'Ultra Luxury Car',
-                'Mercedes-Benz S-Class',
-                'Rolls-Royce Phantom',
             ],
 
             'Electric Car' => [
@@ -450,46 +428,93 @@ class CategorySeeder extends Seeder
                 'Luxury EV',
                 'Compact Electric SUV',
                 'Premium Electric SUV',
-                'Tata Nexon EV',
-                'MG ZS EV',
-                'Tesla Model 3',
             ],
 
             'Hybrid Car' => [
                 'Mild Hybrid',
                 'Strong Hybrid',
                 'Plug-in Hybrid',
-                'Toyota Camry Hybrid',
-                'Honda City e',
             ],
 
             'CNG Cars' => [
                 'Factory Fitted CNG',
                 'Aftermarket CNG',
-                'Maruti Suzuki WagonR CNG',
-                'Tata Tiago CNG',
             ],
 
         ];
 
-        foreach ($subCategories as $subCategoryName => $items) {
+        foreach ($data as $categoryName => $subCategories) {
 
-            $subCategory = SubCategory::create([
-                'category_id' => $category->id,
-                'name' => $subCategoryName,
-                'description' => $subCategoryName,
+            /*
+            |--------------------------------------------------------------------------
+            | Category
+            |--------------------------------------------------------------------------
+            */
+            $category = Category::create([
+                'name' => $categoryName,
+                'description' => $categoryName,
                 'status' => 1,
             ]);
 
-            foreach ($items as $item) {
+            /*
+            |--------------------------------------------------------------------------
+            | Sub Categories
+            |--------------------------------------------------------------------------
+            */
+            foreach ($subCategories as $subCategoryName) {
 
-                SubCategoryItem::create([
+                $subCategory = SubCategory::create([
                     'category_id' => $category->id,
-                    'sub_category_id' => $subCategory->id,
-                    'name' => $item,
-                    'description' => $item,
+                    'name' => $subCategoryName,
+                    'description' => $subCategoryName,
                     'status' => 1,
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | SUV Sub Sub Categories
+                |--------------------------------------------------------------------------
+                */
+                if ($categoryName == 'SUV') {
+
+                    if ($subCategoryName == 'Compact SUV') {
+
+                        $compactItems = [
+                            'Urban SUV',
+                            'Mini SUV',
+                        ];
+
+                        foreach ($compactItems as $item) {
+
+                            SubCategoryItem::create([
+                                'category_id' => $category->id,
+                                'sub_category_id' => $subCategory->id,
+                                'name' => $item,
+                                'description' => $item,
+                                'status' => 1,
+                            ]);
+                        }
+                    }
+
+                    if ($subCategoryName == 'Off-Road SUV') {
+
+                        $offRoadItems = [
+                            '4x4 SUV',
+                            'Adventure SUV',
+                        ];
+
+                        foreach ($offRoadItems as $item) {
+
+                            SubCategoryItem::create([
+                                'category_id' => $category->id,
+                                'sub_category_id' => $subCategory->id,
+                                'name' => $item,
+                                'description' => $item,
+                                'status' => 1,
+                            ]);
+                        }
+                    }
+                }
             }
         }
 
