@@ -21,6 +21,16 @@ class Order extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | Refund Status
+    |--------------------------------------------------------------------------
+    */
+    const REFUND_NONE    = 0;
+    const REFUND_PARTIAL = 1;
+    const REFUND_FULL    = 2;
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Payment Method
     |--------------------------------------------------------------------------
     */
@@ -39,7 +49,7 @@ class Order extends Model
     const STATUS_SHIPPED    = 3;
     const STATUS_DELIVERED  = 4;
     const STATUS_CANCELLED  = 5;
-
+    const STATUS_PARTIAL_CANCELLED = 6;
     /**
      * The attributes that are mass assignable.
      */
@@ -65,10 +75,16 @@ class Order extends Model
         'wallet_used',
         'online_paid',
 
+        'refund_amount',
+        'refund_status',
+
         'payment_status',
         'payment_method',
 
         'order_status',
+        'cancel_reason_id',
+        'cancel_note',
+        'cancelled_at',
 
         'notes',
         'placed_at',
@@ -88,7 +104,9 @@ class Order extends Model
         'loyalty_earned'    => 'decimal:2',
         'wallet_used'       => 'decimal:2',
         'online_paid'       => 'decimal:2',
+        'refund_amount'     => 'decimal:2',
         'placed_at'         => 'datetime',
+        'cancelled_at'      => 'datetime',
     ];
 
     /*
@@ -135,6 +153,14 @@ class Order extends Model
         return $this->hasOne(Shipment::class);
     }
 
+    public function cancelReason()
+    {
+        return $this->belongsTo(
+            RedemptionCancelReason::class,
+            'cancel_reason_id'
+        );
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Accessors
@@ -151,6 +177,15 @@ class Order extends Model
         ][$this->payment_status] ?? 'Unknown';
     }
 
+    public function getRefundStatusTextAttribute()
+    {
+        return [
+            self::REFUND_NONE    => 'No Refund',
+            self::REFUND_PARTIAL => 'Partial Refund',
+            self::REFUND_FULL    => 'Full Refund',
+        ][$this->refund_status] ?? 'Unknown';
+    }
+
     public function getPaymentMethodTextAttribute()
     {
         return [
@@ -163,12 +198,13 @@ class Order extends Model
     public function getOrderStatusTextAttribute()
     {
         return [
-            self::STATUS_PENDING    => 'Pending',
-            self::STATUS_CONFIRMED  => 'Confirmed',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_SHIPPED    => 'Shipped',
-            self::STATUS_DELIVERED  => 'Delivered',
-            self::STATUS_CANCELLED  => 'Cancelled',
+            self::STATUS_PENDING            => 'Pending',
+            self::STATUS_CONFIRMED          => 'Confirmed',
+            self::STATUS_PROCESSING         => 'Processing',
+            self::STATUS_SHIPPED            => 'Shipped',
+            self::STATUS_DELIVERED          => 'Delivered',
+            self::STATUS_CANCELLED          => 'Cancelled',
+            self::STATUS_PARTIAL_CANCELLED => 'Partial Cancelled',
         ][$this->order_status] ?? 'Unknown';
     }
 }

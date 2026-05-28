@@ -95,7 +95,5 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
         Route::get('orders/{encoded_id}/invoice', [OrderController::class, 'invoice']);
 
-
-
     //});
 });
