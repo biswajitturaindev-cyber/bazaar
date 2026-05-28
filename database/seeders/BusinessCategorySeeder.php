@@ -43,8 +43,8 @@ class BusinessCategorySeeder extends Seeder
                 'subs' => [
                     ['name' => 'Hardware Shop', 'image' => 'construction/Hardware Shop.webp'],
                     ['name' => 'Builders', 'image' => 'construction/Builders.webp'],
-                    ['name' => 'Marble & Tiles', 'image' => 'construction/Marbel Shop.webp'],
-                    ['name' => 'Electric Materials', 'image' => 'construction/Electric Material.webp'],
+                    ['name' => 'Marbel Shop', 'image' => 'construction/Marbel Shop.webp'],
+                    ['name' => 'Electric Material', 'image' => 'construction/Electric Material.webp'],
                     ['name' => 'Ply Shop', 'image' => 'construction/Ply Shop.webp'],
                     ['name' => 'Home Paint', 'image' => 'construction/Home Paint.webp'],
                 ],
@@ -62,21 +62,21 @@ class BusinessCategorySeeder extends Seeder
             'Fashion & Lifestyle' => [
                 'image' => 'Watches.webp',
                 'subs' => [
-                    ['name' => 'Fashion (Male / Female)', 'image' => 'fashion & lifestyle/Fashion.webp'],
-                    ['name' => 'Winter Wear', 'image' => 'fashion & lifestyle/Fashion.webp'],
+                    ['name' => 'Fashion', 'image' => 'fashion & lifestyle/Fashion.webp'],
                     ['name' => 'Shoes', 'image' => 'fashion & lifestyle/Shoe.webp'],
                     ['name' => 'Watches', 'image' => 'fashion & lifestyle/Watches.webp'],
                     ['name' => 'Bags & Luggage', 'image' => 'fashion & lifestyle/Bag & Luggages.webp'],
                     ['name' => 'Boutiques', 'image' => 'fashion & lifestyle/Boutiques.webp'],
-                    ['name' => 'Cosmetics & Imitation Jewellery', 'image' => 'fashion & lifestyle/Cosmetics & Imitation.webp'],
-                    ['name' => 'Jewellery Shop', 'image' => 'fashion & lifestyle/Jewellery.webp'],
+                    ['name' => 'Cosmetics & Imitation', 'image' => 'fashion & lifestyle/Cosmetics & Imitation.webp'],
+                    ['name' => 'Jewellery', 'image' => 'fashion & lifestyle/Jewellery.webp'],
                 ],
             ],
 
             'Automobile' => [
                 'image' => 'Car accessories.webp',
                 'subs' => [
-                    ['name' => 'Pre-Owned Cars & Bikes', 'image' => 'automobile/Car.webp'],
+                    ['name' => 'Cars', 'image' => 'automobile/Car.webp'],
+                    ['name' => 'Bike', 'image' => 'automobile/Battery.webp'],
                     ['name' => 'Battery', 'image' => 'automobile/Battery.webp'],
                     ['name' => 'Tyres', 'image' => 'automobile/Tyre.webp'],
                     ['name' => 'Car Decor Items', 'image' => 'automobile/Car accessories.webp'],
@@ -115,7 +115,9 @@ class BusinessCategorySeeder extends Seeder
             'Health & Medical' => [
                 'image' => 'Medicine.webp',
                 'subs' => [
-                    ['name' => 'Medicine', 'image' => 'medical/Medicine.webp'],
+                    ['name' => 'Medication (Weight)', 'image' => 'medical/Medicine.webp'],
+                    ['name' => 'Medication (Volume)', 'image' => 'medical/Medicine.webp'],
+                    ['name' => 'Medical Supplies', 'image' => 'medical/Medicine.webp'],
                 ],
             ],
 
