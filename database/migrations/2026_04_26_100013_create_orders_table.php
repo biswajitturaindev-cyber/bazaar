@@ -13,20 +13,10 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Order Info
-            |--------------------------------------------------------------------------
-            */
             $table->string('order_no')->unique();
             $table->string('invoice_no')->nullable();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Business
-            |--------------------------------------------------------------------------
-            */
+
             $table->foreignId('business_id')
                 ->nullable()
                 ->constrained()
@@ -37,14 +27,8 @@ return new class extends Migration
                 ->constrained('business_categories')
                 ->nullOnDelete();
 
-
             $table->unsignedBigInteger('user_id');
 
-            /*
-            |--------------------------------------------------------------------------
-            | Quantity & Amount
-            |--------------------------------------------------------------------------
-            */
             $table->integer('total_items')->default(0);
             $table->decimal('items_total', 12, 2)->default(0);
             $table->decimal('discount_amount', 12, 2)->default(0);
@@ -53,40 +37,30 @@ return new class extends Migration
             $table->decimal('tax_amount', 12, 2)->default(0);
             $table->decimal('grand_total', 12, 2)->default(0);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Loyalty & Wallet
-            |--------------------------------------------------------------------------
-            */
+
             $table->decimal('loyalty_used', 12, 2)->default(0);
             $table->decimal('loyalty_earned', 12, 2)->default(0);
             $table->decimal('wallet_used', 12, 2)->default(0);
             $table->decimal('online_paid', 12, 2)->default(0);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Payment
-            |--------------------------------------------------------------------------
-            */
             $table->tinyInteger('payment_status')->default(0)->comment('0=Pending, 1=Paid, 2=Failed, 3=Refunded');
-
             $table->tinyInteger('payment_method')->default(1)->comment('0=Wallet, 1=Online, 2=COD');
 
-            /*
-            |--------------------------------------------------------------------------
-            | Order Status
-            |--------------------------------------------------------------------------
-            */
             $table->tinyInteger('order_status')->default(0)->comment(
-                '0=Pending, 1=Confirmed, 2=Processing, 3=Shipped, 4=Delivered, 5=Cancelled'
+                '0=Pending, 1=Confirmed, 2=Processing, 3=Shipped, 4=Delivered, 5=Cancelled, 6=Partial Cancelled'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Extra
-            |--------------------------------------------------------------------------
-            */
             $table->text('notes')->nullable();
+
+            $table->decimal('refund_amount', 12, 2)->default(0);
+            $table->tinyInteger('refund_status')->default(0)->comment(
+                '0=No Refund, 1=Partial Refund, 2=Full Refund'
+            );
+            $table->foreignId('cancel_reason_id')->nullable()->constrained('redemption_cancel_reasons')->nullOnDelete();
+            $table->text('cancel_note')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+
+
             $table->timestamp('placed_at')->nullable();
             $table->timestamps();
         });

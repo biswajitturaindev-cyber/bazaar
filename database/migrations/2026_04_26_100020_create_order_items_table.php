@@ -14,97 +14,43 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
 
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Order
-            |--------------------------------------------------------------------------
-            */
-            $table->foreignId('order_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product
-            |--------------------------------------------------------------------------
-            */
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('product_id');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product Variant
-            |--------------------------------------------------------------------------
-            */
-            $table->foreignId('product_variant_id')
-                ->nullable()
-                ->constrained('product_variants')
-                ->nullOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product Snapshot
-            |--------------------------------------------------------------------------
-            */
+            $table->foreignId('product_variant_id')->nullable()->constrained('product_variants')->nullOnDelete();
             $table->string('product_name');
+            $table->string('sku')->nullable();
+            $table->smallInteger('quantity')->default(1);
+            $table->decimal('mrp', 12, 2)->default(0);
+            $table->decimal('selling_price', 12, 2)->default(0);
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('final_price', 12, 2)->default(0);
+            $table->decimal('subtotal', 12, 2)->default(0);
+            $table->decimal('loyalty_points', 12, 2)->default(0);
+            $table->json('product_snapshot')->nullable();
+            $table->enum('status', [
+                'pending',
+                'confirmed',
+                'cancelled',
+                'shipped',
+                'delivered'
+            ])->default('pending');
 
-            $table->string('sku')
-                ->nullable();
+            $table->foreignId('cancel_reason_id')->nullable()->constrained('redemption_cancel_reasons')->nullOnDelete();
+            $table->text('cancel_note')->nullable();
+            $table->enum('cancelled_by', [
+                'admin',
+                'vendor',
+                'customer',
+                'system',
+            ])->nullable();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Quantity
-            |--------------------------------------------------------------------------
-            */
-            $table->smallInteger('quantity')
-                ->default(1);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Pricing
-            |--------------------------------------------------------------------------
-            */
-            $table->decimal('mrp', 12, 2)
-                ->default(0);
-
-            $table->decimal('selling_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('discount_amount', 12, 2)
-                ->default(0);
-
-            $table->decimal('final_price', 12, 2)
-                ->default(0);
-
-            $table->decimal('subtotal', 12, 2)
-                ->default(0);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Loyalty
-            |--------------------------------------------------------------------------
-            */
-            $table->decimal('loyalty_points', 12, 2)
-                ->default(0);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product Snapshot JSON
-            |--------------------------------------------------------------------------
-            */
-            $table->json('product_snapshot')
-                ->nullable();
-
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Indexes
-            |--------------------------------------------------------------------------
-            */
             $table->index('product_id');
-
             $table->index('product_variant_id');
+            $table->index('status');
+            $table->index('cancel_reason_id');
         });
     }
 

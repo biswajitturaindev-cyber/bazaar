@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             //PincodeSeeder::class,
             DeliveryPartnerSeeder::class,
+            RedemptionCancelReasonSeeder::class,
             ]);
 
         // Create Test User
