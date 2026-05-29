@@ -31,7 +31,7 @@
 
                 {{-- Category --}}
                 <div>
-                    <label class="block mb-2 font-medium">Category</label>
+                    <label class="block mb-2 font-medium">Business Category</label>
 
                     <select name="business_category_id" id="categorySelect"
                         class="w-full border rounded-lg px-3 py-2">
@@ -53,7 +53,7 @@
 
                 {{-- Sub Category --}}
                 <div>
-                    <label class="block mb-2 font-medium">Sub Category</label>
+                    <label class="block mb-2 font-medium">Business Sub Category</label>
 
                     <select name="business_sub_category_id" id="subCategorySelect"
                         class="w-full border rounded-lg px-3 py-2">
