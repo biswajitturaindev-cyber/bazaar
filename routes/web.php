@@ -127,6 +127,10 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('attribute-master', AttributemasterController::class);
         Route::resource('attributes', AttributeController::class);
+        Route::post(
+            'attributes/get-attribute-masters',
+            [AttributeController::class, 'getAttributeMasters']
+        )->name('attributes.getAttributeMasters');
         Route::resource('attribute-values', AttributeValueController::class);
 
         /*
