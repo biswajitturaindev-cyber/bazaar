@@ -95,7 +95,7 @@
                             Attribute Name <span class="text-red-500">*</span>
                         </label>
 
-                        <input type="text" name="name"
+                        <input type="text" name="name" id="attribute_name" readonly
                             value="{{ old('name', isset($attribute) ? $attribute->name : '') }}" maxlength="50" required
                             class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 @error('name') border-red-500 @enderror"
                             placeholder="Enter Attribute Name (e.g. Size, Color)">
@@ -223,6 +223,19 @@
                     );
                 }
             });
+
+        });
+
+        // Auto populate Attribute Name
+        $('#attribute_master_id').on('change', function () {
+
+            let selectedText = $(this).find('option:selected').text().trim();
+
+            if ($(this).val()) {
+                $('#attribute_name').val(selectedText);
+            } else {
+                $('#attribute_name').val('');
+            }
 
         });
 

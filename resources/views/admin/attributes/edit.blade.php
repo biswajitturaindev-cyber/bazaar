@@ -60,7 +60,7 @@
                 {{-- Attribute Master --}}
                 <div>
                     <label class="block mb-2 font-medium">Attribute Master</label>
-                    <select name="attribute_master_id" class="w-full border rounded-lg px-3 py-2">
+                    <select name="attribute_master_id" id="attribute_master_id" class="w-full border rounded-lg px-3 py-2">
                         <option value="">Select Attribute Master</option>
                         @foreach($attributeMasters as $master)
                             <option value="{{ $master->id }}"
@@ -84,7 +84,7 @@
                 <div>
                     <label class="block mb-2 font-medium">Attribute Name</label>
                     <input type="text"
-                           name="name"
+                           name="name" id="attribute_name" readonly
                            value="{{ old('name', $attribute->name) }}"
                            class="w-full border rounded-lg px-3 py-2">
                 </div>
@@ -140,6 +140,84 @@
                     });
                 }
             });
+
+        });
+
+
+        $('#category_id').on('change', function() {
+
+            let categoryId = $(this).val();
+
+            // Reset dropdown
+            $('#attribute_master_id').html(
+                '<option value="">Select Attribute Master</option>'
+            );
+
+            if (!categoryId) {
+                return;
+            }
+
+            $('#attribute_master_id').html(
+                '<option value="">Loading...</option>'
+            );
+
+            $.ajax({
+                url: "{{ route('attributes.getAttributeMasters') }}",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    category_id: categoryId,
+                    _token: "{{ csrf_token() }}",
+                },
+                success: function(response) {
+                    console.log(response);
+
+                    let html =
+                        '<option value="">Select Attribute Master</option>';
+
+                    if (response.length > 0) {
+
+                        $.each(response, function(index, item) {
+                            html += `
+                                <option value="${item.id}">
+                                    ${item.name}
+                                </option>
+                            `;
+                        });
+
+                    } else {
+
+                        html += `
+                            <option value="">
+                                No Attribute Master Found
+                            </option>
+                        `;
+                    }
+
+                    $('#attribute_master_id').html(html);
+                },
+                error: function(xhr) {
+
+                    console.log(xhr.responseText);
+
+                    $('#attribute_master_id').html(
+                        '<option value="">Failed to load data</option>'
+                    );
+                }
+            });
+
+        });
+
+        // Auto populate Attribute Name
+        $('#attribute_master_id').on('change', function () {
+
+            let selectedText = $(this).find('option:selected').text().trim();
+
+            if ($(this).val()) {
+                $('#attribute_name').val(selectedText);
+            } else {
+                $('#attribute_name').val('');
+            }
 
         });
     </script>
