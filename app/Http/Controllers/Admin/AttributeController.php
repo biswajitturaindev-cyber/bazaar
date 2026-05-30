@@ -82,15 +82,51 @@ class AttributeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    // public function edit(string $id)
+    // {
+    //     $attribute = Attribute::findOrFail($id);
+
+    //     $categories = Category::where('status', 1)->get();
+    //     $subCategories = SubCategory::where('category_id', $attribute->category_id)
+    //         ->where('status', 1)
+    //         ->get();
+    //     $attributeMasters = AttributeMaster::get();
+
+    //     return view('admin.attributes.edit', compact(
+    //         'attribute',
+    //         'categories',
+    //         'subCategories',
+    //         'attributeMasters'
+    //     ));
+    // }
+
+    public function edit($id)
     {
         $attribute = Attribute::findOrFail($id);
-
         $categories = Category::where('status', 1)->get();
         $subCategories = SubCategory::where('category_id', $attribute->category_id)
             ->where('status', 1)
             ->get();
-        $attributeMasters = AttributeMaster::get();
+
+        $mapping = DB::table('business_category_mappings')
+            ->where('category_id', $attribute->category_id)
+            ->first();
+
+        $attributeMasters = collect();
+
+        if ($mapping) {
+            $attributeMasters = AttributeMaster::where(
+                    'business_category_id',
+                    $mapping->business_category_id
+                )
+                ->where(
+                    'business_sub_category_id',
+                    $mapping->business_sub_category_id
+                )
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        }
 
         return view('admin.attributes.edit', compact(
             'attribute',
@@ -99,6 +135,7 @@ class AttributeController extends Controller
             'attributeMasters'
         ));
     }
+
 
     /**
      * Update the specified resource in storage.
