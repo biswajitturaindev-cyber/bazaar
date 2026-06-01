@@ -14,4 +14,12 @@ class RedemptionCancelReason extends Model
         'reason',
         'status',
     ];
+
+    public function orderItems()
+    {
+        return $this->hasMany(
+            OrderItem::class,
+            'cancel_reason_id'
+        );
+    }
 }

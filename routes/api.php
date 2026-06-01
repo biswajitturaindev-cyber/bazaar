@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\MasterProductController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
+use App\Http\Controllers\Api\RedemptionCancelReasonController;
 use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
@@ -184,6 +185,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::post('orders/modify-item-quantity', [OrderController::class, 'modifyItemQuantity']);
     Route::post('orders/cancel-item',[OrderController::class, 'cancelItem']);
+    /*
+    |--------------------------------------------------------------------------
+    | Get redemption cancel reasons
+    |--------------------------------------------------------------------------
+    */
+    Route::resource(
+        'cancel-reasons',
+        RedemptionCancelReasonController::class
+    )->only(['index']);
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {
