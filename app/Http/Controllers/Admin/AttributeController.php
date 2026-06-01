@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\AttributeMaster;
+use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
@@ -16,13 +17,25 @@ class AttributeController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index()
+    // {
+    //     $attributes = Attribute::with([
+    //         'category',
+    //         'subCategory',
+    //         'attributeMaster'
+    //     ])->latest()->paginate(10);
+    //     return view('admin.attributes.index', compact('attributes'));
+    // }
+
     public function index()
     {
         $attributes = Attribute::with([
             'category',
             'subCategory',
-            'attributeMaster'
+            'attributeMaster',
+            'values'
         ])->latest()->paginate(10);
+
         return view('admin.attributes.index', compact('attributes'));
     }
 
@@ -56,20 +69,46 @@ class AttributeController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'category_id' => 'required|integer',
-            'sub_category_id' => 'required|integer',
+        $request->validate([
+            'category_id'         => 'required|integer',
+            'sub_category_id'     => 'required|integer',
             'attribute_master_id' => 'required|integer',
-            'type' => 'required|in:text,color',
-            'name' => 'required|unique:attributes,name',
-            'status' => 'required|in:0,1',
+            'type'                => 'required|in:text,color',
+            'name'                => 'required|string|max:255',
+            'status'              => 'required|in:0,1',
         ]);
 
-        Attribute::create($data);
+        // Check duplicate attribute
+        $exists = Attribute::where('category_id', $request->category_id)
+            ->where('sub_category_id', $request->sub_category_id)
+            ->where('attribute_master_id', $request->attribute_master_id)
+            ->where('name', $request->name)
+            ->exists();
 
-        return redirect()->route('attributes.index')
-            ->with('success', 'Attribute created successfully');
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'This attribute already exists for the selected Category, Sub Category and Attribute Master.'
+                ]);
+        }
+
+        Attribute::create([
+            'category_id'         => $request->category_id,
+            'sub_category_id'     => $request->sub_category_id,
+            'attribute_master_id' => $request->attribute_master_id,
+            'type'                => $request->type,
+            'name'                => $request->name,
+            'status'              => $request->status,
+        ]);
+
+        return redirect()
+            ->route('attributes.index')
+            ->with('success', 'Attribute created successfully.');
     }
+
+
 
     /**
      * Display the specified resource.
@@ -145,17 +184,34 @@ class AttributeController extends Controller
         $attribute = Attribute::findOrFail($id);
 
         $data = $request->validate([
-            'category_id' => 'required|integer',
-            'sub_category_id' => 'required|integer',
+            'category_id'         => 'required|integer',
+            'sub_category_id'     => 'required|integer',
             'attribute_master_id' => 'required|integer',
-            'type' => 'required|in:text,color',
-            'name' => 'required|unique:attributes,name,' . $id,
-            'status' => 'required|in:0,1',
+            'type'                => 'required|in:text,color',
+            'name'                => 'required|string|max:255',
+            'status'              => 'required|in:0,1',
         ]);
+
+        $exists = Attribute::where('category_id', $request->category_id)
+            ->where('sub_category_id', $request->sub_category_id)
+            ->where('attribute_master_id', $request->attribute_master_id)
+            ->where('name', $request->name)
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'This attribute already exists.'
+                ]);
+        }
 
         $attribute->update($data);
 
-        return redirect()->route('attributes.index')
+        return redirect()
+            ->route('attributes.index')
             ->with('success', 'Attribute updated successfully');
     }
 

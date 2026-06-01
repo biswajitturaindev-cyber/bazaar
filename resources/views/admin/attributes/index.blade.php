@@ -41,8 +41,6 @@
                             <th class="px-3 py-2">Category</th>
                             <th class="px-3 py-2">Sub Category</th>
                             <th class="px-3 py-2">Attribute Master</th>
-                            <th class="px-3 py-2">Type</th>
-                            <th class="px-3 py-2">Attribute Name</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">Action</th>
                         </tr>
@@ -72,15 +70,6 @@
                                     {{ $attribute->attributeMaster->name ?? '-' }}
                                 </td>
 
-                                {{-- Type --}}
-                                <td class="px-3 py-2 capitalize">
-                                    {{ $attribute->type ?? '-' }}
-                                </td>
-
-                                {{-- Name --}}
-                                <td class="px-3 py-2 font-medium">
-                                    {{ $attribute->name ?? '-' }}
-                                </td>
 
                                 {{-- Status --}}
                                 <td class="px-3 py-2">

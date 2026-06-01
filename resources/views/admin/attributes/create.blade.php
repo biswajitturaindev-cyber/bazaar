@@ -14,13 +14,23 @@
 
             {{-- Header --}}
             <div class="flex justify-between items-center p-5 border-b">
-                <h2 class="text-lg font-semibold">Add Attribute</h2>
+                <h2 class="text-lg font-semibold">Add Attribute & Value</h2>
 
                 <a href="{{ route('attributes.index') }}"
                     class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
                     Back
                 </a>
             </div>
+
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             {{-- Form --}}
             <form action="{{ route('attributes.store') }}" method="POST">
@@ -90,35 +100,32 @@
                     </div>
 
                     {{-- Attribute Name --}}
-                    <div>
-                        <label class="block mb-2 font-medium">
-                            Attribute Name <span class="text-red-500">*</span>
-                        </label>
 
-                        <input type="text" name="name" id="attribute_name" readonly
+
+                    <input type="hidden" name="name" id="attribute_name" readonly
                             value="{{ old('name', isset($attribute) ? $attribute->name : '') }}" maxlength="50" required
                             class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200 @error('name') border-red-500 @enderror"
                             placeholder="Enter Attribute Name (e.g. Size, Color)">
 
-                        @error('name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+
                     {{-- Status --}}
                     <div>
                         <label class="block mb-2 font-medium">Status</label>
 
-                        <select name="status" class="w-full border rounded-lg px-3 py-2">
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
+                        <select name="status" class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+
+                            <option value="1" selected>Active</option>
+                            <option value="0" >Inactive</option>
+
                         </select>
 
                         @error('status')
-                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                 </div>
+
 
                 {{-- Submit --}}
                 <div class="p-5 border-t flex justify-end">
@@ -197,7 +204,7 @@
 
                         $.each(response, function(index, item) {
                             html += `
-                                <option value="${item.id}">
+                                <option value="${item.id}" data-name="${item.name}">
                                     ${item.name}
                                 </option>
                             `;
@@ -223,19 +230,52 @@
                     );
                 }
             });
-
         });
 
-        // Auto populate Attribute Name
         $('#attribute_master_id').on('change', function () {
 
-            let selectedText = $(this).find('option:selected').text().trim();
+            let selectedOption = $(this).find('option:selected');
+            let attributeName = selectedOption.data('name') || '';
 
-            if ($(this).val()) {
-                $('#attribute_name').val(selectedText);
+            // Auto populate Attribute Name
+            $('#attribute_name').val(attributeName);
+
+            // Show/Hide Color Section
+            if (attributeName.toLowerCase() === 'color') {
+                $('#colorSection').removeClass('hidden');
             } else {
-                $('#attribute_name').val('');
+                $('#colorSection').addClass('hidden');
             }
+
+        }).trigger('change');
+
+        $(document).ready(function () {
+
+            // Initial load
+            $('#colorCode').val($('#colorPicker').val());
+            $('#colorPreview').css('background', $('#colorPicker').val());
+
+            // Picker → Textbox
+            $('#colorPicker').on('input change', function () {
+
+                let color = $(this).val();
+
+                $('#colorCode').val(color);
+                $('#colorPreview').css('background', color);
+
+                console.log('Picker:', color); // Debug
+            });
+
+            // Textbox → Picker
+            $('#colorCode').on('input', function () {
+
+                let color = $(this).val();
+
+                if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
+                    $('#colorPicker').val(color);
+                    $('#colorPreview').css('background', color);
+                }
+            });
 
         });
 
