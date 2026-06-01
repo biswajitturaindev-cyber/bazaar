@@ -246,6 +246,11 @@ class OrderController extends Controller
                 'Invalid order item ID'
             );
 
+            $CancelReasonId = decodeIdOrFail(
+                $request->cancel_reason_id,
+                'Invalid cancel reason ID'
+            );
+
             $orderItem = OrderItem::findOrFail($orderItemId);
 
             if ($orderItem->status === 'cancelled') {
@@ -257,7 +262,7 @@ class OrderController extends Controller
 
             $orderItem->update([
                 'status'           => 'cancelled',
-                'cancel_reason_id' => $request->cancel_reason_id,
+                'cancel_reason_id' => $CancelReasonId,
                 'cancel_note'      => $request->cancel_note,
                 'cancelled_by'     => 'vendor',
                 'cancelled_at'     => now(),
