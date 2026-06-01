@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->string('sku')->nullable();
             $table->smallInteger('quantity')->default(1);
+            $table->smallInteger('modified_quantity')->nullable();
             $table->decimal('mrp', 12, 2)->default(0);
             $table->decimal('selling_price', 12, 2)->default(0);
             $table->decimal('discount_amount', 12, 2)->default(0);

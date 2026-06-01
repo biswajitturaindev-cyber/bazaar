@@ -653,6 +653,7 @@ class OrderController extends Controller
                     'product_name' => $cart->product_name,
                     'sku' => $cart->productVariant->sku ?? null,
                     'quantity' => $cart->quantity,
+                    'modified_quantity' => $cart->quantity,
                     'mrp' => $cart->productVariant->mrp ?? 0,
                     'selling_price' => $cart->productVariant->selling_price ?? 0,
                     'discount_amount' => $cart->productVariant->discount ?? 0,
