@@ -24,6 +24,7 @@ class OrderController extends Controller
 
                 'items',
                 'items.attributes',
+                'items.cancelReason',
 
                 'addresses',
                 'statusHistories',
@@ -231,7 +232,7 @@ class OrderController extends Controller
      * Cancel Item
      */
     public function cancelItem(Request $request)
-    { 
+    {
         $request->validate([
             'order_item_id'    => 'required',
             'cancel_reason_id' => 'required|integer',
