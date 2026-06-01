@@ -235,7 +235,7 @@ class OrderController extends Controller
     {
         $request->validate([
             'order_item_id'    => 'required',
-            'cancel_reason_id' => 'required|integer',
+            'cancel_reason_id' => 'required',
             'cancel_note'      => 'nullable|string|max:500',
         ]);
 
