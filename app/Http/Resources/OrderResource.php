@@ -117,14 +117,42 @@ class OrderResource extends JsonResource
                         |--------------------------------------------------------------------------
                         */
 
-                        'quantity' => (int) $item->quantity,
-                        'modified_quantity' => (int) $item->modified_quantity,
-                        'mrp' => (float) $item->mrp,
-                        'selling_price' => (float) $item->selling_price,
-                        'discount_amount' => (float) $item->discount_amount,
-                        'final_price' => (float) $item->final_price,
-                        'subtotal' => (float) $item->subtotal,
-                        'loyalty_points' => (float) $item->loyalty_points,
+                        // 'quantity' => (int) $item->quantity,
+                        // 'modified_quantity' => (int) $item->modified_quantity,
+                        // 'mrp' => (float) $item->mrp,
+                        // 'selling_price' => (float) $item->selling_price,
+                        // 'discount_amount' => (float) $item->discount_amount,
+                        // 'final_price' => (float) $item->final_price,
+                        // 'subtotal' => (float) $item->subtotal,
+                        // 'loyalty_points' => (float) $item->loyalty_points,
+
+
+                            'quantity' => (int) $item->quantity,
+
+                            'modified_quantity' => $item->modified_quantity
+                                ? (int) $item->modified_quantity
+                                : null,
+
+                            'status' => $item->status,
+
+                            'cancel_reason_id' => $item->cancel_reason_id
+                                ? Hashids::encode($item->cancel_reason_id)
+                                : null,
+
+                            'cancel_note' => $item->cancel_note,
+
+                            'cancelled_by' => $item->cancelled_by,
+
+                            'cancelled_at' => $item->cancelled_at
+                                ? $item->cancelled_at->format('Y-m-d H:i:s')
+                                : null,
+
+                            'mrp' => (float) $item->mrp,
+                            'selling_price' => (float) $item->selling_price,
+                            'discount_amount' => (float) $item->discount_amount,
+                            'final_price' => (float) $item->final_price,
+                            'subtotal' => (float) $item->subtotal,
+                            'loyalty_points' => (float) $item->loyalty_points,
 
                         /*
                         |--------------------------------------------------------------------------
