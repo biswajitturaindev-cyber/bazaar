@@ -118,6 +118,7 @@ class OrderResource extends JsonResource
                         */
 
                         'quantity' => (int) $item->quantity,
+                        'modified_quantity' => (int) $item->modified_quantity,
                         'mrp' => (float) $item->mrp,
                         'selling_price' => (float) $item->selling_price,
                         'discount_amount' => (float) $item->discount_amount,

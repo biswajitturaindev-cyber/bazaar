@@ -44,6 +44,7 @@ class OrderItem extends Model
         'sku',
 
         'quantity',
+        'modified_quantity',
 
         'mrp',
         'selling_price',
@@ -70,6 +71,7 @@ class OrderItem extends Model
      */
     protected $casts = [
         'quantity'          => 'integer',
+        'modified_quantity' => 'integer',
 
         'mrp'               => 'decimal:2',
         'selling_price'     => 'decimal:2',

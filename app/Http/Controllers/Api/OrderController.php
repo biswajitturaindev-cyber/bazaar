@@ -25,7 +25,6 @@ class OrderController extends Controller
                 'items.attributes',
 
                 'addresses',
-
                 'statusHistories',
             ]);
 
