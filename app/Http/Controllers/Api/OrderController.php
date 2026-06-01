@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 
@@ -182,4 +183,99 @@ class OrderController extends Controller
     {
         //
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function modifyItemQuantity(Request $request)
+    {
+        $request->validate([
+            'order_item_id'     => 'required',
+            'modified_quantity' => 'required|integer|min:1',
+        ]);
+
+        $orderItemId = decodeIdOrFail(
+            $request->order_item_id,
+            'Invalid order item ID'
+        );
+
+        $orderItem = OrderItem::findOrFail($orderItemId);
+
+        // Create log
+        // OrderItemQuantityLog::create([
+        //     'order_item_id'   => $orderItem->id,
+        //     'order_id'        => $orderItem->order_id,
+        //     'old_quantity'    => $orderItem->modified_quantity ?? $orderItem->quantity,
+        //     'new_quantity'    => $request->modified_quantity,
+        //     'updated_by_type' => 'vendor',
+        //     'updated_by_id'   => auth()->id(),
+        //     'remarks'         => 'Quantity modified by vendor',
+        // ]);
+
+        // Update quantity
+        $orderItem->update([
+            'modified_quantity' => $request->modified_quantity,
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Quantity updated successfully',
+            'data'    => [
+                'order_item_id'     => $request->order_item_id,
+                'modified_quantity' => $request->modified_quantity,
+            ]
+        ]);
+    }
+
+    /**
+     * Cancel Item
+     */
+    public function cancelItem(Request $request)
+    { 
+        $request->validate([
+            'order_item_id'    => 'required',
+            'cancel_reason_id' => 'required|integer',
+            'cancel_note'      => 'nullable|string|max:500',
+        ]);
+
+        try {
+
+            $orderItemId = decodeIdOrFail(
+                $request->order_item_id,
+                'Invalid order item ID'
+            );
+
+            $orderItem = OrderItem::findOrFail($orderItemId);
+
+            if ($orderItem->status === 'cancelled') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item already cancelled',
+                ], 422);
+            }
+
+            $orderItem->update([
+                'status'           => 'cancelled',
+                'cancel_reason_id' => $request->cancel_reason_id,
+                'cancel_note'      => $request->cancel_note,
+                'cancelled_by'     => 'vendor',
+                'cancelled_at'     => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order item cancelled successfully',
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel item',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }

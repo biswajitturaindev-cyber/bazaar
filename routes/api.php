@@ -182,6 +182,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('orders', OrderController::class);
+    Route::post('orders/modify-item-quantity', [OrderController::class, 'modifyItemQuantity']);
+    Route::post('orders/cancel-item',[OrderController::class, 'cancelItem']);
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {
