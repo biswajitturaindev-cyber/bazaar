@@ -185,6 +185,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::post('orders/modify-item-quantity', [OrderController::class, 'modifyItemQuantity']);
     Route::post('orders/cancel-item',[OrderController::class, 'cancelItem']);
+    Route::get('orders/{encoded_id}/invoice', [OrderController::class, 'invoice']);
     /*
     |--------------------------------------------------------------------------
     | Get redemption cancel reasons

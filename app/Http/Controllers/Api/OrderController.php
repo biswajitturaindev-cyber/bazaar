@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -358,6 +359,69 @@ class OrderController extends Controller
                 'success' => false,
                 'message' => 'Failed to cancel item',
                 'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function invoice($encoded_id)
+    {
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Decode Order ID
+            |--------------------------------------------------------------------------
+            */
+            $orderId = decodeIdOrFail($encoded_id);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Order
+            |--------------------------------------------------------------------------
+            */
+            $order = Order::with([
+                'items',
+                'addresses',
+                'business',
+            ])->findOrFail($orderId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Address & Business
+            |--------------------------------------------------------------------------
+            */
+            $address = $order->addresses->first();
+
+            $business = $order->business;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate PDF
+            |--------------------------------------------------------------------------
+            */
+            $pdf = Pdf::loadView(
+                'pdf.order-invoice',
+                compact(
+                    'order',
+                    'address',
+                    'business'
+                )
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stream PDF
+            |--------------------------------------------------------------------------
+            */
+            return $pdf->stream(
+                $order->invoice_no . '.pdf'
+            );
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
