@@ -8,10 +8,13 @@ use Vinkla\Hashids\Facades\Hashids;
 class AttributeValue extends Model
 {
     protected $fillable = [
+        'category_id',
+        'sub_category_id',
+        'attribute_master_id',
         'attribute_id',
         'value',
         'color_code',
-        'status'
+        'status',
     ];
 
     // Value → Attribute

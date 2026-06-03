@@ -28,7 +28,9 @@
                     <thead class="bg-gray-100">
                         <tr class="border">
                             <th class="px-3 py-2">Sl.No</th>
-                            <th class="px-3 py-2">Attribute</th>
+                            <th class="px-3 py-2">Category</th>
+                            <th class="px-3 py-2">Sub Category</th>
+                            <th class="px-3 py-2">Attribute Master</th>
                             <th class="px-3 py-2">Value</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">Action</th>
@@ -39,41 +41,40 @@
                         @foreach ($values as $value)
                             <tr class="border-l border-r">
 
-                                {{-- Serial --}}
                                 <td class="px-3 py-2">
                                     {{ ($values->currentPage() - 1) * $values->perPage() + $loop->iteration }}
                                 </td>
 
-                                {{-- Attribute --}}
                                 <td class="px-3 py-2">
-                                    {{ $value->attribute?->name ?? '-' }}
+                                    {{ $value->attribute?->category?->name ?? '-' }}
                                 </td>
 
-                                {{-- Value + Color --}}
+                                <td class="px-3 py-2">
+                                    {{ $value->attribute?->subCategory?->name ?? '-' }}
+                                </td>
+
+                                <td class="px-3 py-2">
+                                    {{ $value->attribute?->attributeMaster?->name ?? '-' }}
+                                </td>
+
                                 <td class="px-3 py-2 font-medium">
                                     <div class="flex items-center gap-2">
-
-                                        {{-- Color Preview --}}
                                         @if ($value->color_code)
                                             <span class="w-5 h-5 rounded border"
                                                 style="background-color: {{ $value->color_code }}">
                                             </span>
                                         @endif
 
-                                        {{-- Text --}}
                                         <span>{{ $value->value ?? '-' }}</span>
 
-                                        {{-- HEX --}}
                                         @if ($value->color_code)
                                             <span class="text-xs text-gray-500">
                                                 ({{ $value->color_code }})
                                             </span>
                                         @endif
-
                                     </div>
                                 </td>
 
-                                {{-- Status --}}
                                 <td class="px-3 py-2">
                                     <span
                                         class="px-2 py-1 text-xs font-semibold rounded
@@ -82,22 +83,11 @@
                                     </span>
                                 </td>
 
-                                {{-- Actions --}}
-                                <td class="px-3 py-2 flex gap-2">
-
-                                    {{-- Edit --}}
+                                <td class="px-3 py-2">
                                     <a href="{{ route('attribute-values.edit', $value->id) }}"
                                         class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
                                         Edit
                                     </a>
-
-                                    {{-- Delete --}}
-                                    {{-- <form action="{{ route('attribute-values.destroy', $value->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="bg-red-500 px-2 py-1 rounded text-white">Delete</button>
-                                    </form> --}}
-
                                 </td>
 
                             </tr>

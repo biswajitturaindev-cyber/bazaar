@@ -132,6 +132,14 @@ Route::prefix('admin')->group(function () {
             [AttributeController::class, 'getAttributeMasters']
         )->name('attributes.getAttributeMasters');
         Route::resource('attribute-values', AttributeValueController::class);
+        Route::post(
+            'attribute-values/get-sub-categories',
+            [AttributeValueController::class, 'getSubCategories']
+        )->name('attributevalues.getSubCategories');
+        Route::post(
+            'attribute-values/get-attribute-master',
+            [AttributeValueController::class, 'getAttributeMaster']
+        )->name('attributevalues.getAttributeMaster');
 
         /*
         |--------------------------------------------------------------------------

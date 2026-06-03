@@ -13,11 +13,29 @@ return new class extends Migration
     {
         Schema::create('attribute_values', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attribute_id')->constrained()->cascadeOnDelete();
+
+            $table->foreignId('category_id')
+                ->constrained('categories')
+                ->cascadeOnDelete();
+
+            $table->foreignId('sub_category_id')
+                ->constrained('sub_categories')
+                ->cascadeOnDelete();
+
+            $table->foreignId('attribute_master_id')
+                ->constrained('attribute_masters')
+                ->cascadeOnDelete();
+
+            $table->foreignId('attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnDelete();
+
             $table->string('value');
             $table->string('color_code')->nullable();
             $table->boolean('status')->default(1);
+
             $table->timestamps();
+
             $table->unique(['attribute_id', 'value']);
         });
     }
