@@ -22,30 +22,62 @@
                 </a>
             </div>
 
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{-- Form --}}
             <form action="{{ route('attribute-values.store') }}" method="POST">
                 @csrf
 
                 <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    {{-- Attribute --}}
+                    {{-- Category --}}
                     <div>
-                        <label class="block mb-2 font-medium">Attribute</label>
+                        <label class="block mb-2 font-medium">Category</label>
 
-                        <select name="attribute_id" id="attributeSelect"
-                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
-
-                            <option value="">-- Select Attribute --</option>
-
-                            @foreach ($attributes as $attribute)
-                                <option value="{{ $attribute->id }}" data-name="{{ strtolower($attribute->name) }}"
-                                    {{ old('attribute_id') == $attribute->id ? 'selected' : '' }}>
-                                    {{ $attribute->name }}
+                        <select name="category_id" id="category_id" class="w-full border rounded-lg px-3 py-2">
+                            <option value="">Select Category</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
 
-                        @error('attribute_id')
+                        @error('category_id')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Sub Category --}}
+                    <div>
+                        <label class="block mb-2 font-medium">Sub Category</label>
+
+                        <select name="sub_category_id" id="sub_category_id" class="w-full border rounded-lg px-3 py-2">
+                            <option value="">Select Sub Category</option>
+                        </select>
+
+                        @error('sub_category_id')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Attribute Master --}}
+                    <div>
+                        <label class="block mb-2 font-medium">Attribute Master</label>
+
+                        <select id="attribute_master_id" name="attribute_master_id" class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+                            <option value="">Select Attribute Master</option>
+                        </select>
+
+                        @error('attribute_master_id')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -120,6 +152,85 @@
 
     {{-- JS --}}
     <script>
+        $(document).ready(function () {
+
+            $('#category_id').on('change', function () {
+
+                let categoryId = $(this).val();
+
+                $('#sub_category_id').html('<option value="">Loading...</option>');
+
+                if (categoryId) {
+
+                    $.ajax({
+                        url: "{{ route('attributevalues.getSubCategories') }}",
+                        type: "POST",
+                        data: {
+                            category_id: categoryId,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+
+                            let options =
+                                '<option value="">Select Sub Category</option>';
+
+                            $.each(response, function (key, value) {
+                                options +=
+                                    `<option value="${value.id}">${value.name}</option>`;
+                            });
+
+                            $('#sub_category_id').html(options);
+                        }
+                    });
+
+                } else {
+                    $('#sub_category_id').html(
+                        '<option value="">Select Sub Category</option>'
+                    );
+                }
+
+            });
+
+
+            $('#sub_category_id').on('change', function () {
+
+                let subCategoryId = $(this).val();
+                let categoryId = $('#category_id').val();
+
+                $('#attribute_master_id').html(
+                    '<option value="">Loading...</option>'
+                );
+
+                $.ajax({
+                    url: "{{ route('attributevalues.getAttributeMaster') }}",
+                    type: "POST",
+                    data: {
+                        category_id: categoryId,
+                        sub_category_id: subCategoryId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+
+                        let options =
+                            '<option value="">Select Attribute Master</option>';
+
+                        $.each(response, function (key, value) {
+                            options +=
+                                `<option value="${value.id}">${value.name}</option>`;
+                        });
+
+                        $('#attribute_master_id').html(options);
+                    }
+                });
+
+            });
+
+        });
+
+
+
+
+
         document.addEventListener("DOMContentLoaded", function() {
 
             let attributeSelect = document.getElementById('attributeSelect');

@@ -22,6 +22,16 @@
             </a>
         </div>
 
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Form --}}
         <form action="{{ route('attribute-values.update', $value->id) }}" method="POST">
             @csrf
@@ -29,27 +39,55 @@
 
             <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- Attribute --}}
+                {{-- Category --}}
                 <div>
-                    <label class="block mb-2 font-medium">Attribute</label>
+                    <label class="block mb-2 font-medium">Category</label>
 
-                    <select name="attribute_id" id="attributeSelect"
+                    <select name="category_id" id="category_id"
                         class="w-full border rounded-lg px-3 py-2">
+                        <option value="">Select Category</option>
 
-                        <option value="">-- Select Attribute --</option>
-
-                        @foreach ($attributes as $attribute)
-                            <option value="{{ $attribute->id }}"
-                                data-name="{{ strtolower($attribute->name) }}"
-                                {{ old('attribute_id', $value->attribute_id) == $attribute->id ? 'selected' : '' }}>
-                                {{ $attribute->name }}
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}"
+                                {{ old('category_id', $value->category_id) == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
                             </option>
                         @endforeach
                     </select>
+                </div>
 
-                    @error('attribute_id')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                {{-- Sub Category --}}
+                <div>
+                    <label class="block mb-2 font-medium">Sub Category</label>
+
+                    <select name="sub_category_id" id="sub_category_id"
+                        class="w-full border rounded-lg px-3 py-2">
+                        <option value="">Select Sub Category</option>
+
+                        @foreach ($subCategories as $subCategory)
+                            <option value="{{ $subCategory->id }}"
+                                {{ old('sub_category_id', $value->sub_category_id) == $subCategory->id ? 'selected' : '' }}>
+                                {{ $subCategory->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Attribute Master --}}
+                <div>
+                    <label class="block mb-2 font-medium">Attribute Master</label>
+
+                    <select name="attribute_master_id" id="attribute_master_id"
+                        class="w-full border rounded-lg px-3 py-2">
+                        <option value="">Select Attribute Master</option>
+
+                        @foreach ($attributeMasters as $master)
+                            <option value="{{ $master->id }}"
+                                {{ old('attribute_master_id', $value->attribute_master_id) == $master->id ? 'selected' : '' }}>
+                                {{ $master->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 {{-- Value --}}
@@ -137,52 +175,100 @@
 
 {{-- JS --}}
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    $(document).ready(function () {
 
-    let attributeSelect = document.getElementById('attributeSelect');
-    let colorSection = document.getElementById('colorSection');
+        $('#category_id').on('change', function () {
 
-    let picker = document.getElementById('colorPicker');
-    let code = document.getElementById('colorCode');
-    let preview = document.getElementById('colorPreview');
+            $.post("{{ route('attributevalues.getSubCategories') }}", {
+                category_id: $(this).val(),
+                _token: "{{ csrf_token() }}"
+            }, function (response) {
 
-    function toggleColorField() {
-        let selected = attributeSelect.options[attributeSelect.selectedIndex];
-        let name = selected.getAttribute('data-name');
+                let options =
+                    '<option value="">Select Sub Category</option>';
 
-        if (name && name.includes('color')) {
-            colorSection.classList.remove('hidden');
-        } else {
-            colorSection.classList.add('hidden');
-        }
-    }
+                $.each(response, function (i, item) {
+                    options +=
+                        `<option value="${item.id}">${item.name}</option>`;
+                });
 
-    // Picker → input
-    picker.addEventListener('input', function () {
-        code.value = picker.value;
-        preview.style.background = picker.value;
+                $('#sub_category_id').html(options);
+                $('#attribute_master_id').html(
+                    '<option value="">Select Attribute Master</option>'
+                );
+            });
+
+        });
+
+        $('#sub_category_id').on('change', function () {
+
+            $.post("{{ route('attributevalues.getAttributeMaster') }}", {
+                category_id: $('#category_id').val(),
+                sub_category_id: $(this).val(),
+                _token: "{{ csrf_token() }}"
+            }, function (response) {
+
+                let options =
+                    '<option value="">Select Attribute Master</option>';
+
+                $.each(response, function (i, item) {
+                    options +=
+                        `<option value="${item.id}">${item.name}</option>`;
+                });
+
+                $('#attribute_master_id').html(options);
+            });
+
+        });
+
     });
 
-    // Input → picker
-    code.addEventListener('input', function () {
-        let val = code.value;
+    document.addEventListener("DOMContentLoaded", function () {
 
-        if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
-            picker.value = val;
-            preview.style.background = val;
+        let attributeSelect = document.getElementById('attributeSelect');
+        let colorSection = document.getElementById('colorSection');
+
+        let picker = document.getElementById('colorPicker');
+        let code = document.getElementById('colorCode');
+        let preview = document.getElementById('colorPreview');
+
+        function toggleColorField() {
+            let selected = attributeSelect.options[attributeSelect.selectedIndex];
+            let name = selected.getAttribute('data-name');
+
+            if (name && name.includes('color')) {
+                colorSection.classList.remove('hidden');
+            } else {
+                colorSection.classList.add('hidden');
+            }
         }
+
+        // Picker → input
+        picker.addEventListener('input', function () {
+            code.value = picker.value;
+            preview.style.background = picker.value;
+        });
+
+        // Input → picker
+        code.addEventListener('input', function () {
+            let val = code.value;
+
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+                picker.value = val;
+                preview.style.background = val;
+            }
+        });
+
+        // Change attribute
+        attributeSelect.addEventListener('change', toggleColorField);
+
+        // Initial load
+        toggleColorField();
+
+        let initialColor = code.value || '#000000';
+        picker.value = initialColor;
+        preview.style.background = initialColor;
     });
-
-    // Change attribute
-    attributeSelect.addEventListener('change', toggleColorField);
-
-    // Initial load
-    toggleColorField();
-
-    let initialColor = code.value || '#000000';
-    picker.value = initialColor;
-    preview.style.background = initialColor;
-});
 </script>
 
 @endsection
