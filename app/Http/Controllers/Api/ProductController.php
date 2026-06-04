@@ -190,9 +190,13 @@ class ProductController extends Controller
                 'variants.*.discount' => 'nullable|numeric',
                 'variants.*.final_price' => 'nullable|numeric',
 
+                'variants.*.commission' => 'nullable|numeric',
+                'variants.*.vendor_commission' => 'nullable|numeric',
+
 
                 'variants.*.stock' => 'nullable|integer',
                 'variants.*.variant_status' => 'nullable|integer',
+                'variants.*.batch_no' => 'nullable',
                 'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
 
@@ -214,6 +218,10 @@ class ProductController extends Controller
                 'variants.*.meta_title' => 'nullable|string',
                 'variants.*.meta_keyword' => 'nullable|string',
                 'variants.*.meta_description' => 'nullable|string',
+
+                // Vendor commission approval status
+                'variants.*.vendor_commission_approval_status' => 'nullable|integer|in:0,1,2',
+
             ];
 
             $data = $request->validate($rules);
@@ -281,11 +289,16 @@ class ProductController extends Controller
                     'discount' => $variantData['discount'] ?? 0,
                     'final_price' => $variantData['final_price'] ?? null,
 
+                    'commission' => $variantData['commission'] ?? null,
+                    'vendor_commission' => $variantData['vendor_commission'] ?? null,
+                    'vendor_commission_approval_status' => $variantData['vendor_commission_approval_status'] ?? 0,
+
                     'short_description' => $variantData['short_description'] ?? null,
                     'long_description' => $variantData['long_description'] ?? null,
 
                     'variant_status' => $variantData['variant_status'] ?? null,
 
+                    'batch_no' => $variantData['batch_no'] ?? null,
                     'manufacture_date' => $variantData['manufacture_date'] ?? null,
                     'expiry_date' => $variantData['expiry_date'] ?? null,
 
