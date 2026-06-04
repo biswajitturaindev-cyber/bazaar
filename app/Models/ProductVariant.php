@@ -140,4 +140,13 @@ class ProductVariant extends Model
         );
     }
 
+
+    public function getVendorCommissionApprovalStatusTextAttribute()
+    {
+        return [
+            0 => 'Waiting for Approval',
+            1 => 'Approved',
+            2 => 'Rejected',
+        ][$this->vendor_commission_approval_status] ?? 'Unknown';
+    }
 }

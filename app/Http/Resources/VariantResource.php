@@ -29,6 +29,7 @@ class VariantResource extends JsonResource
             'commission' => $this->commission,
             'vendor_commission' => $this->vendor_commission,
             'vendor_commission_approval_status' => $this->vendor_commission_approval_status,
+            'vendor_commission_approval_status_label' => $this->vendor_commission_approval_status_text,
 
             'short_description' => $this->short_description,
             'long_description' => $this->long_description,
