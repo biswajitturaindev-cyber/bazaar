@@ -53,6 +53,7 @@ class MasterProductResource extends JsonResource
 
             'selling_price' => $this->selling_price,
 
+            'commission' => $this->commission,
             /*
             |--------------------------------------------------------------------------
             | Description

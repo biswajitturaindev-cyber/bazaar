@@ -78,7 +78,7 @@
 
                 <!-- Product Price -->
                 <div>
-                    <label>Product Price</label>
+                    <label>MRP</label>
                     <input type="number" step="0.01" name="product_price"
                         value="{{ $product->product_price }}"
                         class="w-full border rounded-lg px-3 py-2">
@@ -181,6 +181,18 @@
 
                     </div>
 
+                </div>
+
+                <!-- commission -->
+                <div>
+                    <label class="block mb-2 font-medium">Commission</label>
+                    <input type="number" step="0.01" name="commission" value="{{ $product->commission }}"
+                        class="w-full border rounded-lg px-3 py-2"
+                        placeholder="Enter Commission">
+
+                    @error('commission')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Status -->

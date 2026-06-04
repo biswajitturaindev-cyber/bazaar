@@ -21,9 +21,11 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('image')->nullable();
+
             $table->decimal('product_price', 10, 2);
             $table->decimal('selling_price', 10, 2);
             $table->text('description')->nullable();
+            $table->decimal('commission', 10, 2);
             $table->boolean('status')->default(1);
 
             $table->timestamps();

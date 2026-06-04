@@ -35,6 +35,7 @@ return new class extends Migration
                 ->default(1)
                 ->comment('1 = Active, 0 = Inactive');
 
+            $table->string('batch_no')->nullable();
             $table->date('manufacture_date')->nullable();
             $table->date('expiry_date')->nullable();
 
