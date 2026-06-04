@@ -77,6 +77,7 @@ class ProductController extends Controller
                                 'mrp',
                                 'cost_price',
                                 'is_primary',
+                                'batch_no',
                                 'manufacture_date',
                                 'expiry_date',
                                 'short_description',

@@ -16,6 +16,8 @@ class ProductVariant extends Model
         'selling_price',
         'discount',
         'final_price',
+        'commission',
+        'vendor_commission',
         'short_description',
         'long_description',
         'is_primary',
@@ -23,6 +25,7 @@ class ProductVariant extends Model
         'batch_no',
         'manufacture_date',
         'expiry_date',
+        'vendor_commission_approval_status',
     ];
 
     protected $casts = [
