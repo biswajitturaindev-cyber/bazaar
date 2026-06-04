@@ -19,14 +19,38 @@ return new class extends Migration
             $table->foreignId('product_variant_id')->nullable()->constrained('product_variants')->nullOnDelete();
             $table->string('product_name');
             $table->string('sku')->nullable();
+
+            // GST Invoice Fields
+            $table->string('hsn_code')->nullable();
+            $table->string('batch_no')->nullable();
+
             $table->smallInteger('quantity')->default(1);
             $table->smallInteger('modified_quantity')->nullable();
+
             $table->decimal('mrp', 12, 2)->default(0);
             $table->decimal('selling_price', 12, 2)->default(0);
             $table->decimal('discount_amount', 12, 2)->default(0);
+
+            // Taxable amount before GST
+            $table->decimal('taxable_value', 12, 2)->default(0);
+
+            // GST %
+            $table->decimal('cgst_percent', 5, 2)->default(0);
+            $table->decimal('cgst_amount', 12, 2)->default(0);
+
+            $table->decimal('sgst_percent', 5, 2)->default(0);
+            $table->decimal('sgst_amount', 12, 2)->default(0);
+
+            $table->decimal('igst_percent', 5, 2)->default(0);
+            $table->decimal('igst_amount', 12, 2)->default(0);
+
+
+
             $table->decimal('final_price', 12, 2)->default(0);
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('loyalty_points', 12, 2)->default(0);
+
+
             $table->json('product_snapshot')->nullable();
             $table->enum('status', [
                 'pending',
@@ -52,6 +76,7 @@ return new class extends Migration
             $table->index('product_variant_id');
             $table->index('status');
             $table->index('cancel_reason_id');
+            $table->index('hsn_code');
         });
     }
 

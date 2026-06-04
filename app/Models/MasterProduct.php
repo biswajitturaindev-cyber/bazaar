@@ -20,6 +20,7 @@ class MasterProduct extends Model
         'product_price',
         'selling_price',
         'description',
+        'commission',
         'status'
     ];
 

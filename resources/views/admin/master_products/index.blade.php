@@ -26,14 +26,12 @@
                 <thead class="bg-gray-100">
                     <tr class="border">
                         <th class="px-3 py-2">Sl.No</th>
-                        <th class="px-3 py-2">Category</th>
-                        <th class="px-3 py-2">Sub Category</th>
-                        <th class="px-3 py-2">Sub Sub Category</th>
+                        <th class="px-3 py-2">Category Hierarchy</th>
                         <th class="px-3 py-2">Product Name</th>
-                        <th class="px-3 py-2">HSN</th>
+
                         <th>Product Price</th>
                         <th>Selling Price</th>
-                        <th>Description</th>
+                        <th>Commission</th>
                         <th class="px-3 py-2">Image</th>
                         <th class="px-3 py-2">Status</th>
                         <th class="px-3 py-2">Action</th>
@@ -49,29 +47,21 @@
                                 {{ $loop->iteration }}
                             </td>
 
-                            {{-- Category --}}
-                            <td class="px-3 py-2">
+                            <td class="px-3 py-2 whitespace-nowrap">
                                 {{ $product->category->name ?? '-' }}
-                            </td>
 
-                            {{-- Sub Category --}}
-                            <td class="px-3 py-2">
-                                {{ $product->subCategory->name ?? '-' }}
-                            </td>
+                                @if($product->subCategory)
+                                    → {{ $product->subCategory->name }}
+                                @endif
 
-                            {{-- Sub Sub Category --}}
-                            <td class="px-3 py-2">
-                                {{ $product->subSubCategory->name ?? '-' }}
+                                @if($product->subSubCategory)
+                                    → {{ $product->subSubCategory->name }}
+                                @endif
                             </td>
 
                             {{-- Product Name --}}
                             <td class="px-3 py-2">
                                 {{ $product->name }}
-                            </td>
-
-                            {{-- HSN --}}
-                            <td class="px-3 py-2">
-                                {{ $product->hsn->hsn_code ?? '-' }}
                             </td>
 
                             {{-- Product Price --}}
@@ -84,9 +74,10 @@
                                 {{ $product->selling_price }}
                             </td>
 
-                            {{-- Description --}}
+
+                            {{-- Commission --}}
                             <td class="px-3 py-2">
-                                {{ \Str::limit($product->description, 50) }}
+                                {{ $product->commission }}
                             </td>
 
                             {{-- Primary Image --}}

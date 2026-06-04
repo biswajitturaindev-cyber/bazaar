@@ -52,6 +52,17 @@ return new class extends Migration
 
             $table->text('notes')->nullable();
 
+            /*
+            |--------------------------------------------------------------------------
+            | GST Invoice Details
+            |--------------------------------------------------------------------------
+            */
+            $table->boolean('is_gst_bill')->default(false);
+            $table->string('gst_name')->nullable();
+            $table->string('gst_number', 15)->nullable();
+            $table->text('gst_address')->nullable();
+
+
             $table->decimal('refund_amount', 12, 2)->default(0);
             $table->tinyInteger('refund_status')->default(0)->comment(
                 '0=No Refund, 1=Partial Refund, 2=Full Refund'

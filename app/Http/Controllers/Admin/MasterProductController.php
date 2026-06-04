@@ -61,8 +61,10 @@ class MasterProductController extends Controller
             'sub_sub_category_id'  => 'nullable',
             'hsn_id'               => 'required',
             'name'                 => 'required|string|max:255',
+
             'product_price'        => 'required|numeric',
             'selling_price'        => 'required|numeric',
+            'commission'           => 'nullable|numeric',
             'description'          => 'nullable|string',
 
             // Multiple Images
@@ -149,7 +151,7 @@ class MasterProductController extends Controller
             ->route('master-products.index')
             ->with('success', 'Product created successfully');
     }
-    
+
     /**
      * Display the specified resource.
      */
@@ -192,6 +194,7 @@ class MasterProductController extends Controller
             'name'                 => 'required|string|max:255',
             'product_price'        => 'required|numeric',
             'selling_price'        => 'required|numeric',
+            'commission'           => 'nullable|numeric',
             'description'          => 'nullable|string',
 
             // Multiple Images

@@ -43,6 +43,20 @@ class OrderItem extends Model
         'product_name',
         'sku',
 
+        // GST
+        'hsn_code',
+        'batch_no',
+        'taxable_value',
+
+        'cgst_percent',
+        'cgst_amount',
+
+        'sgst_percent',
+        'sgst_amount',
+
+        'igst_percent',
+        'igst_amount',
+
         'quantity',
         'modified_quantity',
 
@@ -76,11 +90,22 @@ class OrderItem extends Model
         'mrp'               => 'decimal:2',
         'selling_price'     => 'decimal:2',
         'discount_amount'   => 'decimal:2',
+
+        'taxable_value'     => 'decimal:2',
+
+        'cgst_percent'      => 'decimal:2',
+        'cgst_amount'       => 'decimal:2',
+
+        'sgst_percent'      => 'decimal:2',
+        'sgst_amount'       => 'decimal:2',
+
+        'igst_percent'      => 'decimal:2',
+        'igst_amount'       => 'decimal:2',
+
         'final_price'       => 'decimal:2',
         'subtotal'          => 'decimal:2',
 
         'loyalty_points'    => 'decimal:2',
-
         'refund_amount'     => 'decimal:2',
 
         'product_snapshot'  => 'array',

@@ -20,6 +20,7 @@ class ProductVariant extends Model
         'long_description',
         'is_primary',
         'variant_status',
+        'batch_no',
         'manufacture_date',
         'expiry_date',
     ];

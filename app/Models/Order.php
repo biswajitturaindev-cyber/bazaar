@@ -86,6 +86,12 @@ class Order extends Model
         'cancel_note',
         'cancelled_at',
 
+        // GST
+        'is_gst_bill',
+        'gst_name',
+        'gst_number',
+        'gst_address',
+
         'notes',
         'placed_at',
     ];
@@ -105,6 +111,7 @@ class Order extends Model
         'wallet_used'       => 'decimal:2',
         'online_paid'       => 'decimal:2',
         'refund_amount'     => 'decimal:2',
+        'is_gst_bill'       => 'boolean',
         'placed_at'         => 'datetime',
         'cancelled_at'      => 'datetime',
     ];
