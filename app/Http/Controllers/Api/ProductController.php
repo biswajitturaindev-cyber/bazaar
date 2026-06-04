@@ -585,12 +585,16 @@ class ProductController extends Controller
                                 'mrp',
                                 'cost_price',
                                 'selling_price',
+                                'commission',
+                                'vendor_commission',
+                                'vendor_commission_approval_status',
                                 'discount',
                                 'final_price',
                                 'short_description',
                                 'long_description',
                                 'is_primary',
                                 'variant_status',
+                                'batch_no',
                                 'manufacture_date',
                                 'expiry_date'
                             ])
