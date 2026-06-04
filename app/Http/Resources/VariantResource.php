@@ -26,11 +26,15 @@ class VariantResource extends JsonResource
             'selling_price' => $this->selling_price,
             'discount' => $this->discount,
             'final_price' => $this->final_price,
+            'commission' => $this->commission,
+            'vendor_commission' => $this->vendor_commission,
+            'vendor_commission_approval_status' => $this->vendor_commission_approval_status,
 
             'short_description' => $this->short_description,
             'long_description' => $this->long_description,
 
             'variant_status' => $this->variant_status,
+            'batch_no' => $this->batch_no,
 
             'manufacture_date' => optional($this->manufacture_date)->format('Y-m-d'),
             'expiry_date' => optional($this->expiry_date)->format('Y-m-d'),
