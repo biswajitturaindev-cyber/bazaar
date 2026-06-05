@@ -87,6 +87,8 @@ class KycDetailController extends Controller
 
                 'pan_no' => 'required|string|max:255',
                 'gst_no' => 'nullable|string|max:255',
+                'gst_state_code' => 'nullable|string|max:2',
+                'gst_address' => 'nullable|string',
                 'trade_license_no' => 'nullable|string|max:255',
                 'fssai_license_no' => 'nullable|string|max:255',
 
@@ -212,6 +214,8 @@ class KycDetailController extends Controller
                 */
                 'pan_no' => 'nullable|string|max:255',
                 'gst_no' => 'nullable|string|max:255',
+                'gst_state_code' => 'nullable|string|max:2',
+                'gst_address' => 'nullable|string',
                 'trade_license_no' => 'nullable|string|max:255',
                 'fssai_license_no' => 'nullable|string|max:255',
 
