@@ -29,11 +29,15 @@ class KycDetailResource extends JsonResource
                 $this->pan_no,
                 $this->pan_card_status
             ),
-            'gst_certificate' => $this->document(
-                $this->gst_certificate,
-                $this->gst_no,
-                $this->gst_certificate_status
-            ),
+            'gst_certificate' => [
+                ...$this->document(
+                    $this->gst_certificate,
+                    $this->gst_no,
+                    $this->gst_certificate_status
+                ),
+                'state_code' => $this->gst_state_code,
+                'gst_address' => $this->gst_address,
+            ],
             'trade_license' => $this->document(
                 $this->trade_license,
                 $this->trade_license_no,

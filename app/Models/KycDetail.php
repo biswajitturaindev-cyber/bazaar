@@ -19,6 +19,8 @@ class KycDetail extends Model
         'gst_certificate',
         'gst_certificate_status',
         'gst_no',
+        'gst_state_code',
+        'gst_address',
         'trade_license',
         'trade_license_status',
         'trade_license_no',
