@@ -31,6 +31,8 @@ return new class extends Migration
             $table->string('gst_certificate')->nullable();
             $table->tinyInteger('gst_certificate_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
             $table->string('gst_no')->nullable();
+            $table->string('gst_state_code', 10)->nullable();
+            $table->text('gst_address')->nullable();
 
             $table->string('trade_license')->nullable();
             $table->tinyInteger('trade_license_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
