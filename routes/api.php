@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\RedemptionCancelReasonController;
+use App\Http\Controllers\Api\StateController;
 use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
@@ -76,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/gst/check', [UserController::class, 'checkGst']);
     Route::get('/users/category/dropdown', [UserController::class, 'CategoryDropdown']);
     Route::apiResource('bank-details', BankDetailController::class);
+    Route::get('/states', [StateController::class, 'index']);
     Route::apiResource('kyc-details', KycDetailController::class);
     Route::post('kyc-details/update/shop-image', [KycDetailController::class, 'updateShopImage']);
     Route::apiResource('store-operational', StoreOperationalController::class);
