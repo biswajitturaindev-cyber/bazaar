@@ -11,6 +11,7 @@ class Cart extends Model
 
     protected $fillable = [
         'user_id',
+        'business_id',
         'business_category_id',
         'product_id',
         'product_variant_id',
@@ -21,6 +22,7 @@ class Cart extends Model
 
     protected $casts = [
         'user_id'              => 'integer',
+        'business_id'          => 'integer',
         'business_category_id' => 'integer',
         'product_id'           => 'integer',
         'product_variant_id'   => 'integer',
@@ -122,5 +124,16 @@ class Cart extends Model
         return $this->productVariant?->attributes ?? [];
     }
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Business
+    |--------------------------------------------------------------------------
+    */
+    public function business()
+    {
+        return $this->belongsTo(
+            Business::class,
+            'business_id'
+        );
+    }
 }

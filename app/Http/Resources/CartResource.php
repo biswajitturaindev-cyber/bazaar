@@ -118,23 +118,18 @@ class CartResource extends JsonResource
             |--------------------------------------------------------------------------
             */
             'user' => $this->user_id,
+            /*
+            |--------------------------------------------------------------------------
+            | Business Details
+            |--------------------------------------------------------------------------
+            */
+            'business' => [
+                'id' => $this->business
+                    ? Hashids::encode($this->business->id)
+                    : null,
 
-            // 'user' => [
-
-            //     'user_id' => $this->user
-            //         ? Hashids::encode($this->user->id)
-            //         : null,
-
-            //     'name' => $this->user->name ?? null,
-
-            //     'email' => $this->user->email ?? null,
-
-            //     'mobile' => $this->user->mobile ?? null,
-
-            //     'profile_image' => !empty($this->user?->image)
-            //         ? asset('storage/' . $this->user->image)
-            //         : null,
-            // ],
+                'name' => $this->business->business_name ?? null,
+            ],
 
             /*
             |--------------------------------------------------------------------------
