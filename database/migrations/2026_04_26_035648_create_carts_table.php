@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('business_id');
 
             /*
             |--------------------------------------------------------------------------
@@ -77,6 +78,7 @@ return new class extends Migration
 
             $table->unique([
                 'user_id',
+                'business_id',
                 'business_category_id',
                 'product_id',
                 'attribute_hash'
@@ -89,8 +91,9 @@ return new class extends Migration
             */
 
             $table->index('user_id');
-
+            $table->index('business_id');
             $table->index([
+                'business_id',
                 'business_category_id',
                 'product_id'
             ]);
