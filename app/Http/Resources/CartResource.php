@@ -95,8 +95,9 @@ class CartResource extends JsonResource
         |--------------------------------------------------------------------------
         */
 
-        $finalPrice = (float) (
-            $variant->final_price ?? 0
+        $finalPrice = round(
+            (float) ($variant->final_price ?? 0),
+            2
         );
 
         return [
