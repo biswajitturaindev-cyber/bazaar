@@ -21,29 +21,19 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
     {
         try {
-
             $modelMap = config('product.model_map');
             $allProducts = collect();
 
             // Pagination
-            $perPage = $request->get('per_page', 10);
-            $page = $request->get('page', 1);
+            $perPage = (int) $request->get('per_page', 10);
+            $page    = (int) $request->get('page', 1);
 
             // Filters
-            $businessCategoryId = $request->filled('business_category_id')
-                ? decodeIdOrFail($request->business_category_id, 'Invalid business category ID')
-                : null;
-
-            $businessSubCategoryId = $request->filled('business_sub_category_id')
-                ? decodeIdOrFail($request->business_sub_category_id, 'Invalid business sub category ID')
-                : null;
-
-            $categoryId = $request->filled('category_id')
-                ? decodeIdOrFail($request->category_id, 'Invalid category ID')
+            $businessId = $request->filled('business_id')
+                ? decodeIdOrFail($request->business_id, 'Invalid business ID')
                 : null;
 
             foreach ($modelMap as $type => $modelClass) {
@@ -62,21 +52,15 @@ class ProductController extends Controller
                         'status',
                         'created_at'
                     ])
-                ->where('status', 1); // Only active products
-                // Filters
-                if ($businessCategoryId) {
-                    $query->where('business_category_id', $businessCategoryId);
+                    ->where('status', 1);
+
+                // Apply Filters
+                if ($businessId) {
+                    $query->where('business_id', $businessId);
                 }
 
-                if ($businessSubCategoryId) {
-                    $query->where('business_sub_category_id', $businessSubCategoryId);
-                }
 
-                if ($categoryId) {
-                    $query->where('category_id', $categoryId);
-                }
 
-                // Eager loading
                 $products = $query->with([
                     'business:id,business_name',
                     'category:id,name',
@@ -134,10 +118,12 @@ class ProductController extends Controller
                 $allProducts = $allProducts->concat($products);
             }
 
-            // Sorting
-            $allProducts = $allProducts->sortByDesc('created_at')->values();
+            // Global Sorting
+            $allProducts = $allProducts
+                ->sortByDesc('created_at')
+                ->values();
 
-            // Pagination
+            // Manual Pagination
             $total = $allProducts->count();
 
             $paginated = $allProducts
@@ -149,8 +135,8 @@ class ProductController extends Controller
                 'message' => 'Product list fetched successfully',
                 'data'    => MemberProductResource::collection($paginated),
                 'meta'    => [
-                    'current_page' => (int)$page,
-                    'per_page'     => (int)$perPage,
+                    'current_page' => $page,
+                    'per_page'     => $perPage,
                     'total'        => $total,
                     'last_page'    => (int) ceil($total / $perPage),
                 ]
@@ -158,7 +144,10 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
 
-            \Log::error('Member Product Index Error: ' . $e->getMessage());
+            \Log::error('Member Product Index Error', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'status'  => false,
@@ -167,6 +156,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
     /**
      * Show the form for creating a new resource.
      */
