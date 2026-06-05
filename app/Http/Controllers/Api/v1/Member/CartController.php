@@ -419,4 +419,39 @@ class CartController extends Controller
             ], 500);
         }
     }
+    /**
+     * Remove item
+     */
+    public function deleteByUser($userId)
+    {
+        try {
+
+            $deleted = Cart::where('user_id', $userId)->delete();
+
+            if (!$deleted) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No cart items found for this user'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User cart deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            \Log::error('Delete User Cart Error: ' . $e->getMessage(), [
+                'user_id' => $userId,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete user cart',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

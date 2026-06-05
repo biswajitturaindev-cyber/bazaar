@@ -83,7 +83,7 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         Route::post('/cart', [CartController::class, 'store']);
         Route::put('/cart/{id}', [CartController::class, 'update']);
         Route::delete('/cart/{id}', [CartController::class, 'destroy']);
-
+        Route::delete('/cart/user/{user_id}', [CartController::class, 'deleteByUser']);
         /*
         |--------------------------------------------------------------------------
         | Orders
