@@ -82,7 +82,7 @@
                         <option value="">Select Attribute Master</option>
 
                         @foreach ($attributeMasters as $master)
-                            <option value="{{ $master->id }}"
+                            <option value="{{ $master->id }}" data-name="{{ $master->name }}"
                                 {{ old('attribute_master_id', $value->attribute_master_id) == $master->id ? 'selected' : '' }}>
                                 {{ $master->name }}
                             </option>
@@ -232,16 +232,12 @@
         let code = document.getElementById('colorCode');
 
         function toggleColorField() {
-
-            if (!attributeSelect) return;
-
             let selected = attributeSelect.options[attributeSelect.selectedIndex];
 
-            if (!selected) return;
+            console.log('Selected:', selected);
+            console.log('Data Name:', selected.getAttribute('data-name'));
 
-            let name = (
-                selected.getAttribute('data-name') || ''
-            ).toLowerCase();
+            let name = (selected.getAttribute('data-name') || '').toLowerCase().trim();
 
             if (name === 'color') {
                 colorSection.classList.remove('hidden');
