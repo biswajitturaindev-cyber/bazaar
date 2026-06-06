@@ -231,48 +231,79 @@
 
 
 
-        document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
 
-            let attributeSelect = document.getElementById('attributeSelect');
-            let colorSection = document.getElementById('colorSection');
+        let attributeSelect = document.getElementById('attribute_master_id');
+        let colorSection = document.getElementById('colorSection');
 
-            let picker = document.getElementById('colorPicker');
-            let code = document.getElementById('colorCode');
-            let preview = document.getElementById('colorPreview');
+        let picker = document.getElementById('colorPicker');
+        let code = document.getElementById('colorCode');
+        let preview = document.getElementById('colorPreview');
 
-            function toggleColorField() {
-                let selected = attributeSelect.options[attributeSelect.selectedIndex];
-                let name = selected.getAttribute('data-name');
+        function toggleColorField() {
 
-                if (name && name.includes('color')) {
-                    colorSection.classList.remove('hidden');
-                } else {
-                    colorSection.classList.add('hidden');
-                }
+            if (!attributeSelect || attributeSelect.selectedIndex < 0) {
+                colorSection.classList.add('hidden');
+                return;
             }
 
-            // Picker → Input
+            let selected = attributeSelect.options[attributeSelect.selectedIndex];
+
+            // Try data-name first, fallback to option text
+            let name = (
+                selected.getAttribute('data-name') ||
+                selected.textContent ||
+                ''
+            ).toLowerCase();
+
+            if (name.includes('color')) {
+                colorSection.classList.remove('hidden');
+            } else {
+                colorSection.classList.add('hidden');
+            }
+        }
+
+        // Picker → Input
+        if (picker && code) {
             picker.addEventListener('input', function() {
                 code.value = picker.value;
-                preview.style.background = picker.value;
-            });
 
-            // Input → Picker
+                if (preview) {
+                    preview.style.background = picker.value;
+                }
+            });
+        }
+
+        // Input → Picker
+        if (code) {
             code.addEventListener('input', function() {
+
                 let val = code.value;
 
                 if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
-                    picker.value = val;
-                    preview.style.background = val;
+
+                    if (picker) {
+                        picker.value = val;
+                    }
+
+                    if (preview) {
+                        preview.style.background = val;
+                    }
                 }
             });
+        }
 
-            // Attribute Change
+        // Attribute Change
+        if (attributeSelect) {
             attributeSelect.addEventListener('change', toggleColorField);
+        }
 
-            // Initial Load
-            toggleColorField();
-            preview.style.background = code.value;
-        });
+        // Initial Load
+        toggleColorField();
+
+        if (preview && code) {
+            preview.style.background = code.value || '#000000';
+        }
+    });
     </script>
 @endsection

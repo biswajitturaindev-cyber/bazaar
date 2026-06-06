@@ -183,17 +183,13 @@ class CartResource extends JsonResource
                         function ($attr) {
 
                             return [
-
                                 'attribute_id' => Hashids::encode(
                                     $attr->attribute_id
                                 ),
-
                                 'attribute_value_id' => Hashids::encode(
                                     $attr->attribute_value_id
                                 ),
-
                                 'attribute_name' => $attr->attribute_name,
-
                                 'attribute_value' => $attr->attribute_value,
                             ];
                         }
