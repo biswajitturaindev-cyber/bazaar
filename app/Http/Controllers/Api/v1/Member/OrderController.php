@@ -209,9 +209,7 @@ class OrderController extends Controller
                 'order_no' => $orderNo,
                 'invoice_no' => $invoiceNo,
                 'business_id' => $product->business_id,
-                'business_category_id' => $cartItems
-                    ->first()
-                    ->business_category_id,
+                'business_category_id' => $cartItems->first()->business_category_id,
                 'user_id' => $userId,
                 'total_items' => $totalItems,
                 'items_total' => $itemsTotal,

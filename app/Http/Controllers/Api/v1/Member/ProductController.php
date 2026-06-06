@@ -94,7 +94,7 @@ class ProductController extends Controller
                                     'attribute_value_id'
                                 ])->with([
                                     'attribute:id,name',
-                                    'attributeValue:id,value'
+                                    'attributeValue:id,value,color_code'
                                 ]);
                             },
 
