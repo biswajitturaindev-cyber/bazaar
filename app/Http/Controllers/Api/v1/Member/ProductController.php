@@ -276,7 +276,7 @@ class ProductController extends Controller
                                     ])
                                     ->with([
                                         'attribute:id,name',
-                                        'attributeValue:id,value'
+                                        'attributeValue:id,value,color_code'
                                     ]);
                                 },
                                 // Images
