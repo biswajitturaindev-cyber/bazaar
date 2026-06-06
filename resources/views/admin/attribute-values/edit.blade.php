@@ -223,51 +223,58 @@
 
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
-        let attributeSelect = document.getElementById('attributeSelect');
+        let attributeSelect = document.getElementById('attribute_master_id');
         let colorSection = document.getElementById('colorSection');
 
         let picker = document.getElementById('colorPicker');
         let code = document.getElementById('colorCode');
-        let preview = document.getElementById('colorPreview');
 
         function toggleColorField() {
-            let selected = attributeSelect.options[attributeSelect.selectedIndex];
-            let name = selected.getAttribute('data-name');
 
-            if (name && name.includes('color')) {
+            if (!attributeSelect) return;
+
+            let selected = attributeSelect.options[attributeSelect.selectedIndex];
+
+            if (!selected) return;
+
+            let name = (
+                selected.getAttribute('data-name') || ''
+            ).toLowerCase();
+
+            if (name === 'color') {
                 colorSection.classList.remove('hidden');
             } else {
                 colorSection.classList.add('hidden');
             }
         }
 
-        // Picker → input
-        picker.addEventListener('input', function () {
-            code.value = picker.value;
-            preview.style.background = picker.value;
-        });
+        // Picker → Input
+        if (picker && code) {
+            picker.value = code.value || '#000000';
 
-        // Input → picker
-        code.addEventListener('input', function () {
-            let val = code.value;
+            picker.addEventListener('input', function() {
+                code.value = picker.value;
+            });
 
-            if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
-                picker.value = val;
-                preview.style.background = val;
-            }
-        });
+            // Input → Picker
+            code.addEventListener('input', function() {
+                let val = code.value;
 
-        // Change attribute
-        attributeSelect.addEventListener('change', toggleColorField);
+                if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+                    picker.value = val;
+                }
+            });
+        }
 
-        // Initial load
+        // Attribute Change
+        if (attributeSelect) {
+            attributeSelect.addEventListener('change', toggleColorField);
+        }
+
+        // Initial Load (important for edit page)
         toggleColorField();
-
-        let initialColor = code.value || '#000000';
-        picker.value = initialColor;
-        preview.style.background = initialColor;
     });
 </script>
 
