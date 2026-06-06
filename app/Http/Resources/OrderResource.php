@@ -170,12 +170,10 @@ class OrderResource extends JsonResource
                                 return [
 
                                     'attribute_id' => $attr->attribute_id,
-
                                     'attribute_value_id' => $attr->attribute_value_id,
-
                                     'name' => $attr->attribute_name,
-
                                     'value' => $attr->attribute_value,
+                                    'color_code'         => $attr->attributeValue?->color_code,
                                 ];
                             }),
 
