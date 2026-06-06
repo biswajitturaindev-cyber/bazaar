@@ -107,9 +107,18 @@ class OrderResource extends JsonResource
                         |--------------------------------------------------------------------------
                         */
 
-                        'image' => isset($item->product_snapshot['image'])
-                                    ? asset('storage/' . $item->product_snapshot['image'])
-                                    : null,
+                        // 'image' => isset($item->product_snapshot['image'])
+                        //             ? asset('storage/' . $item->product_snapshot['image'])
+                        //             : null,
+
+                        'image' => optional(
+                            $item->variant?->images?->first()
+                        )->image_medium
+                            ? asset(
+                                'storage/' .
+                                $item->variant->images->first()->image_medium
+                            )
+                            : null,
 
                         /*
                         |--------------------------------------------------------------------------
@@ -168,12 +177,11 @@ class OrderResource extends JsonResource
                             ->map(function ($attr) {
 
                                 return [
-
                                     'attribute_id' => $attr->attribute_id,
                                     'attribute_value_id' => $attr->attribute_value_id,
                                     'name' => $attr->attribute_name,
                                     'value' => $attr->attribute_value,
-                                    'color_code'         => $attr->attributeValue?->color_code,
+                                    'color_code' => $attr->attributeValue?->color_code,
                                 ];
                             }),
 

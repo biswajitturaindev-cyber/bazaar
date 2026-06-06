@@ -425,6 +425,7 @@ class OrderController extends Controller
             // Items
             'items',
             'items.attributes',
+            'items.variant.images',
 
             // Address
             'addresses',
