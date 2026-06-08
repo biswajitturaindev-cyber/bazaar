@@ -136,4 +136,18 @@ class Cart extends Model
             'business_id'
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | KYC Details
+    |--------------------------------------------------------------------------
+    */
+    public function kycDetail()
+    {
+        return $this->hasOne(
+            KycDetail::class,
+            'business_id', // kyc_details.business_id
+            'business_id'  // carts.business_id
+        );
+    }
 }

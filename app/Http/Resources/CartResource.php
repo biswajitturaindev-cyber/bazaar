@@ -129,6 +129,10 @@ class CartResource extends JsonResource
                     : null,
 
                 'name' => $this->business->business_name ?? null,
+
+                'gst_no' => $this->gst_no ?? null,
+                'gst_state_code' => $this->gst_state_code ?? null,
+                'gst_address' => $this->gst_address ?? null,
             ],
 
             /*
