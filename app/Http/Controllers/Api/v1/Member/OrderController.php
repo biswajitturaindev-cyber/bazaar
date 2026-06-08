@@ -532,4 +532,83 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Cancel Item
+     */
+    public function cancelItem(Request $request)
+    {
+        $request->validate([
+            'order_item_id'    => 'required',
+            'cancel_reason_id' => 'required',
+            'cancel_note'      => 'nullable|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $orderItemId = decodeIdOrFail(
+                $request->order_item_id,
+                'Invalid order item ID'
+            );
+
+            $cancelReasonId = decodeIdOrFail(
+                $request->cancel_reason_id,
+                'Invalid cancel reason ID'
+            );
+
+            $orderItem = OrderItem::findOrFail($orderItemId);
+
+            if ($orderItem->status === 'cancelled') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item already cancelled',
+                ], 422);
+            }
+
+            // Cancel current item
+            $orderItem->update([
+                'status'           => 'cancelled',
+                'cancel_reason_id' => $cancelReasonId,
+                'cancel_note'      => $request->cancel_note,
+                'cancelled_by'     => 'member',
+                'cancelled_at'     => now(),
+            ]);
+
+            // Check if any active items remain
+            $activeItemsCount = OrderItem::where('order_id', $orderItem->order_id)
+                ->where('status', '!=', 'cancelled')
+                ->count();
+
+            // If all items cancelled, cancel the order
+            if ($activeItemsCount === 0) {
+
+                Order::where('id', $orderItem->order_id)
+                    ->update([
+                        'order_status'     => 5, // Cancelled
+                        'cancel_reason_id' => $cancelReasonId,
+                        'cancel_note'      => $request->cancel_note,
+                        'cancelled_at'     => now(),
+                    ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order item cancelled successfully',
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel item',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

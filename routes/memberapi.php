@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\Member\VendorController;
 use App\Http\Controllers\Api\v1\Member\CartController;
 use App\Http\Controllers\Api\v1\Member\OrderController;
 use App\Http\Controllers\Api\v1\Member\VendorBannerController;
+use App\Http\Controllers\Api\v1\member\RedemptionCancelReasonController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -94,6 +95,16 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
         Route::get('orders/{encoded_id}/invoice', [OrderController::class, 'invoice']);
+        Route::post('orders/cancel-item',[OrderController::class, 'cancelItem']);
+        /*
+        |--------------------------------------------------------------------------
+        | Get redemption cancel reasons
+        |--------------------------------------------------------------------------
+        */
+        Route::resource(
+            'cancel-reasons',
+            RedemptionCancelReasonController::class
+        )->only(['index']);
 
     //});
 });
