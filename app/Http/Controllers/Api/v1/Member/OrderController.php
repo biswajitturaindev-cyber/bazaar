@@ -572,7 +572,7 @@ class OrderController extends Controller
                 'status'           => 'cancelled',
                 'cancel_reason_id' => $cancelReasonId,
                 'cancel_note'      => $request->cancel_note,
-                'cancelled_by'     => 'member',
+                'cancelled_by'     => 'customer',
                 'cancelled_at'     => now(),
             ]);
 
