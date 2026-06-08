@@ -293,13 +293,21 @@ class OrderController extends Controller
                 ->first();
 
 
+                $product = $cart->product();
+
+                $hsnCode = null;
+
+                if ($product) {
+                    $hsnCode = $product->hsn_id ?? null;
+                }
+
                 $orderItem = $order->items()->create([
 
                     'product_id' => $cart->product_id,
                     'product_variant_id' => $cart->product_variant_id,
                     'product_name' => $cart->product_name,
                     'sku' => $cart->productVariant->sku ?? null,
-                    'hsn_code' => $cart->product->hsn->hsn_code ?? null,
+                    'hsn_code' => $hsnCode,
                     'quantity' => $cart->quantity,
                     'modified_quantity' => $cart->quantity,
                     'mrp' => $cart->productVariant->mrp ?? 0,
