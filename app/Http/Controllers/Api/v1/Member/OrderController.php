@@ -299,6 +299,7 @@ class OrderController extends Controller
                     'product_variant_id' => $cart->product_variant_id,
                     'product_name' => $cart->product_name,
                     'sku' => $cart->productVariant->sku ?? null,
+                    'hsn_code' => $cart->product->hsn->hsn_code ?? null,
                     'quantity' => $cart->quantity,
                     'modified_quantity' => $cart->quantity,
                     'mrp' => $cart->productVariant->mrp ?? 0,
@@ -507,7 +508,7 @@ class OrderController extends Controller
             |--------------------------------------------------------------------------
             */
             $pdf = Pdf::loadView(
-                'pdf.order-invoice',
+                'pdf.order-invoice-pos',
                 compact(
                     'order',
                     'address',
@@ -515,11 +516,9 @@ class OrderController extends Controller
                 )
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Stream PDF
-            |--------------------------------------------------------------------------
-            */
+            // A5 size similar to your screenshot
+            $pdf->setPaper('A5', 'portrait');
+
             return $pdf->stream(
                 $order->invoice_no . '.pdf'
             );
