@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\v1\Member\VendorController;
 use App\Http\Controllers\Api\v1\Member\CartController;
 use App\Http\Controllers\Api\v1\Member\OrderController;
 use App\Http\Controllers\Api\v1\Member\VendorBannerController;
-use App\Http\Controllers\Api\v1\member\RedemptionCancelReasonController;
+use App\Http\Controllers\Api\v1\Member\RedemptionCancelReasonController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
