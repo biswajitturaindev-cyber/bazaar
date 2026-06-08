@@ -420,6 +420,7 @@ class OrderController extends Controller
 
             // Business
             'business',
+            'business.kycDetail',
             'businessCategory',
 
             // Items
