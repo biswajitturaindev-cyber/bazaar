@@ -92,9 +92,10 @@ class OrderController extends Controller
                 'notes' => 'nullable|string',
 
                 'is_gst_bill' => 'nullable|boolean',
-                'gst_name' => 'required_if:is_gst_bill,1|string|max:255',
-                'gst_number' => 'required_if:is_gst_bill,1|string|max:15',
-                'gst_address' => 'required_if:is_gst_bill,1|string|max:500',
+
+                'gst_name'    => 'nullable|string|max:255',
+                'gst_number'  => 'nullable|string|max:15',
+                'gst_address' => 'nullable|string|max:500',
             ]);
 
             $userId = (int) $request->user_id;
