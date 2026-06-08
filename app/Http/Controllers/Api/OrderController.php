@@ -233,60 +233,6 @@ class OrderController extends Controller
     /**
      * Cancel Item
      */
-    // public function cancelItem(Request $request)
-    // {
-    //     $request->validate([
-    //         'order_item_id'    => 'required',
-    //         'cancel_reason_id' => 'required',
-    //         'cancel_note'      => 'nullable|string|max:500',
-    //     ]);
-
-    //     try {
-
-    //         $orderItemId = decodeIdOrFail(
-    //             $request->order_item_id,
-    //             'Invalid order item ID'
-    //         );
-
-
-    //         $CancelReasonId = decodeIdOrFail(
-    //             $request->cancel_reason_id,
-    //             'Invalid cancel reason ID'
-    //         );
-
-    //         $orderItem = OrderItem::findOrFail($orderItemId);
-
-    //         if ($orderItem->status === 'cancelled') {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Item already cancelled',
-    //             ], 422);
-    //         }
-
-    //         $orderItem->update([
-    //             'status'           => 'cancelled',
-    //             'cancel_reason_id' => $CancelReasonId,
-    //             'cancel_note'      => $request->cancel_note,
-    //             'cancelled_by'     => 'vendor',
-    //             'cancelled_at'     => now(),
-    //         ]);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Order item cancelled successfully',
-    //         ]);
-
-    //     } catch (\Exception $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to cancel item',
-    //             'error'   => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-
     public function cancelItem(Request $request)
     {
         $request->validate([
