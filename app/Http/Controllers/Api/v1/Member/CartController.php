@@ -21,27 +21,31 @@ class CartController extends Controller
     {
 
         try {
+
             $request->validate([
                 'user_id' => 'required',
             ]);
 
             $userId = $request->user_id;
 
-            $cart = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
+            $cart = Cart::where('user_id', $userId)
+                ->latest('id')
+                ->get();
+
+            $kyc = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
                 ->where('carts.user_id', $userId)
                 ->select(
-                    'carts.*',
                     'kyc_details.gst_no',
                     'kyc_details.gst_state_code',
                     'kyc_details.gst_address'
                 )
-                ->latest('carts.id')
-                ->get();
+                ->first();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cart fetched successfully',
                 'total_items' => $cart->count(),
+                'vendor_gst_details' => $kyc,
                 'data' => CartResource::collection($cart),
             ]);
 
