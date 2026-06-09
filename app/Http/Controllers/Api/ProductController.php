@@ -1265,15 +1265,14 @@ class ProductController extends Controller
     }
 
 
-    public function getAttributes($categoryId, $subCategoryId)
+    public function getAttributes($categoryId)
     {
         try {
 
-            $categoryId = decodeIdOrFail($categoryId);
-            $subCategoryId = decodeIdOrFail($subCategoryId);
+            $decodedCategoryId = decodeIdOrFail($categoryId);
 
-            $attributes = AttributeValue::where('category_id', $categoryId)
-                ->where('sub_category_id', $subCategoryId)
+            $attributes = AttributeValue::where('category_id', $decodedCategoryId)
+                ->with(['attributeMaster', 'attribute'])
                 ->get();
 
             return response()->json([
@@ -1286,7 +1285,6 @@ class ProductController extends Controller
 
             \Log::error('Get Attributes Error', [
                 'category_id' => $categoryId,
-                'sub_category_id' => $subCategoryId,
                 'error' => $e->getMessage(),
             ]);
 
