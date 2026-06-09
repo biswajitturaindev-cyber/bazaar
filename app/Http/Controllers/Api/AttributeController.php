@@ -16,50 +16,6 @@ class AttributeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index(Request $request)
-    // {
-    //     try {
-
-    //         $businessCategoryId = decodeIdOrFail($request->business_category_id);
-    //         $businessSubCategoryId = decodeIdOrFail($request->business_sub_category_id);
-
-    //         $data = Attribute::query()
-    //             ->select('attributes.*')
-    //             ->join(
-    //                 'business_category_mappings',
-    //                 'business_category_mappings.category_id',
-    //                 '=',
-    //                 'attributes.category_id'
-    //             )
-    //             ->join(
-    //                 'attribute_masters',
-    //                 'attribute_masters.id',
-    //                 '=',
-    //                 'attributes.attribute_master_id'
-    //             )
-    //             ->where('business_category_mappings.business_category_id', $businessCategoryId)
-    //             ->where('business_category_mappings.business_sub_category_id', $businessSubCategoryId)
-    //             ->where('business_category_mappings.status', 1)
-    //             ->with('values')
-    //             ->latest()
-    //             ->get();
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Attribute list fetched successfully',
-    //             'data' => AttributeResource::collection($data)
-    //         ], 200);
-
-    //     } catch (Exception $e) {
-
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Something went wrong',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function index(Request $request)
     {
         try {
