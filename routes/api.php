@@ -145,7 +145,10 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::apiResource('products', ProductController::class);
      Route::patch('product-variants/{variant_id}/status', [ProductController::class, 'updateVariantStatus']);
      Route::delete('delete-product-image/{id}', [ProductController::class, 'deleteProductImage']);
-     Route::get('categories/{category_id}/attribute-exists',[ProductController::class, 'checkAttributeExists']);
+     Route::get(
+        'categories/{category_id}/attribute-exists',
+        [ProductController::class, 'checkAttributeExists']
+     );
     /*
     |--------------------------------------------------------------------------
     | Review Products

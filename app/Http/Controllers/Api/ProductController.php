@@ -1265,25 +1265,23 @@ class ProductController extends Controller
     }
 
 
-    public function getAttributes($categoryId)
+    public function checkAttributeExists($categoryId)
     {
         try {
 
             $decodedCategoryId = decodeIdOrFail($categoryId);
 
-            $attributes = AttributeValue::where('category_id', $decodedCategoryId)
-                ->with(['attributeMaster', 'attribute'])
-                ->get();
+            $exists = AttributeValue::where('category_id', $decodedCategoryId)
+                ->exists();
 
             return response()->json([
                 'success' => true,
-                'attribute_exists' => $attributes->isNotEmpty(),
-                'data' => $attributes,
+                'attribute_exists' => $exists,
             ], 200);
 
         } catch (\Exception $e) {
 
-            \Log::error('Get Attributes Error', [
+            \Log::error('Check Attribute Exists Error', [
                 'category_id' => $categoryId,
                 'error' => $e->getMessage(),
             ]);
