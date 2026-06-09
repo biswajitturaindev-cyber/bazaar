@@ -19,6 +19,7 @@ class ProductFoodBeverages extends Model
         'sub_category_id',
         'sub_sub_category_id',
         'hsn_id',
+        'has_variant',
         'name',
         'status',
     ];

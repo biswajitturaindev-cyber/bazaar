@@ -50,10 +50,13 @@ class VariantResource extends JsonResource
             // TOTAL STOCK
             'total_stock' => $this->stocks->sum('stock'),
 
-            'attributes' => AttributeRelationResource::collection(
-                $this->whenLoaded('attributes')
-            ),
+            // 'attributes' => AttributeRelationResource::collection(
+            //     $this->whenLoaded('attributes')
+            // ),
 
+            'attributes' => $this->product?->has_variant
+                ? AttributeRelationResource::collection($this->whenLoaded('attributes'))
+                : [],
 
             'images' => ProductImageResource::collection(
                 $this->whenLoaded('images')
