@@ -282,6 +282,7 @@ class ProductController extends Controller
                 'sub_sub_category_id' => $data['sub_sub_category_id'] ?? null,
                 'hsn_id' =>$data['hsn_id'] ?? null,
                 'name' => $data['name'],
+                'has_variant' => $data['has_variant'] ?? 0,
                 'status' => $data['status'],
                 'created_at' => now(),
                 'updated_at' => now(),
