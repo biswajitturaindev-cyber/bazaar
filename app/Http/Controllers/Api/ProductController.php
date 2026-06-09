@@ -8,6 +8,7 @@ use App\Models\ProductAttributeValue;
 use App\Models\ProductImage;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\VariantResource;
+use App\Models\AttributeValue;
 use App\Models\Business;
 use App\Models\BusinessCategory;
 use App\Models\Category;
@@ -1259,6 +1260,39 @@ class ProductController extends Controller
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),
                 'file' => $e->getFile()
+            ], 500);
+        }
+    }
+
+
+    public function getAttributes($categoryId, $subCategoryId)
+    {
+        try {
+
+            $categoryId = decodeIdOrFail($categoryId);
+            $subCategoryId = decodeIdOrFail($subCategoryId);
+
+            $attributes = AttributeValue::where('category_id', $categoryId)
+                ->where('sub_category_id', $subCategoryId)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'attribute_exists' => $attributes->isNotEmpty(),
+                'data' => $attributes,
+            ], 200);
+
+        } catch (\Exception $e) {
+
+            \Log::error('Get Attributes Error', [
+                'category_id' => $categoryId,
+                'sub_category_id' => $subCategoryId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
