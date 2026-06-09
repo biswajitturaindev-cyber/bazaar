@@ -4,158 +4,255 @@
 <head>
     <meta charset="utf-8">
     <title>Invoice Details</title>
+<style>
+    *{
+    box-sizing:border-box;
+}
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+body{
+    font-family: DejaVu Sans, sans-serif;
+    font-size:13px;
+    color:#222;
+    margin:0;
+    padding:25px;
+    line-height:1.5;
+}
 
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            color: #222;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.4;
-        }
+.container{
+    width:100%;
+}
 
-        .container {
-            width: 100%;
-        }
+/* =========================
+   HEADER
+========================= */
 
-        .header-title {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+.header-title{
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:25px;
+}
 
-        .row {
-            width: 100%;
-            clear: both;
-        }
+.row{
+    width:100%;
+}
 
-        .left {
-            float: left;
-        }
+.left{
+    float:left;
+}
 
-        .right {
-            float: right;
-        }
+.right{
+    float:right;
+}
 
-        .text-right {
-            text-align: right;
-        }
+.clearfix{
+    clear:both;
+}
 
-        .text-center {
-            text-align: center;
-        }
+.text-right{
+    text-align:right;
+}
 
-        .bold {
-            font-weight: bold;
-        }
+.text-center{
+    text-align:center;
+}
 
-        .divider {
-            border-top: 1px dashed #cfcfcf;
-            margin: 15px 0;
-        }
+/* =========================
+   DIVIDER
+========================= */
 
-        .customer-section {
-            text-align: center;
-            margin: 20px 0;
-        }
+.divider{
+    border-top:1px dashed #d9d9d9;
+    margin:18px 0;
+}
 
-        .customer-section p {
-            margin: 4px 0;
-        }
+/* =========================
+   CUSTOMER
+========================= */
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.customer-section{
+    text-align:center;
+    margin:18px 0;
+}
 
-        .items-table th {
-            text-align: left;
-            padding: 8px 0;
-            font-size: 13px;
-        }
+.customer-section p{
+    margin:4px 0;
+    font-size:14px;
+}
 
-        .items-table td {
-            padding: 12px 0;
-            vertical-align: top;
-        }
+.customer-section strong{
+    font-weight:bold;
+}
 
-        .item-name {
-            font-size: 15px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
+/* =========================
+   TABLE
+========================= */
 
-        .sub-code {
-            color: #888;
-            font-size: 11px;
-        }
+table{
+    width:100%;
+    border-collapse:collapse;
+}
 
-        .qty {
-            text-align: center;
-        }
+.items-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
 
-        .amount {
-            text-align: right;
-        }
+.items-table th{
+    font-size:16px;
+    font-weight:bold;
+    text-align:left;
+    vertical-align:top;
+    padding-bottom:18px;
+}
 
-        .amount strong {
-            display: block;
-        }
+.items-table td{
+    vertical-align:top;
+    padding:12px 0;
+}
 
-        .summary-table td {
-            padding: 6px 0;
-            font-size: 14px;
-        }
+/* =========================
+   COLUMN WIDTHS
+========================= */
 
-        .summary-table .grand {
-            font-size: 18px;
-            font-weight: bold;
-        }
+.desc-col{
+    width:65%;
+}
 
-        .tax-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
+.qty-col{
+    width:10%;
+    text-align:center;
+}
 
-        .tax-table td {
-            padding: 6px 0;
-            font-size: 14px;
-        }
+.amount-col{
+    width:25%;
+    text-align:right;
+}
 
-        .tax-total {
-            border-top: 2px solid #bbb;
-            padding-top: 10px !important;
-            font-weight: bold;
-            font-size: 16px;
-        }
+/* =========================
+   PRODUCT
+========================= */
 
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-        }
+.product-row{
+    page-break-inside:avoid;
+}
 
-        .footer-company {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+.product-name{
+    font-size:16px;
+    font-weight:bold;
+    color:#222;
+    margin-bottom:4px;
+}
 
-        .footer p {
-            margin: 3px 0;
-            color: #444;
-        }
+.product-code{
+    font-size:12px;
+    color:#999;
+    line-height:18px;
+}
 
-        .clearfix {
-            clear: both;
-        }
+.qty-column{
+    text-align:center;
+    font-size:15px;
+    padding-top:10px;
+}
+
+.amount-column{
+    text-align:right;
+    white-space:nowrap;
+}
+
+.unit-price{
+    font-size:15px;
+    color:#444;
+    margin-bottom:4px;
+}
+
+.total-price{
+    font-size:18px;
+    font-weight:bold;
+    color:#222;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+.summary-table{
+    margin-top:10px;
+}
+
+.summary-table td{
+    padding:8px 0;
+    font-size:15px;
+}
+
+.grand{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.net-payable{
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* =========================
+   TAX
+========================= */
+
+.tax-title{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.tax-table td{
+    padding:6px 0;
+    font-size:15px;
+}
+
+.tax-total{
+    border-top:2px solid #c9c9c9;
+    padding-top:10px !important;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+}
+
+.footer-company{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.footer p{
+    margin:4px 0;
+    color:#444;
+    font-size:13px;
+}
+
+/* =========================
+   DOMPDF FIX
+========================= */
+
+.page-break{
+    page-break-after:always;
+}
+
+.no-break{
+    page-break-inside:avoid;
+}
     </style>
+
 </head>
 
 <body>
@@ -224,33 +321,33 @@
     <div class="divider"></div>
 
     <!-- PRODUCT HEADER -->
-    <table class="items-table">
 
-        <thead>
+<table class="items-table">
+
+    <thead>
 
         <tr>
-            <th width="55%">
+
+            <th class="desc-col">
                 Description<br>
                 SAQ Code<br>
                 HSN Code
             </th>
 
-            <th width="10%" class="text-center">
+            <th class="qty-col">
                 QTY
             </th>
 
-            <th width="17%" class="text-right">
-                Unit Amt
-            </th>
-
-            <th width="18%" class="text-right">
+            <th class="amount-col">
+                Unit Amt<br>
                 Total Amt
             </th>
+
         </tr>
 
-        </thead>
+    </thead>
 
-        <tbody>
+    <tbody>
 
         @php
             $totalQty = 0;
@@ -262,45 +359,47 @@
                 $totalQty += $item->quantity;
             @endphp
 
-            <tr>
+            <tr class="product-row">
 
-                <td>
+                <td class="desc-col">
 
-                    <div class="item-name">
+                    <div class="product-name">
                         {{ $item->product_name }}
                     </div>
 
-                    <div class="sub-code">
-                        {{ $item->saq_code ?? $item->sku }}
+                    <div class="product-code">
+                        {{ $item->sku }}
                     </div>
 
-                    <div class="sub-code">
-                        {{ $item->hsn_code ?? '' }}
+                    <div class="product-code">
+                        {{ $item->hsn_code }}
                     </div>
 
                 </td>
 
-                <td class="qty">
+                <td class="qty-column">
                     {{ $item->quantity }}
                 </td>
 
-                <td class="amount">
-                    ₹{{ number_format($item->final_price,2) }}
-                </td>
+                <td class="amount-column">
 
-                <td class="amount">
-                    <strong>
+                    <div class="unit-price">
+                        ₹{{ number_format($item->final_price,2) }}
+                    </div>
+
+                    <div class="total-price">
                         ₹{{ number_format($item->subtotal,2) }}
-                    </strong>
+                    </div>
+
                 </td>
 
             </tr>
 
         @endforeach
 
-        </tbody>
+    </tbody>
 
-    </table>
+</table>
 
     <div class="divider"></div>
 
