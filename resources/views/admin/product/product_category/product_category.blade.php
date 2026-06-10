@@ -79,57 +79,57 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
-        function validate(value, title, rules = []) {
+        // function validate(value, title, rules = []) {
 
-            for (let rule of rules) {
+        //     for (let rule of rules) {
 
-                let [type, param] = rule.split(":");
+        //         let [type, param] = rule.split(":");
 
-                switch (type) {
+        //         switch (type) {
 
-                    case "required":
-                        if (!value || value.trim() === "") {
-                            return `${title} is required`;
-                        }
-                        break;
+        //             case "required":
+        //                 if (!value || value.trim() === "") {
+        //                     return `${title} is required`;
+        //                 }
+        //                 break;
 
-                    case "min":
-                        if (value.length < param) {
-                            return `${title} must be at least ${param} characters`;
-                        }
-                        break;
+        //             case "min":
+        //                 if (value.length < param) {
+        //                     return `${title} must be at least ${param} characters`;
+        //                 }
+        //                 break;
 
-                    case "max":
-                        if (value.length > param) {
-                            return `${title} must be less than ${param} characters`;
-                        }
-                        break;
+        //             case "max":
+        //                 if (value.length > param) {
+        //                     return `${title} must be less than ${param} characters`;
+        //                 }
+        //                 break;
 
-                    case "alphanum_space_dot":
+        //             case "alphanum_space_dot":
 
-                        if (!/^[A-Za-z0-9 .]+$/.test(value)) {
-                            return `${title} can contain only letters, numbers, spaces and '.'`;
-                        }
+        //                 if (!/^[A-Za-z0-9 .]+$/.test(value)) {
+        //                     return `${title} can contain only letters, numbers, spaces and '.'`;
+        //                 }
 
-                        break;
+        //                 break;
 
-                }
+        //         }
 
-            }
+        //     }
 
-            return null;
+        //     return null;
 
-        }
+        // }
 
 
-        const validationRules = {
+        // const validationRules = {
 
-            category_name: {
-                title: "Category Name",
-                rules: ["required", "min:3", "max:50", "alphanum_space_dot"]
-            }
+        //     category_name: {
+        //         title: "Category Name",
+        //         rules: ["required", "min:3", "max:50", "alphanum_space_dot"]
+        //     }
 
-        };
+        // };
 
 
         /* ---------- SHOW ERROR ---------- */
