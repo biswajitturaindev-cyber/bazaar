@@ -74,8 +74,8 @@
             class="list-none w-5/6 mx-auto space-y-2 overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out dropdown-content block">
             <li><a href="{{ route('attribute-master.index') }}" class="text-slate-400 text-sm hover:text-white">- Attribute
                     Master</a></li>
-            <li><a href="{{ route('attributes.index') }}" class="text-slate-400 text-sm hover:text-white">- Attributes
-                    List</a></li>
+            {{-- <li><a href="{{ route('attributes.index') }}" class="text-slate-400 text-sm hover:text-white">- Attributes
+                    List</a></li> --}}
             <li><a href="{{ route('attribute-values.index') }}" class="text-slate-400 text-sm hover:text-white">-
                     Attribute Values List</a></li>
         </ul>

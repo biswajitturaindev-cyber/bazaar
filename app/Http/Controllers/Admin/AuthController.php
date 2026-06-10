@@ -49,12 +49,12 @@ class AuthController extends Controller
 
         return redirect()->route('admin.login.form');
     }
-    
+
     public function change_password(Request $request)
     {
         return view('admin.change_password');
     }
-    
+
     public function updateadminPassword(Request $request)
     {
     $request->validate([
@@ -147,5 +147,5 @@ public function verifyPasswordOtp(Request $request)
     ]);
 }
 
-    
+
 }
