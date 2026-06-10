@@ -154,6 +154,7 @@
     <script>
         $(document).ready(function () {
 
+            /*
             $('#category_id').on('change', function () {
 
                 let categoryId = $(this).val();
@@ -190,39 +191,132 @@
                 }
 
             });
+            */
 
 
-            $('#sub_category_id').on('change', function () {
 
-                let subCategoryId = $(this).val();
-                let categoryId = $('#category_id').val();
+
+            // Category → SubCategory
+            $('#category_id').on('change', function() {
+                let categoryId = $(this).val();
+
+                $('#sub_category_id').html('<option>Loading...</option>');
+
+                if (categoryId) {
+                    $.ajax({
+                        url: '/admin/product-get-subcategories/' + categoryId,
+                        type: 'GET',
+                        success: function(data) {
+                            let options = '<option value="">Select Sub Category</option>';
+
+                            $.each(data, function(key, value) {
+                                options +=
+                                    `<option value="${value.id}">${value.name}</option>`;
+                            });
+
+                            $('#sub_category_id').html(options);
+                        }
+                    });
+                }
+            });
+
+
+
+            // $('#sub_category_id').on('change', function () {
+
+            //     let subCategoryId = $(this).val();
+            //     let categoryId = $('#category_id').val();
+
+            //     $('#attribute_master_id').html(
+            //         '<option value="">Loading...</option>'
+            //     );
+
+            //     $.ajax({
+            //         url: "{{ route('attributevalues.getAttributeMaster') }}",
+            //         type: "POST",
+            //         data: {
+            //             category_id: categoryId,
+            //             sub_category_id: subCategoryId,
+            //             _token: "{{ csrf_token() }}"
+            //         },
+            //         success: function (response) {
+
+            //             let options =
+            //                 '<option value="">Select Attribute Master</option>';
+
+            //             $.each(response, function (key, value) {
+            //                 options +=
+            //                     `<option value="${value.id}">${value.name}</option>`;
+            //             });
+
+            //             $('#attribute_master_id').html(options);
+            //         }
+            //     });
+
+            // });
+
+
+            $('#category_id').on('change', function() {
+
+                let categoryId = $(this).val();
+
+                // Reset dropdown
+                $('#attribute_master_id').html(
+                    '<option value="">Select Attribute Master</option>'
+                );
+
+                if (!categoryId) {
+                    return;
+                }
 
                 $('#attribute_master_id').html(
                     '<option value="">Loading...</option>'
                 );
 
                 $.ajax({
-                    url: "{{ route('attributevalues.getAttributeMaster') }}",
+                    url: "{{ route('attributes.getAttributeMasters') }}",
                     type: "POST",
+                    dataType: "json",
                     data: {
                         category_id: categoryId,
-                        sub_category_id: subCategoryId,
-                        _token: "{{ csrf_token() }}"
+                        _token: "{{ csrf_token() }}",
                     },
-                    success: function (response) {
+                    success: function(response) {
+                        console.log(response);
 
-                        let options =
+                        let html =
                             '<option value="">Select Attribute Master</option>';
 
-                        $.each(response, function (key, value) {
-                            options +=
-                                `<option value="${value.id}">${value.name}</option>`;
-                        });
+                        if (response.length > 0) {
 
-                        $('#attribute_master_id').html(options);
+                            $.each(response, function(index, item) {
+                                html += `
+                                    <option value="${item.id}" data-name="${item.name}">
+                                        ${item.name}
+                                    </option>
+                                `;
+                            });
+
+                        } else {
+
+                            html += `
+                                <option value="">
+                                    No Attribute Master Found
+                                </option>
+                            `;
+                        }
+
+                        $('#attribute_master_id').html(html);
+                    },
+                    error: function(xhr) {
+
+                        console.log(xhr.responseText);
+
+                        $('#attribute_master_id').html(
+                            '<option value="">Failed to load data</option>'
+                        );
                     }
                 });
-
             });
 
         });

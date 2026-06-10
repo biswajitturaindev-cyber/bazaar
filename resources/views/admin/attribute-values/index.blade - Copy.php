@@ -46,15 +46,15 @@
                                 </td>
 
                                 <td class="px-3 py-2">
-                                    {{ $value->category?->name ?? '-' }}
+                                    {{ $value->attribute?->category?->name ?? '-' }}
                                 </td>
 
                                 <td class="px-3 py-2">
-                                    {{ $value->subCategory?->name ?? '-' }}
+                                    {{ $value->attribute?->subCategory?->name ?? '-' }}
                                 </td>
 
                                 <td class="px-3 py-2">
-                                    {{ $value->attributeMaster?->name ?? '-' }}
+                                    {{ $value->attribute?->attributeMaster?->name ?? '-' }}
                                 </td>
 
                                 <td class="px-3 py-2 font-medium">
