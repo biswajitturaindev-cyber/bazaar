@@ -364,23 +364,25 @@ class ProductController extends Controller
                 'string',
                 'min:3',
                 'max:100',
-                Rule::unique('sub_category_items')->where(function ($query) use ($request) {
-                    return $query->where('category_id', $request->category_id)
-                        ->where('sub_category_id', $request->sub_category_id);
-                }),
+                Rule::unique('sub_category_items', 'name')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('category_id', $request->category_id)
+                            ->where('sub_category_id', $request->sub_category_id);
+                    }),
             ],
 
             'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp',
         ], [
-            'name.unique' => 'This sub category item already exists.',
+            'name.unique' => 'This sub category item already exists in the selected category and sub category.',
         ]);
 
         $imageName = null;
 
         if ($request->hasFile('image')) {
             try {
+
                 $file = $request->file('image');
                 $imageName = time() . '.' . $file->extension();
 
@@ -395,9 +397,12 @@ class ProductController extends Controller
                 );
 
             } catch (\Exception $e) {
-                return back()->withErrors([
-                    'image' => 'Image upload failed'
-                ]);
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'image' => 'Image upload failed.'
+                    ]);
             }
         }
 
@@ -407,7 +412,7 @@ class ProductController extends Controller
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
-            'image' => $imageName
+            'image' => $imageName,
         ]);
 
         return redirect()
@@ -446,7 +451,6 @@ class ProductController extends Controller
     {
         $item = SubCategoryItem::findOrFail($id);
 
-        // Validation
         $data = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
@@ -457,19 +461,21 @@ class ProductController extends Controller
                 'min:3',
                 'max:100',
                 Rule::unique('sub_category_items')
-                    ->ignore($id)
                     ->where(function ($query) use ($request) {
-                        return $query->where('category_id', $request->category_id)
+                        $query->where('category_id', $request->category_id)
                             ->where('sub_category_id', $request->sub_category_id);
-                    }),
+                    })
+                    ->ignore($item->id, 'id'),
             ],
 
             'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
         ], [
-            'name.unique' => 'This sub category item already exists.',
+            'name.unique' => 'This sub category item already exists in the selected category and sub category.',
         ]);
+
+        $imageName = $item->image;
 
         // Image Update
         if ($request->hasFile('image')) {
@@ -478,7 +484,7 @@ class ProductController extends Controller
 
                 // Delete old image
                 if (
-                    $item->image &&
+                    !empty($item->image) &&
                     Storage::disk('public')->exists('subcategoryitem/' . $item->image)
                 ) {
                     Storage::disk('public')->delete('subcategoryitem/' . $item->image);
@@ -497,14 +503,13 @@ class ProductController extends Controller
                     (string) $image->toJpeg(90)
                 );
 
-                $item->image = $imageName;
-                $item->save();
-
             } catch (\Exception $e) {
 
-                return back()->withErrors([
-                    'image' => 'Image upload failed.'
-                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Image upload failed.',
+                    'error' => $e->getMessage()
+                ], 422);
             }
         }
 
@@ -515,6 +520,7 @@ class ProductController extends Controller
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
+            'image' => $imageName,
         ]);
 
         return response()->json([

@@ -95,6 +95,7 @@
                             @error('name')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
+                            <span id="nameError" class="text-red-500 text-sm"></span>
                         </div>
 
                         <!-- Status -->
@@ -167,34 +168,56 @@
             positionClass: "toast-top-right",
             timeOut: 3000
         };
+
+         const baseUrl = "{{ route('get.subcategories.list', ':id') }}";
+
+        $('#category_id').change(function() {
+
+            let category_id = $(this).val();
+
+            $.ajax({
+                url: baseUrl.replace(':id', category_id),
+                type: 'GET',
+                success: function(data) {
+
+                    let options = '<option value="">Select Sub Category</option>';
+
+                    $.each(data, function(key, value) {
+                        options += `<option value="${value.id}">${value.name}</option>`;
+                    });
+
+                    $('#sub_category_id').html(options);
+                }
+            });
+
+        });
+
         $(document).ready(function() {
 
+
+
             // NAME VALIDATION + CHECK EXISTING
-            $('#subCategoryName').on('keyup', function() {
+            $('#subCategoryItemName, #category_id, #sub_category_id').on('keyup change', function() {
 
-                let name = $(this).val();
-                let regex = /^[A-Za-z0-9 .]+$/;
+                let name = $('#subCategoryItemName').val();
+                let category_id = $('#category_id').val();
+                let sub_category_id = $('#sub_category_id').val();
 
-                if (name.length > 0) {
-
-                    if (!regex.test(name)) {
-                        $('#nameError').text('Only letters, numbers, spaces and dots are allowed.');
-                        return;
-                    } else {
-                        $('#nameError').text('');
-                    }
+                if (name.length > 0 && category_id && sub_category_id) {
 
                     $.ajax({
-                        url: "{{ route('admin.product.sub.category.check.name') }}",
+                        url: "{{ route('admin.product.sub.category.item.check.name') }}",
                         type: "POST",
                         data: {
                             _token: "{{ csrf_token() }}",
+                            category_id: category_id,
+                            sub_category_id: sub_category_id,
                             name: name
                         },
                         success: function(response) {
 
                             if (response.exists) {
-                                $('#nameError').text('Sub category already exists');
+                                $('#nameError').text('Sub category item already exists');
                             } else {
                                 $('#nameError').text('');
                             }
@@ -207,6 +230,8 @@
                 }
 
             });
+
+
 
 
             // FORM SUBMIT AJAX
