@@ -284,20 +284,28 @@ class ProductController extends Controller
     public function productSubCategoryUpdate(Request $request, $id)
     {
         $request->validate([
-            'category_id' => 'required',
+            'category_id' => 'required|exists:categories,id',
+
             'name' => [
                 'required',
                 'min:3',
                 'max:50',
                 'regex:/^[A-Za-z0-9 .]+$/',
-                'unique:sub_categories,name,' . $id
+                Rule::unique('sub_categories')
+                    ->ignore($id)
+                    ->where(function ($query) use ($request) {
+                        return $query->where('category_id', $request->category_id);
+                    }),
             ],
+
             'description' => [
                 'nullable',
                 'min:10',
                 'max:200',
                 'regex:/^[A-Za-z0-9 .]+$/'
             ],
+        ], [
+            'name.unique' => 'This sub category already exists in the selected category.',
         ]);
 
         $subcategory = SubCategory::findOrFail($id);
@@ -347,25 +355,34 @@ class ProductController extends Controller
 
     public function productSubCategoryItemStore(Request $request)
     {
-        // Validation
         $data = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
 
-            'name' => 'required|string|min:3|max:100|unique:sub_category_items,name',
-            'description' => 'nullable|string|max:200',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                Rule::unique('sub_category_items')->where(function ($query) use ($request) {
+                    return $query->where('category_id', $request->category_id)
+                        ->where('sub_category_id', $request->sub_category_id);
+                }),
+            ],
 
+            'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
+        ], [
+            'name.unique' => 'This sub category item already exists.',
         ]);
 
         $imageName = null;
 
-        // Image Upload
         if ($request->hasFile('image')) {
             try {
                 $file = $request->file('image');
-                $imageName = time().'.'.$file->extension();
+                $imageName = time() . '.' . $file->extension();
 
                 $manager = new ImageManager(new Driver());
 
@@ -373,16 +390,17 @@ class ProductController extends Controller
                     ->cover(300, 300);
 
                 Storage::disk('public')->put(
-                    'subcategoryitem/'.$imageName,
+                    'subcategoryitem/' . $imageName,
                     (string) $image->toJpeg(90)
                 );
 
             } catch (\Exception $e) {
-                return back()->withErrors(['image' => 'Image upload failed']);
+                return back()->withErrors([
+                    'image' => 'Image upload failed'
+                ]);
             }
         }
 
-        // Save
         SubCategoryItem::create([
             'category_id' => $data['category_id'],
             'sub_category_id' => $data['sub_category_id'],
@@ -392,7 +410,6 @@ class ProductController extends Controller
             'image' => $imageName
         ]);
 
-        // Redirect
         return redirect()
             ->route('admin.product.sub.category.item.list')
             ->with('success', 'Sub Category Item Added Successfully');
@@ -400,7 +417,10 @@ class ProductController extends Controller
 
     public function checksubcatitemName(Request $request)
     {
-        $exists = SubCategory::where('name', $request->name)->exists();
+        $exists = SubCategoryItem::where('category_id', $request->category_id)
+            ->where('sub_category_id', $request->sub_category_id)
+            ->where('name', $request->name)
+            ->exists();
 
         return response()->json([
             'exists' => $exists
@@ -431,23 +451,41 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
 
-            'name' => 'required|string|min:3|max:100|unique:sub_category_items,name,' . $id,
-            'description' => 'nullable|string|max:200',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                Rule::unique('sub_category_items')
+                    ->ignore($id)
+                    ->where(function ($query) use ($request) {
+                        return $query->where('category_id', $request->category_id)
+                            ->where('sub_category_id', $request->sub_category_id);
+                    }),
+            ],
 
+            'description' => 'nullable|string|max:200',
             'status' => 'required|in:0,1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp'
+        ], [
+            'name.unique' => 'This sub category item already exists.',
         ]);
 
         // Image Update
         if ($request->hasFile('image')) {
+
             try {
-                // delete old image
-                if ($item->image && Storage::disk('public')->exists('subcategory/'.$item->image)) {
-                    Storage::disk('public')->delete('subcategory/'.$item->image);
+
+                // Delete old image
+                if (
+                    $item->image &&
+                    Storage::disk('public')->exists('subcategoryitem/' . $item->image)
+                ) {
+                    Storage::disk('public')->delete('subcategoryitem/' . $item->image);
                 }
 
                 $file = $request->file('image');
-                $imageName = time().'.'.$file->extension();
+                $imageName = time() . '.' . $file->extension();
 
                 $manager = new ImageManager(new Driver());
 
@@ -455,14 +493,18 @@ class ProductController extends Controller
                     ->cover(300, 300);
 
                 Storage::disk('public')->put(
-                    'subcategoryitem/'.$imageName,
+                    'subcategoryitem/' . $imageName,
                     (string) $image->toJpeg(90)
                 );
 
                 $item->image = $imageName;
+                $item->save();
 
             } catch (\Exception $e) {
-                return back()->withErrors(['image' => 'Image upload failed']);
+
+                return back()->withErrors([
+                    'image' => 'Image upload failed.'
+                ]);
             }
         }
 
@@ -472,15 +514,13 @@ class ProductController extends Controller
             'sub_category_id' => $data['sub_category_id'],
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'status' => $data['status']
+            'status' => $data['status'],
         ]);
 
-        // Redirect (better than JSON for form submit)
         return response()->json([
             'success' => true,
             'message' => 'Sub Category Item updated successfully'
         ]);
-
     }
 
     public function productSubCategoryItemDelete($id)

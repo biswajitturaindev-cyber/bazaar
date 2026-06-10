@@ -149,23 +149,27 @@
     <script>
         $(document).ready(function() {
 
-            $('#subCategoryItemName').on('keyup', function() {
+            $('#subCategoryItemName, #category_id, #sub_category_id').on('keyup change', function() {
 
-                let name = $(this).val();
+                let name = $('#subCategoryItemName').val();
+                let category_id = $('#category_id').val();
+                let sub_category_id = $('#sub_category_id').val();
 
-                if (name.length > 0) {
+                if (name.length > 0 && category_id && sub_category_id) {
 
                     $.ajax({
                         url: "{{ route('admin.product.sub.category.item.check.name') }}",
                         type: "POST",
                         data: {
                             _token: "{{ csrf_token() }}",
+                            category_id: category_id,
+                            sub_category_id: sub_category_id,
                             name: name
                         },
                         success: function(response) {
 
                             if (response.exists) {
-                                $('#nameError').text('Sub category already exists');
+                                $('#nameError').text('Sub category item already exists');
                             } else {
                                 $('#nameError').text('');
                             }
