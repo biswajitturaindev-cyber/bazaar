@@ -54,6 +54,12 @@ return new class extends Migration
 
             // Basic Info
             $table->string('name');
+            
+            // Variant
+            $table->boolean('has_variant')
+                ->default(false)
+                ->comment('0=No Variant, 1=Has Variant');
+
             // Status
             $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
 

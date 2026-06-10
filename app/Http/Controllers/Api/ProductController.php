@@ -347,42 +347,6 @@ class ProductController extends Controller
                 }
 
                 // ATTRIBUTES WITH DECODE
-                /*
-                if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
-
-                    $insertData = [];
-
-                    foreach ($variantData['attributes'] as $attr) {
-
-                        if (!empty($attr['attribute_id']) && !empty($attr['attribute_value_id'])) {
-
-                            $attributeId = decodeIdOrFail($attr['attribute_id'], 'Invalid Attribute ID');
-                            $attributeValueId = decodeIdOrFail($attr['attribute_value_id'], 'Invalid Attribute Value ID');
-
-                            // Optional validation
-                            if (!DB::table('attributes')->where('id', $attributeId)->exists()) {
-                                throw new \Exception('Attribute not found');
-                            }
-
-                            if (!DB::table('attribute_values')->where('id', $attributeValueId)->exists()) {
-                                throw new \Exception('Attribute value not found');
-                            }
-
-                            $insertData[] = [
-                                'product_variant_id' => $variant->id,
-                                'attribute_id' => $attributeId,
-                                'attribute_value_id' => $attributeValueId,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        }
-                    }
-
-                    // Bulk insert (faster)
-                    if (!empty($insertData)) {
-                        DB::table('product_attribute_relations')->insert($insertData);
-                    }
-                }*/
 
                 if (
                     $request->boolean('has_variant') &&
