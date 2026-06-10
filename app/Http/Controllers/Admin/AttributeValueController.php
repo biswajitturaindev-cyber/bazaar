@@ -9,6 +9,7 @@ use App\Models\Attribute;
 use App\Models\AttributeMaster;
 use App\Models\Category;
 use App\Models\SubCategory;
+use Illuminate\Validation\Rule;
 
 class AttributeValueController extends Controller
 {
@@ -24,20 +25,31 @@ class AttributeValueController extends Controller
     //     return view('admin.attribute-values.index', compact('values'));
     // }
 
+    // public function index()
+    // {
+    //     $values = AttributeValue::with([
+    //         'attribute.category',
+    //         'attribute.subCategory',
+    //         'attribute.attributeMaster'
+    //     ])
+    //     ->latest()
+    //     ->paginate(10);
+
+    //     return view('admin.attribute-values.index', compact('values'));
+    // }
+
     public function index()
     {
         $values = AttributeValue::with([
-            'attribute.category',
-            'attribute.subCategory',
-            'attribute.attributeMaster'
+            'category',
+            'subCategory',
+            'attributeMaster'
         ])
         ->latest()
         ->paginate(10);
 
         return view('admin.attribute-values.index', compact('values'));
     }
-
-
     /**
      * Show the form for creating a new resource.
      */
@@ -51,52 +63,91 @@ class AttributeValueController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'category_id'         => 'required|exists:categories,id',
+    //         'sub_category_id'     => 'required|exists:sub_categories,id',
+    //         'attribute_master_id' => 'required|exists:attribute_masters,id',
+    //         'value'               => 'required|string|max:255',
+    //         'color_code'          => 'nullable|string',
+    //         'status'              => 'required|in:0,1',
+    //     ]);
+
+    //     $attribute = Attribute::where('category_id', $data['category_id'])
+    //         ->where('sub_category_id', $data['sub_category_id'])
+    //         ->where('attribute_master_id', $data['attribute_master_id'])
+    //         ->first();
+
+    //     if (!$attribute) {
+    //         return back()->withInput()->withErrors([
+    //             'attribute_master_id' => 'Attribute not found.'
+    //         ]);
+    //     }
+
+    //     $exists = AttributeValue::where('attribute_id', $attribute->id)
+    //         ->where('value', $data['value'])
+    //         ->exists();
+
+    //     if ($exists) {
+    //         return back()->withInput()->withErrors([
+    //             'value' => 'This value already exists for selected attribute.'
+    //         ]);
+    //     }
+
+    //     AttributeValue::create([
+    //         'category_id'         => $data['category_id'],
+    //         'sub_category_id'     => $data['sub_category_id'],
+    //         'attribute_master_id' => $data['attribute_master_id'],
+    //         'attribute_id'        => $attribute->id,
+    //         'value'               => $data['value'],
+    //         'color_code'          => $data['color_code'] ?? null,
+    //         'status'              => $data['status'],
+    //     ]);
+
+    //     return redirect()
+    //         ->route('attribute-values.index')
+    //         ->with('success', 'Attribute value created successfully');
+    // }
+
     public function store(Request $request)
     {
         $data = $request->validate([
-            'category_id'         => 'required|exists:categories,id',
-            'sub_category_id'     => 'required|exists:sub_categories,id',
+            'category_id' => 'required|exists:categories,id',
+            'sub_category_id' => 'required|exists:sub_categories,id',
             'attribute_master_id' => 'required|exists:attribute_masters,id',
-            'value'               => 'required|string|max:255',
-            'color_code'          => 'nullable|string',
-            'status'              => 'required|in:0,1',
+
+            'value' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('attribute_values')->where(function ($query) use ($request) {
+                    return $query->where('category_id', $request->category_id)
+                        ->where('sub_category_id', $request->sub_category_id)
+                        ->where('attribute_master_id', $request->attribute_master_id);
+                }),
+            ],
+
+            'color_code' => 'nullable|string|max:50',
+            'status' => 'required|in:0,1',
+        ], [
+            'value.unique' => 'This value already exists.',
         ]);
 
-        $attribute = Attribute::where('category_id', $data['category_id'])
-            ->where('sub_category_id', $data['sub_category_id'])
-            ->where('attribute_master_id', $data['attribute_master_id'])
-            ->first();
-
-        if (!$attribute) {
-            return back()->withInput()->withErrors([
-                'attribute_master_id' => 'Attribute not found.'
-            ]);
-        }
-
-        $exists = AttributeValue::where('attribute_id', $attribute->id)
-            ->where('value', $data['value'])
-            ->exists();
-
-        if ($exists) {
-            return back()->withInput()->withErrors([
-                'value' => 'This value already exists for selected attribute.'
-            ]);
-        }
-
         AttributeValue::create([
-            'category_id'         => $data['category_id'],
-            'sub_category_id'     => $data['sub_category_id'],
+            'category_id' => $data['category_id'],
+            'sub_category_id' => $data['sub_category_id'],
             'attribute_master_id' => $data['attribute_master_id'],
-            'attribute_id'        => $attribute->id,
-            'value'               => $data['value'],
-            'color_code'          => $data['color_code'] ?? null,
-            'status'              => $data['status'],
+            'value' => $data['value'],
+            'color_code' => $data['color_code'] ?? null,
+            'status' => $data['status'],
         ]);
 
         return redirect()
             ->route('attribute-values.index')
-            ->with('success', 'Attribute value created successfully');
+            ->with('success', 'Attribute value created successfully.');
     }
+
 
     /**
      * Display the specified resource.

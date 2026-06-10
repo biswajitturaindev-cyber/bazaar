@@ -26,9 +26,9 @@ return new class extends Migration
                 ->constrained('attribute_masters')
                 ->cascadeOnDelete();
 
-            $table->foreignId('attribute_id')
-                ->constrained('attributes')
-                ->cascadeOnDelete();
+            // $table->foreignId('attribute_id')
+            //     ->constrained('attributes')
+            //     ->cascadeOnDelete();
 
             $table->string('value');
             $table->string('color_code')->nullable();
@@ -36,7 +36,15 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['attribute_id', 'value']);
+            $table->unique(
+                [
+                    'category_id',
+                    'sub_category_id',
+                    'attribute_master_id',
+                    'value'
+                ],
+                'attr_val_unique'
+            );
         });
     }
 

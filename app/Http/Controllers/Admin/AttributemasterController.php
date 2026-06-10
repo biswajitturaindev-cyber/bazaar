@@ -7,7 +7,7 @@ use App\Models\AttributeMaster;
 use App\Models\BusinessCategory;
 use App\Models\BusinessSubCategory;
 use Illuminate\Http\Request;
-
+use Illuminate\Validation\Rule;
 class AttributemasterController extends Controller
 {
     /**
@@ -44,7 +44,16 @@ class AttributemasterController extends Controller
         $data = $request->validate([
             'business_category_id' => 'required|integer',
             'business_sub_category_id' => 'required|integer',
-            'name' => 'required|string|max:255|unique:attribute_masters,name',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('attribute_masters', 'name')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('business_category_id', $request->business_category_id)
+                                    ->where('business_sub_category_id', $request->business_sub_category_id);
+                    }),
+            ],
         ]);
 
         AttributeMaster::create($data);
