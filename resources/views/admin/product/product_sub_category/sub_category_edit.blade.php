@@ -32,7 +32,7 @@ Category / Add Sub Category
                         <label class="block mb-2 text-sm font-medium">Category</label>
                         <select name="category_id"
                                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                
+
                                 <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}"
@@ -40,7 +40,7 @@ Category / Add Sub Category
                                 {{ $category->name }}
                                 </option>
                                 @endforeach
-                                
+
                         </select>
                         @error('category_id')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -49,14 +49,14 @@ Category / Add Sub Category
 
                     <div>
                         <label class="block mb-2 text-sm font-medium">Sub Category Name</label>
-                        
+
                         <input type="text" id="subCategoryName" name="name"
                         value="{{$subcategory->name}}"
                         class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter sub category name">
-                        
+
                         <p id="nameError" class="text-red-500 text-sm mt-1"></p>
-                        
+
                         @error('name')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -116,43 +116,7 @@ toastr.options = {
 $(document).ready(function(){
 
     // NAME VALIDATION + CHECK EXISTING
-    $('#subCategoryName').on('keyup', function(){
 
-        let name = $(this).val();
-        let regex = /^[A-Za-z0-9 .]+$/;
-
-        if(name.length > 0){
-
-            if(!regex.test(name)){
-                $('#nameError').text('Only letters, numbers, spaces and dots are allowed.');
-                return;
-            }else{
-                $('#nameError').text('');
-            }
-
-            $.ajax({
-                url: "{{ route('admin.product.sub.category.check.name') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    name: name
-                },
-                success: function(response){
-
-                    if(response.exists){
-                        $('#nameError').text('Sub category already exists');
-                    }else{
-                        $('#nameError').text('');
-                    }
-
-                }
-            });
-
-        }else{
-            $('#nameError').text('');
-        }
-
-    });
 
 
     // FORM SUBMIT AJAX
