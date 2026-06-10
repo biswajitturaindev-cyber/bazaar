@@ -13,7 +13,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -182,35 +182,72 @@ class ProductController extends Controller
         return view('admin.product.product_sub_category.sub_category',compact('categories'));
     }
 
+    // public function productSubCategoryStore(Request $request)
+    // {
+    //     $request->validate([
+    //         'category_id' => 'required',
+    //         'name' => [
+    //             'required',
+    //             'min:3',
+    //             'max:50',
+    //             'regex:/^[A-Za-z0-9 .]+$/',
+    //             'unique:sub_categories,name'
+    //         ],
+    //         'description' => [
+    //             'nullable',
+    //             'min:10',
+    //             'max:200',
+    //             'regex:/^[A-Za-z0-9 .]+$/'
+    //         ],
+    //     ]);
+
+    //     SubCategory::create([
+    //         'category_id' => $request->category_id,
+    //         //'parent_id' => $request->parent_id ?? 0,
+    //         'name' => $request->name,
+    //         'description' => $request->description,
+    //         'status' => $request->status
+    //     ]);
+
+    //     return redirect()->route('admin.product.sub.category.list')
+    //             ->with('success','Sub Category Added Successfully');
+    // }
+
     public function productSubCategoryStore(Request $request)
     {
         $request->validate([
-            'category_id' => 'required',
+            'category_id' => 'required|exists:categories,id',
+
             'name' => [
                 'required',
                 'min:3',
                 'max:50',
                 'regex:/^[A-Za-z0-9 .]+$/',
-                'unique:sub_categories,name'
+                Rule::unique('sub_categories')->where(function ($query) use ($request) {
+                    return $query->where('category_id', $request->category_id);
+                }),
             ],
+
             'description' => [
                 'nullable',
                 'min:10',
                 'max:200',
                 'regex:/^[A-Za-z0-9 .]+$/'
             ],
+        ], [
+            'name.unique' => 'This sub category already exists in the selected category.',
         ]);
 
         SubCategory::create([
             'category_id' => $request->category_id,
-            //'parent_id' => $request->parent_id ?? 0,
             'name' => $request->name,
             'description' => $request->description,
             'status' => $request->status
         ]);
 
-        return redirect()->route('admin.product.sub.category.list')
-                ->with('success','Sub Category Added Successfully');
+        return redirect()
+            ->route('admin.product.sub.category.list')
+            ->with('success', 'Sub Category Added Successfully');
     }
 
     // public function checkName(Request $request)
