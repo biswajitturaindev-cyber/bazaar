@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('product_variant_id');
-            $table->unsignedBigInteger('attribute_id');
+            $table->unsignedBigInteger('attribute_master_id');
             $table->unsignedBigInteger('attribute_value_id');
 
             $table->timestamps();
@@ -25,14 +25,19 @@ return new class extends Migration
                 ->on('product_variants')
                 ->onDelete('cascade');
 
-            $table->unique(
-                ['product_variant_id', 'attribute_id', 'attribute_value_id'],
-                'pav_unique'
-            );
+            $table->foreign('attribute_master_id')
+                ->references('id')
+                ->on('attribute_masters')
+                ->onDelete('cascade');
 
-            $table->index(
-                ['product_variant_id', 'attribute_id'],
-                'pav_variant_attr_idx'
+            $table->foreign('attribute_value_id')
+                ->references('id')
+                ->on('attribute_values')
+                ->onDelete('cascade');
+
+            $table->unique(
+                ['product_variant_id', 'attribute_master_id'],
+                'pav_variant_attribute_unique'
             );
         });
     }
