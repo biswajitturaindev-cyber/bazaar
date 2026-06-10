@@ -213,9 +213,20 @@ class ProductController extends Controller
                 ->with('success','Sub Category Added Successfully');
     }
 
+    // public function checkName(Request $request)
+    // {
+    //     $exists = SubCategory::where('name', $request->name)->exists();
+
+    //     return response()->json([
+    //         'exists' => $exists
+    //     ]);
+    // }
+
     public function checkName(Request $request)
     {
-        $exists = SubCategory::where('name', $request->name)->exists();
+        $exists = SubCategory::where('category_id', $request->category_id)
+            ->where('name', $request->name)
+            ->exists();
 
         return response()->json([
             'exists' => $exists

@@ -33,7 +33,7 @@ Category / Add Sub Category
                     <div>
                         <label class="block mb-2 text-sm font-medium">Category</label>
 
-                        <select name="category_id"
+                        <select name="category_id" id="category_id"
                             class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                             <option value="">Select Category</option>
@@ -56,14 +56,14 @@ Category / Add Sub Category
                     {{-- Sub Category Name --}}
                     <div>
                         <label class="block mb-2 text-sm font-medium">Sub Category Name</label>
-                        
+
                         <input type="text" id="subCategoryName" name="name"
                         value="@error('name'){{ '' }}@else{{ old('name') }}@enderror"
                         class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter sub category name">
-                        
+
                         <p id="nameError" class="text-red-500 text-sm mt-1"></p>
-                        
+
                         @error('name')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -118,31 +118,63 @@ Category / Add Sub Category
 <script>
 $(document).ready(function(){
 
-    $('#subCategoryName').on('keyup', function(){
+    // $('#subCategoryName').on('keyup', function(){
 
-        let name = $(this).val();
+    //     let name = $(this).val();
 
-        if(name.length > 0){
+    //     if(name.length > 0){
+
+    //         $.ajax({
+    //             url: "{{ route('admin.product.sub.category.check.name') }}",
+    //             type: "POST",
+    //             data: {
+    //                 _token: "{{ csrf_token() }}",
+    //                 name: name
+    //             },
+    //             success: function(response){
+
+    //                 if(response.exists){
+    //                     $('#nameError').text('Sub category already exists');
+    //                 }else{
+    //                     $('#nameError').text('');
+    //                 }
+
+    //             }
+    //         });
+
+    //     }else{
+    //         $('#nameError').text('');
+    //     }
+
+    // });
+
+    $('#subCategoryName, #category_id').on('keyup change', function () {
+
+        let name = $('#subCategoryName').val();
+        let category_id = $('#category_id').val();
+
+        if (name.length > 0 && category_id) {
 
             $.ajax({
                 url: "{{ route('admin.product.sub.category.check.name') }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
+                    category_id: category_id,
                     name: name
                 },
-                success: function(response){
+                success: function (response) {
 
-                    if(response.exists){
-                        $('#nameError').text('Sub category already exists');
-                    }else{
+                    if (response.exists) {
+                        $('#nameError').text('Sub category already exists in this category');
+                    } else {
                         $('#nameError').text('');
                     }
 
                 }
             });
 
-        }else{
+        } else {
             $('#nameError').text('');
         }
 
