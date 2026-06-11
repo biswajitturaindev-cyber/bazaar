@@ -18,10 +18,12 @@ class ProductAttributeRelation extends Model
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
-    // Attribute
-    public function attribute()
+    public function attributeMaster()
     {
-        return $this->belongsTo(Attribute::class);
+        return $this->belongsTo(
+            AttributeMaster::class,
+            'attribute_master_id'
+        );
     }
 
     // Attribute Value
