@@ -16,13 +16,19 @@ class AttributeRelationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'attribute_id' => Hashids::encode($this->attribute_id),
-            'attribute_name' => $this->attribute->name ?? null,
+            'attribute_id' => $this->attributeMaster
+                ? Hashids::encode($this->attributeMaster->id)
+                : null,
 
-            'value_id' => Hashids::encode($this->attribute_value_id),
-            'value' => $this->attributeValue->value ?? null,
+            'attribute_name' => $this->attributeMaster?->name,
 
-            'color_code' => $this->attributeValue->color_code ?? null,
+            'value_id' => $this->attributeValue
+                ? Hashids::encode($this->attributeValue->id)
+                : null,
+
+            'value' => $this->attributeValue?->value,
+
+            'color_code' => $this->attributeValue?->color_code,
         ];
     }
 }

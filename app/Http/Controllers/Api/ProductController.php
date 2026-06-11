@@ -505,12 +505,6 @@ class ProductController extends Controller
     public function show(Request $request, $id)
     {
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Product ID
-            |--------------------------------------------------------------------------
-            */
             $decoded = Hashids::decode($id);
 
             if (empty($decoded)) {
@@ -522,11 +516,6 @@ class ProductController extends Controller
 
             $productId = $decoded[0];
 
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Business ID
-            |--------------------------------------------------------------------------
-            */
             $businessId = null;
 
             if ($request->filled('business_id')) {
@@ -546,11 +535,6 @@ class ProductController extends Controller
 
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Business Category ID
-            |--------------------------------------------------------------------------
-            */
             $businessCategoryId = null;
 
             if ($request->filled('business_category_id')) {
@@ -569,11 +553,6 @@ class ProductController extends Controller
                 $businessCategoryId = $decodedBusinessCategory[0];
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Model Map
-            |--------------------------------------------------------------------------
-            */
             $modelMap = config('product.model_map');
 
             $product = null;
@@ -594,11 +573,6 @@ class ProductController extends Controller
                         'created_at'
                     ])
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Product ID + Business ID Uniqueness
-                    |--------------------------------------------------------------------------
-                    */
                     ->where('id', $productId)
 
                     ->when($businessId, function ($q) use ($businessId) {
@@ -619,11 +593,6 @@ class ProductController extends Controller
 
                         'hsn:id,hsn_code,igst',
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Variants
-                        |--------------------------------------------------------------------------
-                        */
                         'variants' => function ($q) use ($productId) {
 
                             $q->select([
@@ -656,16 +625,13 @@ class ProductController extends Controller
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
 
                                 'attributes' => function ($attr) {
-
                                     $attr->select([
                                         'id',
                                         'product_variant_id',
-                                        'attribute_id',
+                                        'attribute_master_id',
                                         'attribute_value_id'
                                     ])->with([
-
-                                        'attribute:id,name',
-
+                                        'attributeMaster:id,name',
                                         'attributeValue:id,value,color_code'
                                     ]);
                                 },
@@ -692,11 +658,6 @@ class ProductController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Product Not Found
-            |--------------------------------------------------------------------------
-            */
             if (!$product) {
 
                 return response()->json([
@@ -705,11 +666,6 @@ class ProductController extends Controller
                 ], 404);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Success Response
-            |--------------------------------------------------------------------------
-            */
             return response()->json([
                 'status' => true,
                 'data'   => new ProductResource($product)
