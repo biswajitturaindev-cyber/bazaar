@@ -24,7 +24,38 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        
+
+        // $exceptions->render(function (NotFoundHttpException $e, $request) {
+
+        //     if ($request->is('api/*')) {
+        //         return response()->json([
+        //             'status' => false,
+        //             'message' => 'API route not found'
+        //         ], 404);
+        //     }
+        // });
+
+        // $exceptions->render(function (Throwable $e, $request) {
+
+        //     if ($request->is('api/*')) {
+
+        //         $status = 500;
+
+        //         if ($e instanceof HttpExceptionInterface) {
+        //             $status = $e->getStatusCode();
+        //         }
+
+        //         return response()->json([
+        //             'status' => false,
+        //             'message' => $status == 500
+        //                 ? 'Something went wrong'
+        //                 : $e->getMessage()
+        //         ], $status);
+        //     }
+        // });
+
+
+        // Handle API 404 (Route not found)
         $exceptions->render(function (NotFoundHttpException $e, $request) {
 
             if ($request->is('api/*')) {
@@ -35,22 +66,22 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+
         $exceptions->render(function (Throwable $e, $request) {
 
             if ($request->is('api/*')) {
-
                 $status = 500;
-
                 if ($e instanceof HttpExceptionInterface) {
                     $status = $e->getStatusCode();
                 }
-
                 return response()->json([
-                    'status' => false,
-                    'message' => $status == 500
-                        ? 'Something went wrong'
-                        : $e->getMessage()
+                    'status'  => false,
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
                 ], $status);
             }
         });
+
+
     })->create();
