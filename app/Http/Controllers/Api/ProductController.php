@@ -348,6 +348,58 @@ class ProductController extends Controller
 
                 // ATTRIBUTES WITH DECODE
 
+                // if (
+                //     $request->boolean('has_variant') &&
+                //     !empty($variantData['attributes']) &&
+                //     is_array($variantData['attributes'])
+                // ) {
+
+                //     $insertData = [];
+
+                //     foreach ($variantData['attributes'] as $attr) {
+
+                //         if (!empty($attr['attribute_id']) && !empty($attr['attribute_value_id'])) {
+
+                //             $attributeId = decodeIdOrFail(
+                //                 $attr['attribute_id'],
+                //                 'Invalid Attribute ID'
+                //             );
+
+                //             $attributeValueId = decodeIdOrFail(
+                //                 $attr['attribute_value_id'],
+                //                 'Invalid Attribute Value ID'
+                //             );
+
+                //             if (!DB::table('attributes')->where('id', $attributeId)->exists()) {
+                //                 throw new \Exception('Attribute not found');
+                //             }
+
+                //             if (
+                //                 !DB::table('attribute_values')
+                //                     ->where('id', $attributeValueId)
+                //                     ->where('attribute_id', $attributeId)
+                //                     ->exists()
+                //             ) {
+                //                 throw new \Exception(
+                //                     'Selected attribute value does not belong to the selected attribute'
+                //                 );
+                //             }
+
+                //             $insertData[] = [
+                //                 'product_variant_id' => $variant->id,
+                //                 'attribute_id' => $attributeId,
+                //                 'attribute_value_id' => $attributeValueId,
+                //                 'created_at' => now(),
+                //                 'updated_at' => now(),
+                //             ];
+                //         }
+                //     }
+
+                //     if (!empty($insertData)) {
+                //         DB::table('product_attribute_relations')->insert($insertData);
+                //     }
+                // }
+
                 if (
                     $request->boolean('has_variant') &&
                     !empty($variantData['attributes']) &&
@@ -358,11 +410,14 @@ class ProductController extends Controller
 
                     foreach ($variantData['attributes'] as $attr) {
 
-                        if (!empty($attr['attribute_id']) && !empty($attr['attribute_value_id'])) {
+                        if (
+                            !empty($attr['attribute_master_id']) &&
+                            !empty($attr['attribute_value_id'])
+                        ) {
 
-                            $attributeId = decodeIdOrFail(
-                                $attr['attribute_id'],
-                                'Invalid Attribute ID'
+                            $attributeMasterId = decodeIdOrFail(
+                                $attr['attribute_master_id'],
+                                'Invalid Attribute Master ID'
                             );
 
                             $attributeValueId = decodeIdOrFail(
@@ -370,14 +425,18 @@ class ProductController extends Controller
                                 'Invalid Attribute Value ID'
                             );
 
-                            if (!DB::table('attributes')->where('id', $attributeId)->exists()) {
-                                throw new \Exception('Attribute not found');
+                            if (
+                                !DB::table('attribute_masters')
+                                    ->where('id', $attributeMasterId)
+                                    ->exists()
+                            ) {
+                                throw new \Exception('Attribute master not found');
                             }
 
                             if (
                                 !DB::table('attribute_values')
                                     ->where('id', $attributeValueId)
-                                    ->where('attribute_id', $attributeId)
+                                    ->where('attribute_master_id', $attributeMasterId)
                                     ->exists()
                             ) {
                                 throw new \Exception(
@@ -387,7 +446,7 @@ class ProductController extends Controller
 
                             $insertData[] = [
                                 'product_variant_id' => $variant->id,
-                                'attribute_id' => $attributeId,
+                                'attribute_master_id' => $attributeMasterId,
                                 'attribute_value_id' => $attributeValueId,
                                 'created_at' => now(),
                                 'updated_at' => now(),
@@ -399,8 +458,6 @@ class ProductController extends Controller
                         DB::table('product_attribute_relations')->insert($insertData);
                     }
                 }
-
-
 
                 // IMAGES
                 if ($request->hasFile("variants.$index.images")) {
