@@ -17,23 +17,96 @@ class AttributeValueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index()
+    // {
+    //     try {
+    //         $data = AttributeValue::with('attribute')->latest()->get();
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Attribute values fetched successfully',
+    //             'data' => AttributeValueResource::collection($data)
+    //         ], 200);
+
+    //     } catch (Exception $e) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Something went wrong',
+    //             'error' => $e->getMessage() // remove in production
+    //         ], 500);
+    //     }
+    // }
+
+
+    public function index(Request $request)
     {
         try {
-            $data = AttributeValue::with('attribute')->latest()->get();
+
+            $query = AttributeValue::with('attributeMaster');
+
+            if ($request->filled('category_id')) {
+                $categoryId = decodeIdOrFail(
+                    $request->category_id,
+                    'Category'
+                );
+
+                $query->where('category_id', $categoryId);
+            }
+
+            if ($request->filled('sub_category_id')) {
+                $subCategoryId = decodeIdOrFail(
+                    $request->sub_category_id,
+                    'Sub Category'
+                );
+
+                $query->where('sub_category_id', $subCategoryId);
+            }
+
+            $data = $query->latest()->get();
+
+            $groupedData = $data
+            ->groupBy('attribute_master_id')
+            ->map(function ($items) {
+
+                $first = $items->first();
+                $attributeName = $first->attributeMaster->name;
+
+                return [
+                    'attribute_master_id' => Hashids::encode($first->attributeMaster->id),
+                    'attribute_name'      => $attributeName,
+
+                    'values' => $items->map(function ($item) use ($attributeName) {
+
+                        $value = [
+                            'id'     => Hashids::encode($item->id),
+                            'value'  => $item->value,
+                            'status' => $item->status,
+                        ];
+
+                        if ($attributeName === 'Color') {
+                            $value['color_code'] = $item->color_code;
+                        }
+
+                        return $value;
+
+                    })->values(),
+                ];
+            })
+            ->values();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Attribute values fetched successfully',
-                'data' => AttributeValueResource::collection($data)
+                'data' => $groupedData,
             ], 200);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
 
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
-                'error' => $e->getMessage() // remove in production
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

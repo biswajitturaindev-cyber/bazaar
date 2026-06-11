@@ -53,6 +53,9 @@ class AttributeValue extends Model
 
     public function attributeMaster()
     {
-        return $this->belongsTo(AttributeMaster::class);
+        return $this->belongsTo(
+            AttributeMaster::class,
+            'attribute_master_id'
+        );
     }
 }

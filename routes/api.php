@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AttributeController;
+use App\Http\Controllers\Api\AttributeMasterController;
 use App\Http\Controllers\Api\AttributeValueController;
 use App\Http\Controllers\Api\BusinessCategoryMappingController;
 use Illuminate\Http\Request;
@@ -123,10 +124,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Attribute & Attribute values
+    | Attribute & Attribute Master & Attribute values
     |--------------------------------------------------------------------------
     */
     Route::apiResource('attributes', AttributeController::class);
+    Route::apiResource('attribute-master', AttributeMasterController::class);
     Route::apiResource('attribute-values', AttributeValueController::class);
 
     /*
