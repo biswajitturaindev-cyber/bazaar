@@ -110,7 +110,7 @@
                     //     if (!/^[A-Za-z0-9 .]+$/.test(value)) {
                     //         return `${title} can contain only letters, numbers, spaces and '.'`;
                     //     }
-                        break;
+                    //    break;
 
                     case "alphanum_space_special":
 

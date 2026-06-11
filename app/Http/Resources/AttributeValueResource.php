@@ -18,21 +18,25 @@ class AttributeValueResource extends JsonResource
         return [
             'id' => Hashids::encode($this->id),
 
-            'attribute' => [
-                'id' => Hashids::encode($this->attribute?->id),
-                'name' => $this->attribute?->name,
+            'attribute_master' => [
+                'id' => $this->attributeMaster
+                    ? Hashids::encode($this->attributeMaster->id)
+                    : null,
+
+                'name' => $this->attributeMaster?->name,
             ],
 
             'value' => $this->value,
+
             'color_code' => $this->color_code,
 
-            // useful for frontend
-            'color_preview' => $this->color_code
-                ? $this->color_code
-                : null,
+            'color_preview' => $this->color_code,
 
             'status' => $this->status,
-            'status_label' => $this->status ? 'Active' : 'Inactive',
+
+            'status_label' => $this->status
+                ? 'Active'
+                : 'Inactive',
         ];
     }
 }
