@@ -353,12 +353,6 @@ class ProductController extends Controller
                     );
                 }
 
-                dd([
-                    'has_variant' => $request->boolean('has_variant'),
-                    'attributes' => $variantData['attributes'] ?? null,
-                    'insertData' => $insertData,
-                ]);
-
                 // ATTRIBUTES WITH DECODE
                 if (
                     $request->boolean('has_variant') &&
