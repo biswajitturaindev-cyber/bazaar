@@ -1226,12 +1226,12 @@ class ProductController extends Controller
             $modelClass = $modelMap[$categoryId];
 
             $product = $modelClass::with([
-                'variants.attributes.attribute',
+                'variants.attributes.attributeMaster',
                 'variants.attributes.attributeValue',
                 'variants.images',
                 'variants.meta',
                 'variants.stocks.business'
-            ])->find($productId);
+            ])->findOrFail($productId);
 
             return response()->json([
                 'status' => true,
