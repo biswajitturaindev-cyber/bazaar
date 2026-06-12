@@ -803,7 +803,7 @@ class ProductController extends Controller
             // =============================
             DB::table($tableName)->where('id', $productId)->update([
                 'name' => $data['name'],
-                'hsn_id' =>$data['hsn_id'] ?? null,
+                'hsn_id' => !empty($data['hsn_id'])? decodeIdOrFail($data['hsn_id']): null,
                 'has_variant' => $data['has_variant'] ?? 0,
                 'status' => $data['status'],
                 'updated_at' => now(),
