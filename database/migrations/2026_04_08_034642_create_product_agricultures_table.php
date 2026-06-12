@@ -55,10 +55,17 @@ return new class extends Migration
             // Basic Info
             $table->string('name');
 
+            $table->decimal('commission', 10, 2)->nullable();
+            $table->decimal('vendor_commission', 10, 2)->nullable();
+            $table->tinyInteger('vendor_commission_approval_status')
+                ->default(0)
+                ->comment('0=Waiting for Approval, 1=Approved, 2=Rejected');
             // Variant
             $table->boolean('has_variant')
                 ->default(false)
                 ->comment('0=No Variant, 1=Has Variant');
+
+            $table->string('batch_no')->nullable();
 
             // Status
             $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
