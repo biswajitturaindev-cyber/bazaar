@@ -8,7 +8,7 @@ class ProductAttributeRelation extends Model
 {
     protected $fillable = [
         'product_variant_id',
-        'attribute_id',
+        'attribute_master_id',
         'attribute_value_id'
     ];
 
@@ -29,7 +29,10 @@ class ProductAttributeRelation extends Model
     // Attribute Value
     public function attributeValue()
     {
-        return $this->belongsTo(AttributeValue::class);
+        return $this->belongsTo(
+            AttributeValue::class,
+            'attribute_value_id'
+        );
     }
 
     // OPTIONAL: Access actual product dynamically
