@@ -16,16 +16,12 @@ class ProductVariant extends Model
         'selling_price',
         'discount',
         'final_price',
-        'commission',
-        'vendor_commission',
         'short_description',
         'long_description',
         'is_primary',
         'variant_status',
-        'batch_no',
         'manufacture_date',
         'expiry_date',
-        'vendor_commission_approval_status',
     ];
 
     protected $casts = [
@@ -141,12 +137,5 @@ class ProductVariant extends Model
     }
 
 
-    public function getVendorCommissionApprovalStatusTextAttribute()
-    {
-        return [
-            0 => 'Waiting for Approval',
-            1 => 'Approved',
-            2 => 'Rejected',
-        ][$this->vendor_commission_approval_status] ?? 'Unknown';
-    }
+
 }

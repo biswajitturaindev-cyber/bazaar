@@ -24,6 +24,14 @@ class ProductResource extends JsonResource
 
             'name' => $this->name ?? null,
             'has_variant' => (bool) ($this->has_variant ?? false),
+
+            'commission' => $this->commission,
+            'vendor_commission' => $this->vendor_commission,
+            'vendor_commission_approval_status' => $this->vendor_commission_approval_status,
+            'vendor_commission_approval_status_label' => $this->vendor_commission_approval_status_text,
+
+            'batch_no' => $this->batch_no,
+
             'status' => $this->status ?? null,
             'status_label' => config('product.status')[$this->status] ?? 'Unknown',
 

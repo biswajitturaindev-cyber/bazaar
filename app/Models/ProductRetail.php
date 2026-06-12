@@ -23,6 +23,9 @@ class ProductRetail extends Model
         'sub_sub_category_id',
         'hsn_id',
         'has_variant',
+        'commission',
+        'vendor_commission',
+        'vendor_commission_approval_status',
         'name',
         'status',
     ];
@@ -97,5 +100,14 @@ class ProductRetail extends Model
     public function carts()
     {
         return $this->morphMany(Cart::class, 'product');
+    }
+
+    public function getVendorCommissionApprovalStatusTextAttribute()
+    {
+        return [
+            0 => 'Waiting for Approval',
+            1 => 'Approved',
+            2 => 'Rejected',
+        ][$this->vendor_commission_approval_status] ?? 'Unknown';
     }
 }

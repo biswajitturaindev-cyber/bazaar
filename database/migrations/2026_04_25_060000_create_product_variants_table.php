@@ -25,9 +25,6 @@ return new class extends Migration
             $table->decimal('selling_price', 10, 2)->nullable();
             $table->decimal('discount', 10, 2)->nullable();
             $table->decimal('final_price', 10, 2)->nullable();
-            
-            $table->decimal('commission', 10, 2)->nullable();
-            $table->decimal('vendor_commission', 10, 2)->nullable();
 
             $table->text('short_description')->nullable();
             $table->longText('long_description')->nullable();
@@ -38,13 +35,11 @@ return new class extends Migration
                 ->default(1)
                 ->comment('1 = Active, 0 = Inactive');
 
-            $table->string('batch_no')->nullable();
+
             $table->date('manufacture_date')->nullable();
             $table->date('expiry_date')->nullable();
 
-            $table->tinyInteger('vendor_commission_approval_status')
-                ->default(0)
-                ->comment('0=Waiting for Approval, 1=Approved, 2=Rejected');
+
 
             $table->timestamps();
 
