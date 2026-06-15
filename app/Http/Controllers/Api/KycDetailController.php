@@ -70,8 +70,8 @@ class KycDetailController extends Controller
             $data = $request->validate([
                 'business_id' => 'required|exists:businesses,id|unique:kyc_details,business_id',
 
-                'owner_photo' => 'required|file',
-                'shop_photo'  => 'required|file',
+                'owner_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'shop_photo'  => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
                 'pan_card'    => 'required|file',
 
                 'gst_certificate' => 'nullable|file',

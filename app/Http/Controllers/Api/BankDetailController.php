@@ -62,7 +62,7 @@ class BankDetailController extends Controller
                 'ifsc_code' => 'required',
                 'upi_id' => 'nullable',
                 'qr_code' => 'nullable|file|image',
-                'cancelled_cheque' => 'required|file',
+                'cancelled_cheque' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             ]);
 
             // create manager (GD)
