@@ -17,8 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('product_type');
 
-            $table->string('sku')->nullable()->unique()->index();
-            $table->string('barcode')->nullable()->unique()->index();
+            $table->string('sku')->nullable()->index();
+            $table->string('barcode')->nullable()->index();
 
             $table->decimal('mrp', 10, 2)->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
