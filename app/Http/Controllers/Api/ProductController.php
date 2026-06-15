@@ -1116,13 +1116,26 @@ class ProductController extends Controller
                 // =============================
                 // CHECK SKU BELONGS TO OTHER PRODUCT
                 // =============================
+                // $existingVariantOtherProduct = ProductVariant::where('sku', $sku)
+                //     ->where('product_id', '!=', $productId)
+                //     ->first();
+
+                // if ($existingVariantOtherProduct) {
+                //     throw \Illuminate\Validation\ValidationException::withMessages([
+                //         "variants.$index.sku" => ["SKU '{$sku}' already exists for another product"]
+                //     ]);
+                // }
+
                 $existingVariantOtherProduct = ProductVariant::where('sku', $sku)
                     ->where('product_id', '!=', $productId)
+                    ->when(isset($variantId), function ($query) use ($variantId) {
+                        $query->where('id', '!=', $variantId);
+                    })
                     ->first();
 
                 if ($existingVariantOtherProduct) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        "variants.$index.sku" => ["SKU '{$sku}' already exists for another product"]
+                        "variants.$index.sku" => ["SKU '{$sku}' already exists for another product."]
                     ]);
                 }
 
