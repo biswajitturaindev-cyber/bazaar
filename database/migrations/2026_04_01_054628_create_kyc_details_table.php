@@ -18,7 +18,7 @@ return new class extends Migration
                 ->constrained('businesses')
                 ->cascadeOnDelete();
 
-            $table->string('owner_photo');
+            $table->string('owner_photo')->nullable();
             $table->tinyInteger('owner_photo_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
 
             $table->string('shop_photo');
