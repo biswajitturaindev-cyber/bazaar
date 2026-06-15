@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('upi_id')->nullable();
             $table->string('qr_code')->nullable();
 
-            $table->string('cancelled_cheque');
+            $table->string('cancelled_cheque')->nullable();
 
             $table->timestamps();
         });
