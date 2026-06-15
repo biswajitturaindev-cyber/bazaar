@@ -1124,7 +1124,11 @@ class ProductController extends Controller
                 //     ]);
                 // }
 
+
                 $sku = trim($variantData['sku'] ?? '');
+
+                /*
+
 
                 if (!empty($sku)) {
 
@@ -1143,6 +1147,8 @@ class ProductController extends Controller
                         ]);
                     }
                 }
+                */
+
 
                 // =============================
                 // FIND VARIANT
