@@ -27,7 +27,7 @@ return new class extends Migration
 
             // Service Area
             $table->decimal('delivery_radius', 5, 2)->nullable(); // KM
-            $table->text('serviceable_pincode'); // comma separated OR JSON
+            $table->text('serviceable_pincode')->nullable(); // comma separated OR JSON
 
             // Optional fields
             $table->boolean('status')->default(true);
