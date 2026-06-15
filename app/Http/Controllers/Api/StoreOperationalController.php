@@ -72,14 +72,16 @@ class StoreOperationalController extends Controller
 
                 'delivery_radius' => 'nullable|numeric|min:0',
 
-                'serviceable_pincode' => 'required|array',
-                'serviceable_pincode.*' => 'required',
+                'serviceable_pincode' => 'nullable|array',
+                'serviceable_pincode.*' => 'nullable|digits:6',
 
                 'status' => 'required|boolean',
             ]);
 
-            // Convert pincode array  string
-            $validated['serviceable_pincode'] = implode(',', $validated['serviceable_pincode']);
+            // Convert pincode array to comma-separated string
+            $validated['serviceable_pincode'] = isset($validated['serviceable_pincode'])
+                ? implode(',', $validated['serviceable_pincode'])
+                : null;
 
             // Save / Update using business_id
             $store = StoreOperationalDetail::updateOrCreate(
