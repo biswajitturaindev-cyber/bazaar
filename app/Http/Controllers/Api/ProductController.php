@@ -34,6 +34,129 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index()
+    // {
+    //     try {
+
+    //         $modelMap = config('product.model_map');
+    //         $allProducts = collect();
+
+    //         $perPage = request()->get('per_page', 10);
+    //         $page = request()->get('page', 1);
+
+    //         // FILTERS
+    //         $businessId = decodeIdOrFail(request()->business_id);
+    //         foreach ($modelMap as $type => $modelClass) {
+
+    //             $products = $modelClass::query()
+    //                 ->select([
+    //                     'id',
+    //                     'name',
+    //                     'category_id',
+    //                     'sub_category_id',
+    //                     'sub_sub_category_id',
+    //                     'hsn_id',
+    //                     'status',
+    //                     'created_at'
+    //                 ])
+    //                 ->with([
+    //                     'category:id,name',
+    //                     'subCategory:id,name',
+    //                     'subSubCategory:id,name',
+    //                     'hsn:id,hsn_code,igst',
+
+    //                     // optimized variant loading
+    //                     'primaryVariant' => function ($q) {
+    //                         $q->select([
+    //                             'id',
+    //                             'sku',
+    //                             'barcode',
+    //                             'discount',
+    //                             'final_price',
+    //                             'product_id',
+    //                             'product_type',
+    //                             'selling_price',
+    //                             'mrp',
+    //                             'cost_price',
+    //                             'is_primary',
+    //                             'batch_no',
+    //                             'manufacture_date',
+    //                             'expiry_date',
+    //                             'short_description',
+    //                             'long_description'
+    //                         ])
+    //                         ->with([
+    //                             'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+    //                             'attributes' => function ($attr) {
+    //                                 $attr->select([
+    //                                     'id',
+    //                                     'product_variant_id',
+    //                                     'attribute_master_id',
+    //                                     'attribute_value_id'
+    //                                 ])->with([
+    //                                     'attributeMaster:id,name',
+    //                                     'attributeValue:id,value,color_code'
+    //                                 ]);
+    //                             },
+
+    //                             // ONLY ONE IMAGE
+    //                             'images' => function ($img) {
+    //                                 $img->select([
+    //                                     'id',
+    //                                     'product_variant_id',
+    //                                     'image_medium'
+    //                                 ])->limit(1);
+    //                             }
+    //                         ]);
+    //                     }
+    //                 ])
+    //                 ->when($businessId, function ($q) use ($businessId) {
+    //                     $q->where('business_id', $businessId);
+    //                 })
+    //                 ->latest()
+    //                 ->get()
+    //                 ->map(function ($item) use ($type) {
+    //                     $item->product_type = $type;
+    //                     return $item;
+    //                 });
+
+    //             $allProducts = $allProducts->concat($products);
+    //         }
+
+    //         // global sort
+    //         $allProducts = $allProducts->sortByDesc('created_at')->values();
+
+    //         // manual pagination (lightweight)
+    //         $total = $allProducts->count();
+
+    //         $paginated = $allProducts
+    //             ->slice(($page - 1) * $perPage, $perPage)
+    //             ->values();
+
+    //         return response()->json([
+    //             'status'  => true,
+    //             'message' => 'Product list fetched successfully',
+    //             'data'    => ProductResource::collection($paginated),
+    //             'meta'    => [
+    //                 'current_page' => (int)$page,
+    //                 'per_page'     => (int)$perPage,
+    //                 'total'        => $total,
+    //                 'last_page'    => (int) ceil($total / $perPage),
+    //             ]
+    //         ], 200);
+
+    //     } catch (Exception $e) {
+
+    //         Log::error('Product Index Error: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'message' => 'Something went wrong',
+    //             'error'   => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function index()
     {
         try {
@@ -44,8 +167,8 @@ class ProductController extends Controller
             $perPage = request()->get('per_page', 10);
             $page = request()->get('page', 1);
 
-            // FILTERS
             $businessId = decodeIdOrFail(request()->business_id);
+
             foreach ($modelMap as $type => $modelClass) {
 
                 $products = $modelClass::query()
@@ -56,6 +179,7 @@ class ProductController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'batch_no',
                         'status',
                         'created_at'
                     ])
@@ -65,7 +189,6 @@ class ProductController extends Controller
                         'subSubCategory:id,name',
                         'hsn:id,hsn_code,igst',
 
-                        // optimized variant loading
                         'primaryVariant' => function ($q) {
                             $q->select([
                                 'id',
@@ -79,7 +202,6 @@ class ProductController extends Controller
                                 'mrp',
                                 'cost_price',
                                 'is_primary',
-                                'batch_no',
                                 'manufacture_date',
                                 'expiry_date',
                                 'short_description',
@@ -87,19 +209,20 @@ class ProductController extends Controller
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
                                 'attributes' => function ($attr) {
                                     $attr->select([
                                         'id',
                                         'product_variant_id',
                                         'attribute_master_id',
                                         'attribute_value_id'
-                                    ])->with([
+                                    ])
+                                    ->with([
                                         'attributeMaster:id,name',
-                                        'attributeValue:id,value,color_code'
+                                        'attributeValue:id,value,color_code',
                                     ]);
                                 },
 
-                                // ONLY ONE IMAGE
                                 'images' => function ($img) {
                                     $img->select([
                                         'id',
@@ -123,10 +246,8 @@ class ProductController extends Controller
                 $allProducts = $allProducts->concat($products);
             }
 
-            // global sort
             $allProducts = $allProducts->sortByDesc('created_at')->values();
 
-            // manual pagination (lightweight)
             $total = $allProducts->count();
 
             $paginated = $allProducts
@@ -134,25 +255,24 @@ class ProductController extends Controller
                 ->values();
 
             return response()->json([
-                'status'  => true,
+                'status' => true,
                 'message' => 'Product list fetched successfully',
-                'data'    => ProductResource::collection($paginated),
-                'meta'    => [
-                    'current_page' => (int)$page,
-                    'per_page'     => (int)$perPage,
-                    'total'        => $total,
-                    'last_page'    => (int) ceil($total / $perPage),
+                'data' => ProductResource::collection($paginated),
+                'meta' => [
+                    'current_page' => (int) $page,
+                    'per_page' => (int) $perPage,
+                    'total' => $total,
+                    'last_page' => (int) ceil($total / $perPage),
                 ]
-            ], 200);
+            ]);
 
-        } catch (Exception $e) {
-
-            Log::error('Product Index Error: ' . $e->getMessage());
+        } catch (\Throwable $e) {
 
             return response()->json([
-                'status'  => false,
-                'message' => 'Something went wrong',
-                'error'   => $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ], 500);
         }
     }
@@ -562,6 +682,10 @@ class ProductController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'commission',
+                        'vendor_commission',
+                        'vendor_commission_approval_status',
+                        'batch_no',
                         'status',
                         'created_at'
                     ])
@@ -597,16 +721,12 @@ class ProductController extends Controller
                                 'mrp',
                                 'cost_price',
                                 'selling_price',
-                                'commission',
-                                'vendor_commission',
-                                'vendor_commission_approval_status',
                                 'discount',
                                 'final_price',
                                 'short_description',
                                 'long_description',
                                 'is_primary',
                                 'variant_status',
-                                'batch_no',
                                 'manufacture_date',
                                 'expiry_date'
                             ])
