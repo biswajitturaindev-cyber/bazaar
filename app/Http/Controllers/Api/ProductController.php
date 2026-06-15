@@ -87,19 +87,6 @@ class ProductController extends Controller
                             ])
                             ->with([
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
-                                // 'attributes' => function ($attr) {
-                                //     $attr->select([
-                                //         'id',
-                                //         'product_variant_id',
-                                //         'attribute_id',
-                                //         'attribute_value_id'
-                                //     ])->with([
-                                //         'attribute:id,name',
-                                //         'attributeValue:id,value,color_code'
-                                //     ]);
-                                // },
-
                                 'attributes' => function ($attr) {
                                     $attr->select([
                                         'id',
