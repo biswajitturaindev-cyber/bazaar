@@ -12,12 +12,24 @@ class ProductAttributeRelation extends Model
         'attribute_value_id'
     ];
 
-    // Variant (MAIN RELATION)
+    /*
+    |--------------------------------------------------------------------------
+    | Variant
+    |--------------------------------------------------------------------------
+    */
     public function variant()
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(
+            ProductVariant::class,
+            'product_variant_id'
+        );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Attribute Master
+    |--------------------------------------------------------------------------
+    */
     public function attributeMaster()
     {
         return $this->belongsTo(
@@ -26,7 +38,26 @@ class ProductAttributeRelation extends Model
         );
     }
 
-    // Attribute Value
+    /*
+    |--------------------------------------------------------------------------
+    | Backward Compatibility Alias
+    |--------------------------------------------------------------------------
+    | This fixes:
+    | Call to undefined relationship [attribute]
+    */
+    public function attribute()
+    {
+        return $this->belongsTo(
+            AttributeMaster::class,
+            'attribute_master_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attribute Value
+    |--------------------------------------------------------------------------
+    */
     public function attributeValue()
     {
         return $this->belongsTo(
@@ -35,10 +66,13 @@ class ProductAttributeRelation extends Model
         );
     }
 
-    // OPTIONAL: Access actual product dynamically
+    /*
+    |--------------------------------------------------------------------------
+    | Product Accessor
+    |--------------------------------------------------------------------------
+    */
     public function getProductAttribute()
     {
         return $this->variant?->product;
-        // uses your ProductVariant accessor
     }
 }
