@@ -183,8 +183,8 @@ class ProductController extends Controller
                 // Variants
                 'variants' => 'required|array|min:1',
 
-                'variants.*.sku' => 'required|string|distinct|unique:product_variants,sku',
-                'variants.*.barcode' => 'nullable|string|distinct|unique:product_variants,barcode',
+                'variants.*.sku' => 'nullable|string',
+                'variants.*.barcode' => 'nullable|string',
 
                 'variants.*.mrp' => 'required|numeric',
                 'variants.*.cost_price' => 'nullable|numeric',
@@ -292,7 +292,7 @@ class ProductController extends Controller
                     'product_id' => $productId,
                     'product_type' => $categoryId,
 
-                    'sku' => $variantData['sku'],
+                    'sku' => $variantData['sku'] ?? null,
                     'barcode' => $variantData['barcode'] ?? null,
 
                     'mrp' => $variantData['mrp'],
