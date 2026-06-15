@@ -945,24 +945,24 @@ class ProductController extends Controller
 
                 $sku = trim($variantData['sku'] ?? '');
 
-                if ($sku === '') {
-                    continue;
-                }
+                // if ($sku === '') {
+                //     continue;
+                // }
 
-                $query = ProductVariant::where('sku', $sku);
+                // $query = ProductVariant::where('sku', $sku);
 
-                if (!empty($variantData['id'])) {
-                    $variantId = decodeIdOrFail($variantData['id']);
-                    $query->where('id', '!=', $variantId);
-                } else {
-                    $query->where('product_id', '!=', $productId);
-                }
+                // if (!empty($variantData['id'])) {
+                //     $variantId = decodeIdOrFail($variantData['id']);
+                //     $query->where('id', '!=', $variantId);
+                // } else {
+                //     $query->where('product_id', '!=', $productId);
+                // }
 
-                if ($query->exists()) {
-                    throw ValidationException::withMessages([
-                        "variants.$index.sku" => ["SKU '{$sku}' already exists"]
-                    ]);
-                }
+                // if ($query->exists()) {
+                //     throw ValidationException::withMessages([
+                //         "variants.$index.sku" => ["SKU '{$sku}' already exists"]
+                //     ]);
+                // }
 
 
 
