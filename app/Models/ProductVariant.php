@@ -135,7 +135,4 @@ class ProductVariant extends Model
             'product_variant_id'
         );
     }
-
-
-
 }
