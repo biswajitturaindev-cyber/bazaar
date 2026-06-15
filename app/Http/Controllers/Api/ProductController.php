@@ -1103,8 +1103,6 @@ class ProductController extends Controller
 
             foreach ($data['variants'] as $index => $variantData) {
 
-                $sku = $variantData['sku'];
-
                 $manufactureDate = !empty($variantData['manufacture_date'])
                     ? \Carbon\Carbon::parse($variantData['manufacture_date'])->format('Y-m-d')
                     : null;
@@ -1126,17 +1124,24 @@ class ProductController extends Controller
                 //     ]);
                 // }
 
-                $existingVariantOtherProduct = ProductVariant::where('sku', $sku)
-                    ->where('product_id', '!=', $productId)
-                    ->when(isset($variantId), function ($query) use ($variantId) {
-                        $query->where('id', '!=', $variantId);
-                    })
-                    ->first();
+                $sku = trim($variantData['sku'] ?? '');
 
-                if ($existingVariantOtherProduct) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        "variants.$index.sku" => ["SKU '{$sku}' already exists for another product."]
-                    ]);
+                if (!empty($sku)) {
+
+                    $variantId = $variantData['id'] ?? null;
+
+                    $existingVariantOtherProduct = ProductVariant::where('sku', $sku)
+                        ->where('product_id', '!=', $productId)
+                        ->when($variantId, function ($query) use ($variantId) {
+                            $query->where('id', '!=', $variantId);
+                        })
+                        ->first();
+
+                    if ($existingVariantOtherProduct) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            "variants.$index.sku" => ["SKU '{$sku}' already exists for another product."]
+                        ]);
+                    }
                 }
 
                 // =============================
