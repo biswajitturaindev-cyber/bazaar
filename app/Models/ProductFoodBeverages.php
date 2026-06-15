@@ -24,6 +24,7 @@ class ProductFoodBeverages extends Model
         'commission',
         'vendor_commission',
         'vendor_commission_approval_status',
+        'batch_no',
         'status',
     ];
 
