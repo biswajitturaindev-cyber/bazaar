@@ -815,7 +815,7 @@ class ProductController extends Controller
                 'variants' => 'required|array|min:1',
 
                 'variants.*.id' => 'nullable',
-                'variants.*.sku' => 'required|string|distinct',
+                'variants.*.sku' => 'nullable|string|distinct',
                 'variants.*.barcode' => 'nullable|string',
 
                 'variants.*.mrp' => 'required|numeric',
