@@ -197,7 +197,8 @@ class StoreOperationalController extends Controller
 
                 'delivery_radius' => 'nullable|numeric|min:0',
 
-                'serviceable_pincode' => 'required',
+                'serviceable_pincode' => 'nullable|array',
+                'serviceable_pincode.*' => 'nullable|digits:6',
                 'status' => 'required|boolean',
             ]);
 
