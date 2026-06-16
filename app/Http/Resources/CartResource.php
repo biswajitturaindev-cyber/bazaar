@@ -177,7 +177,6 @@ class CartResource extends JsonResource
             | Selected Attributes
             |--------------------------------------------------------------------------
             */
-
             'attributes' => $this->whenLoaded(
                 'cartAttributes',
 
@@ -187,14 +186,22 @@ class CartResource extends JsonResource
                         function ($attr) {
 
                             return [
-                                'attribute_id' => Hashids::encode(
-                                    $attr->attribute_id
+
+                                'attribute_master_id' => Hashids::encode(
+                                    $attr->attribute_master_id
                                 ),
+
                                 'attribute_value_id' => Hashids::encode(
                                     $attr->attribute_value_id
                                 ),
-                                'attribute_name' => $attr->attribute_name,
-                                'attribute_value' => $attr->attribute_value,
+
+                                'attribute_name' => $attr->attribute_master_name
+                                    ?? $attr->attributeMaster?->name,
+
+                                'attribute_value' => $attr->attribute_value
+                                    ?? $attr->attributeValue?->value,
+
+                                'color_code' => $attr->attributeValue?->color_code,
                             ];
                         }
                     );
