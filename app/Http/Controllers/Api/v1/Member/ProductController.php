@@ -233,21 +233,45 @@ class ProductController extends Controller
 
                 $product = $modelClass::query()
 
+                    ->select([
+                        'id',
+                        'name',
+                        'business_id',
+                        'business_category_id',
+                        'business_sub_category_id',
+                        'category_id',
+                        'sub_category_id',
+                        'sub_sub_category_id',
+                        'hsn_id',
+
+                        'commission',
+                        'vendor_commission',
+                        'vendor_commission_approval_status',
+
+                        'status',
+                        'created_at'
+                    ])
+
                     ->where('id', $productId)
                     ->where('business_id', $businessId)
                     ->where('status', 1)
 
                     ->with([
+
                         // Business
                         'business:id,business_name',
+
                         // Categories
                         'category:id,name',
                         'subCategory:id,name',
                         'subSubCategory:id,name',
+
                         // HSN
                         'hsn:id,hsn_code',
-                        // ALL Variants for details page
+
+                        // ALL Variants
                         'variants' => function ($q) {
+
                             $q->select([
                                 'id',
                                 'product_id',
@@ -265,28 +289,36 @@ class ProductController extends Controller
                                 'expiry_date',
                                 'is_primary',
                             ])
+
                             ->with([
+
                                 // SEO Meta
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+
                                 // Attributes
                                 'attributes' => function ($attr) {
+
                                     $attr->select([
                                         'id',
                                         'product_variant_id',
-                                        'attribute_id',
+                                        'attribute_master_id',
                                         'attribute_value_id'
                                     ])
+
                                     ->with([
-                                        'attribute:id,name',
+                                        'attributeMaster:id,name',
                                         'attributeValue:id,value,color_code'
                                     ]);
                                 },
+
                                 // Images
                                 'images:id,product_variant_id,image_large,image_medium,image_small'
                             ]);
                         }
                     ])
+
                     ->first();
+
                 if ($product) {
                     $product->product_type = $type;
                     break;
