@@ -14,19 +14,21 @@ class CartAttribute extends Model
      */
     protected $fillable = [
         'cart_id',
-        'attribute_id',
+        'attribute_master_id',
         'attribute_value_id',
-        'attribute_name',
+        'attribute_master_name',
         'attribute_value',
+        'price'
     ];
 
     /**
      * Attribute Casting
      */
     protected $casts = [
-        'cart_id'            => 'integer',
-        'attribute_id'       => 'integer',
+        'cart_id' => 'integer',
+        'attribute_master_id' => 'integer',
         'attribute_value_id' => 'integer',
+        'price' => 'decimal:2',
     ];
 
     /*
@@ -43,11 +45,11 @@ class CartAttribute extends Model
         );
     }
 
-    public function attribute()
+    public function attributeMaster()
     {
         return $this->belongsTo(
-            Attribute::class,
-            'attribute_id'
+            AttributeMaster::class,
+            'attribute_master_id'
         );
     }
 

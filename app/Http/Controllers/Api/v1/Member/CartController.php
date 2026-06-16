@@ -17,9 +17,50 @@ class CartController extends Controller
     /**
      * Get cart items
      */
+    // public function index(Request $request)
+    // {
+
+    //     try {
+
+    //         $request->validate([
+    //             'user_id' => 'required',
+    //         ]);
+
+    //         $userId = $request->user_id;
+
+    //         $cart = Cart::where('user_id', $userId)
+    //             ->latest('id')
+    //             ->get();
+
+    //         $kyc = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
+    //             ->where('carts.user_id', $userId)
+    //             ->select(
+    //                 'kyc_details.gst_no',
+    //                 'kyc_details.gst_state_code',
+    //                 'kyc_details.gst_address'
+    //             )
+    //             ->first();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Cart fetched successfully',
+    //             'total_items' => $cart->count(),
+    //             'vendor_gst_details' => $kyc,
+    //             'data' => CartResource::collection($cart),
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage(),
+    //             'line' => $e->getLine(),
+    //         ], 500);
+    //     }
+    // }
+
     public function index(Request $request)
     {
-
         try {
 
             $request->validate([
@@ -28,36 +69,70 @@ class CartController extends Controller
 
             $userId = $request->user_id;
 
-            $cart = Cart::where('user_id', $userId)
-                ->latest('id')
-                ->get();
+            $cart = Cart::with([
 
-            $kyc = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
-                ->where('carts.user_id', $userId)
-                ->select(
-                    'kyc_details.gst_no',
-                    'kyc_details.gst_state_code',
-                    'kyc_details.gst_address'
-                )
-                ->first();
+                'business:id,business_name',
+
+                'productVariant' => function ($q) {
+                    $q->select([
+                        'id',
+                        'product_id',
+                        'product_type',
+                        'sku',
+                        'barcode',
+                        'mrp',
+                        'cost_price',
+                        'selling_price',
+                        'discount',
+                        'final_price',
+                        'is_primary',
+                    ]);
+                },
+
+                'cartAttributes' => function ($q) {
+                    $q->with([
+                        'attributeMaster:id,name',
+                        'attributeValue:id,value,color_code',
+                    ]);
+                },
+
+                'kycDetail:id,business_id,gst_no,gst_state_code,gst_address',
+
+            ])
+            ->where('user_id', $userId)
+            ->latest('id')
+            ->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cart fetched successfully',
                 'total_items' => $cart->count(),
-                'vendor_gst_details' => $kyc,
                 'data' => CartResource::collection($cart),
             ]);
 
-        } catch (\Throwable $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
 
             return response()->json([
                 'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (\Throwable $e) {
+
+            \Log::error('Cart Fetch Error', [
                 'message' => $e->getMessage(),
+                'file' => $e->getFile(),
                 'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
             ], 500);
         }
     }
+
 
     /**
      * Add item to cart

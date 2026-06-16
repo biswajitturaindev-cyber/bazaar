@@ -95,9 +95,11 @@ class Cart extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function getFinalPriceAttribute()
+    public function getFinalPriceAttribute($value)
     {
-        return $this->productVariant?->final_price ?? 0;
+        return $value
+            ?? $this->productVariant?->final_price
+            ?? 0;
     }
 
     public function getSubtotalAttribute()
@@ -121,7 +123,14 @@ class Cart extends Model
 
     public function getVariantAttributesAttribute()
     {
-        return $this->productVariant?->attributes ?? [];
+        return $this->productVariant
+            ? $this->productVariant->attributes()
+                ->with([
+                    'attributeMaster',
+                    'attributeValue'
+                ])
+                ->get()
+            : collect();
     }
 
     /*
