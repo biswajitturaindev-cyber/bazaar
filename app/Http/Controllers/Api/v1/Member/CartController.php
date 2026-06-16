@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use App\Models\Cart;
-use App\Models\Attribute;
+use App\Models\AttributeMaster;
 use App\Models\AttributeValue;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Models\CartAttribute;
@@ -142,13 +142,18 @@ class CartController extends Controller
         try {
 
             $request->validate([
-                'user_id'               => 'required|integer',
-                'business_id'           => 'required',
-                'business_category_id'  => 'required',
-                'product_id'            => 'required',
-                'product_variant_id'    => 'nullable',
-                'quantity'              => 'required|integer|min:1',
-                'attributes'            => 'required|array|min:1',
+
+                'user_id' => 'required|integer',
+                'business_id' => 'required',
+                'business_category_id' => 'required',
+                'product_id' => 'required',
+                'product_variant_id' => 'nullable',
+                'quantity' => 'required|integer|min:1',
+
+                'attributes' => 'nullable|array',
+
+                'attributes.*.attribute_master_id' => 'required_with:attributes',
+                'attributes.*.attribute_value_id' => 'required_with:attributes',
             ]);
 
             $userId = $request->user_id;
@@ -178,11 +183,6 @@ class CartController extends Controller
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Single Business Cart Check
-            |--------------------------------------------------------------------------
-            */
 
             $existingBusinessId = Cart::where('user_id', $userId)
                 ->value('business_id');
@@ -225,8 +225,8 @@ class CartController extends Controller
 
                 return [
 
-                    'attribute_id' => decodeIdOrFail(
-                        $attr['attribute_id'],
+                    'attribute_master_id' => decodeIdOrFail(
+                        $attr['attribute_master_id'],
                         'Invalid attribute ID'
                     ),
 
@@ -236,7 +236,7 @@ class CartController extends Controller
                     ),
                 ];
             })
-            ->sortBy('attribute_id')
+            ->sortBy('attribute_master_id')
             ->values()
             ->toArray();
 
@@ -278,34 +278,38 @@ class CartController extends Controller
 
             foreach ($decodedAttributes as $attr) {
 
-                $attribute = Attribute::find(
-                    $attr['attribute_id']
+                $attributeMaster = AttributeMaster::find(
+                    $attr['attribute_master_id']
                 );
 
-                $value = AttributeValue::find(
+                $attributeValue = AttributeValue::find(
                     $attr['attribute_value_id']
                 );
 
-                if (!$attribute || !$value) {
+                if (
+                    !$attributeMaster ||
+                    !$attributeValue
+                ) {
                     continue;
                 }
 
                 if (
-                    (int) $value->attribute_id !==
-                    (int) $attribute->id
+                    (int) $attributeValue->attribute_id !==
+                    (int) $attributeMaster->id
                 ) {
                     continue;
                 }
 
                 CartAttribute::updateOrCreate(
                     [
-                        'cart_id'      => $cartItem->id,
-                        'attribute_id' => $attribute->id,
+                        'cart_id' => $cartItem->id,
+                        'attribute_master_id' => $attributeMaster->id,
                     ],
                     [
-                        'attribute_value_id' => $value->id,
-                        'attribute_name'     => $attribute->name,
-                        'attribute_value'    => $value->value,
+                        'attribute_value_id' => $attributeValue->id,
+                        'attribute_master_name' => $attributeMaster->name,
+                        'attribute_value' => $attributeValue->value,
+                        'price' => $attributeValue->price ?? null,
                     ]
                 );
             }
