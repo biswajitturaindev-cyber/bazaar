@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\File;
 use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     /**
@@ -895,6 +895,67 @@ class ProductController extends Controller
                 }
 
                 $variantIds[] = $variant->id;
+
+
+                if ($request->hasFile("variants.$index.images")) {
+
+                    // Remove old images
+                    $oldImages = ProductImage::where(
+                        'product_variant_id',
+                        $variant->id
+                    )->get();
+
+                    foreach ($oldImages as $oldImage) {
+
+                        Storage::disk('public')->delete([
+                            $oldImage->image_large,
+                            $oldImage->image_medium,
+                            $oldImage->image_small,
+                        ]);
+
+                        $oldImage->delete();
+                    }
+
+                    $manager = new ImageManager(new Driver());
+
+                    foreach ($request->file("variants.$index.images") as $file) {
+
+                        $filename = (string) Str::uuid();
+
+                        $large = $manager->read($file)->cover(600, 600);
+
+                        Storage::disk('public')->put(
+                            "products/large/{$filename}.webp",
+                            compressToTargetSize($large, 30)
+                        );
+
+                        $medium = $manager->read($file)->cover(150, 150);
+
+                        Storage::disk('public')->put(
+                            "products/medium/{$filename}.webp",
+                            compressToTargetSize($medium, 25)
+                        );
+
+                        $small = $manager->read($file)->cover(40, 40);
+
+                        Storage::disk('public')->put(
+                            "products/small/{$filename}.webp",
+                            compressToTargetSize($small, 15)
+                        );
+
+                        ProductImage::create([
+                            'business_category_id' => $business->business_category_id,
+                            'product_id'           => $productId,
+                            'product_variant_id'   => $variant->id,
+                            'image_large'          => "products/large/{$filename}.webp",
+                            'image_medium'         => "products/medium/{$filename}.webp",
+                            'image_small'          => "products/small/{$filename}.webp",
+                        ]);
+                    }
+                }
+
+
+
             }
 
             // Delete removed variants
