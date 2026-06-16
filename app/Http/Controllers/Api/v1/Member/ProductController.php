@@ -35,7 +35,6 @@ class ProductController extends Controller
             $businessId = $request->filled('business_id')
                 ? decodeIdOrFail($request->business_id, 'Invalid business ID')
                 : null;
-
             foreach ($modelMap as $type => $modelClass) {
 
                 $query = $modelClass::query()
@@ -49,6 +48,9 @@ class ProductController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'commission',
+                        'vendor_commission',
+                        'vendor_commission_approval_status',
                         'status',
                         'created_at'
                     ])
@@ -85,16 +87,16 @@ class ProductController extends Controller
                         ->where('is_primary', 1)
                         ->with([
                             'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-
                             'attributes' => function ($attr) {
                                 $attr->select([
                                     'id',
                                     'product_variant_id',
-                                    'attribute_id',
+                                    'attribute_master_id',
                                     'attribute_value_id'
-                                ])->with([
-                                    'attribute:id,name',
-                                    'attributeValue:id,value,color_code'
+                                ])
+                                ->with([
+                                    'attributeMaster:id,name',
+                                    'attributeValue:id,value,color_code',
                                 ]);
                             },
 
