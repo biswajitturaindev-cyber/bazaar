@@ -49,10 +49,14 @@ class ProductReviewController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'commission',
+                        'vendor_commission',
+                        'vendor_commission_approval_status',
                         'status',
                         'created_at'
                     ])
                     ->where('status', 2)
+                    ->orWhere('vendor_commission_approval_status', 0) // Only pending commission approvals
                     ->with([
                         'business:id,business_name',
                         'category:id,name',
@@ -125,6 +129,8 @@ class ProductReviewController extends Controller
             $products = $allProducts
                 ->sortByDesc('created_at')
                 ->values();
+
+
 
             return view(
                 'admin.product-reviews.index',
@@ -298,23 +304,32 @@ class ProductReviewController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+
             $request->validate([
-                'status' => 'required|in:1,2',
+                'status' => 'required|integer|in:0,1,2',
+                'commission' => 'nullable|numeric|min:0|max:100',
+                'vendor_commission' => 'nullable|numeric|min:0|max:100',
+                'vendor_commission_approval_status' => 'required|integer|in:0,1,2',
             ]);
 
             $product = ProductReview::with('productAttributes')->findOrFail($id);
 
-            // Already approved check
-            if ($product->status == 1) {
-                return back()->with('error', 'Product already approved.');
-            }
+            $oldStatus = $product->status;
 
             DB::beginTransaction();
 
-            $product->status = $request->status;
-            $product->save();
 
-            if ($request->status == 1) {
+
+            // Update review product
+            $product->update([
+                'status' => $request->status,
+                'commission' => $request->commission ?? 0,
+                'vendor_commission' => $request->vendor_commission ?? 0,
+                'vendor_commission_approval_status' => $request->vendor_commission_approval_status,
+            ]);
+
+            // Approve Product
+            if ($oldStatus != 1 && $request->status == 1) {
 
                 $tableMap = [
                     1  => ProductFoodBeverages::class,
@@ -332,50 +347,64 @@ class ProductReviewController extends Controller
                 $categoryId = $product->business_category_id;
 
                 if (!isset($tableMap[$categoryId])) {
-                    throw new \Exception('Invalid business category mapping');
+                    throw new \Exception('Invalid business category mapping.');
                 }
 
                 $modelClass = $tableMap[$categoryId];
 
-                // Normalize SKU (avoid case duplicates)
-                $sku = $product->sku ? strtolower(trim($product->sku)) : null;
+                $sku = $product->sku
+                    ? strtolower(trim($product->sku))
+                    : null;
 
                 try {
-                    // Create Product (DB handles uniqueness)
+
                     $newProduct = $modelClass::create([
                         'business_id' => $product->business_id,
                         'business_category_id' => $product->business_category_id,
                         'business_sub_category_id' => $product->business_sub_category_id,
+
                         'category_id' => $product->category_id,
                         'sub_category_id' => $product->sub_category_id,
                         'sub_sub_category_id' => $product->sub_sub_category_id,
+
                         'sku' => $sku,
+
                         'hsn_id' => $product->hsn_id,
+
                         'name' => $product->name,
                         'image' => $product->image,
                         'description' => $product->description,
+
                         'mrp' => $product->mrp,
                         'cost_price' => $product->cost_price,
                         'selling_price' => $product->selling_price,
                         'discount' => $product->discount,
                         'final_price' => $product->final_price,
+
                         'manufacture_date' => $product->manufacture_date,
                         'expiry_date' => $product->expiry_date,
+
+                        'commission' => $product->commission,
+                        'vendor_commission' => $product->vendor_commission,
+                        'vendor_commission_approval_status' => $product->vendor_commission_approval_status,
+
                         'status' => 1,
                     ]);
 
                 } catch (\Illuminate\Database\QueryException $e) {
 
-                    // SQLSTATE[23000] = Integrity constraint violation
                     if ($e->getCode() == 23000) {
-                        throw new \Exception('Duplicate product: same combination already exists.');
+                        throw new \Exception(
+                            'Duplicate product: same combination already exists.'
+                        );
                     }
 
                     throw $e;
                 }
 
-                // Copy attributes
+                // Copy Product Attributes
                 foreach ($product->productAttributes as $attr) {
+
                     $newProduct->attributes()->create([
                         'attribute_id' => $attr->attribute_id,
                         'attribute_value_id' => $attr->attribute_value_id,
@@ -384,23 +413,44 @@ class ProductReviewController extends Controller
                     ]);
                 }
 
-                // Soft delete review product
+                // Remove review record after successful approval
                 $product->delete();
             }
 
             DB::commit();
 
+            $message = match ((int) $request->status) {
+                1 => 'Product approved successfully.',
+                0 => 'Product rejected successfully.',
+                2 => 'Product marked as pending successfully.',
+                default => 'Product updated successfully.',
+            };
+
             return redirect('admin/product-reviews')
-                ->with('success', 'Status updated and product approved successfully.');
+                ->with('success', $message);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
 
         } catch (\Exception $e) {
 
             DB::rollBack();
 
-            return back()->with('error', 'Error: ' . $e->getMessage());
+            \Log::error('Product Review Update Error', [
+                'product_id' => $id,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */
@@ -422,7 +472,10 @@ class ProductReviewController extends Controller
         try {
 
             $request->validate([
-                'status' => 'required|in:0,1,2',
+                'status' => 'required|integer|in:0,1,2',
+                'commission' => 'nullable|numeric|min:0|max:100',
+                'vendor_commission' => 'nullable|numeric|min:0|max:100',
+                'vendor_commission_approval_status' => 'required|integer|in:0,1,2',
             ]);
 
             $modelMap = config('product.model_map');
@@ -435,9 +488,23 @@ class ProductReviewController extends Controller
                 );
             }
 
+            // Product cannot be approved unless commission is approved
+            if (
+                $request->status == 1 &&
+                $request->vendor_commission_approval_status != 1
+            ) {
+                return back()->with(
+                    'error',
+                    'Please approve Vendor Commission first.'
+                );
+            }
+
             $modelClass = $modelMap[$type];
             $product = $modelClass::findOrFail($id);
             $product->status = $request->status;
+            $product->commission = $request->commission;
+            $product->vendor_commission = $request->vendor_commission;
+            $product->vendor_commission_approval_status = $request->vendor_commission_approval_status;
 
             $product->save();
 

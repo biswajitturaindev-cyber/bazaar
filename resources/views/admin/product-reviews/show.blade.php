@@ -377,52 +377,93 @@
     .pd-empty-icon svg { width: 22px; height: 22px; }
     .pd-empty-title { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
     .pd-empty-sub   { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+
+    .status-row{
+        display:flex;
+        flex-wrap:wrap;
+        gap:20px;
+    }
+
+    .status-col{
+        flex:1 1 calc(25% - 15px);
+        min-width:220px;
+    }
+
+    .custom-label{
+        display:block;
+        font-size:14px;
+        font-weight:600;
+        color:#374151;
+        margin-bottom:8px;
+    }
+
+    .custom-select{
+        width:100%;
+        height:44px;
+        padding:0 12px;
+        border:1px solid #d1d5db;
+        border-radius:8px;
+        background:#fff;
+        font-size:14px;
+        transition:all .3s ease;
+    }
+
+    .custom-select:focus{
+        border-color:#4f46e5;
+        box-shadow:0 0 0 3px rgba(79,70,229,.15);
+        outline:none;
+    }
+
+
+    .alert-success{
+        background-color: #d1e7dd !important;
+        border-color: #badbcc !important;
+        color: #0f5132 !important;
+        font-weight: 500;
+    }
+
+    .alert-danger{
+        background-color: #f8d7da !important;
+        border-color: #f5c2c7 !important;
+        color: #842029 !important;
+        font-weight: 500;
+    }
+
+    .alert{
+        border-radius: 8px;
+        padding: 14px 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
 </style>
 
 <div class="grid grid-cols-1 lg:gap-16 md:gap-10">
     {{-- SUCCESS MESSAGE --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-            {{ session('success') }}
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+        <i class="fa fa-check-circle me-2"></i>
+        {{ session('success') }}
 
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    @endif
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+@endif
 
-    {{-- ERROR MESSAGE --}}
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-            {{ session('error') }}
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        <i class="fa fa-exclamation-triangle me-2"></i>
+        {{ session('error') }}
 
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    @endif
-
-    {{-- VALIDATION ERRORS --}}
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    @endif
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+        </button>
+    </div>
+@endif
 
 
     <div class="pd-card">
@@ -496,23 +537,65 @@
                         @csrf
                         @method('PUT')
 
-                        <select name="status" class="form-select pd-status-select">
+                        <div class="status-row">
 
-                            <option value="2" {{ $product->status == 2 ? 'selected' : '' }}>
-                                Pending
-                            </option>
+                            <div class="status-col">
+                                <label class="custom-label">Status</label>
 
-                            <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>
-                                Approved
-                            </option>
+                                <select name="status" class="custom-select">
+                                    <option value="2" {{ $product->status == 2 ? 'selected' : '' }}>
+                                        Pending
+                                    </option>
 
-                            <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>
-                                Rejected
-                            </option>
+                                    <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>
+                                        Approved
+                                    </option>
 
-                        </select>
+                                    <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>
+                                        Rejected
+                                    </option>
+                                </select>
+                            </div>
 
-                        <button type="submit" class="pd-btn pd-btn-approve">
+                            <div class="status-col">
+                                <label class="custom-label">Commission (%)</label>
+                                <input type="number" name="commission" class="custom-select" value="{{ $product->commission ?? 0 }}" min="0" max="100" step="0.01">
+                            </div>
+
+                            <div class="status-col">
+                                <label class="custom-label">Vendor Commission (%)</label>
+                                <input type="number" name="vendor_commission" class="custom-select" value="{{ $product->vendor_commission ?? 0 }}" min="0" max="100" step="0.01">
+                            </div>
+
+                            <div class="status-col">
+                                <label class="custom-label">
+                                    Vendor Comm. Status
+                                </label>
+
+                                <select name="vendor_commission_approval_status" class="custom-select">
+
+                                    <option value="0"
+                                        {{ $product->vendor_commission_approval_status == 0 ? 'selected' : '' }}>
+                                        Waiting for Approval
+                                    </option>
+
+                                    <option value="1"
+                                        {{ $product->vendor_commission_approval_status == 1 ? 'selected' : '' }}>
+                                        Approved
+                                    </option>
+
+                                    <option value="2"
+                                        {{ $product->vendor_commission_approval_status == 2 ? 'selected' : '' }}>
+                                        Rejected
+                                    </option>
+
+                                </select>
+                            </div>
+
+                        </div>
+
+
+                        <button type="submit" class="pd-btn pd-btn-approve mt-5">
                             Update
                         </button>
 
