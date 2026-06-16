@@ -41,7 +41,6 @@ class ProductReviewController extends Controller
             foreach ($modelMap as $type => $modelClass) {
 
                 $products = $modelClass::query()
-
                     ->select([
                         'id',
                         'name',
@@ -53,16 +52,14 @@ class ProductReviewController extends Controller
                         'status',
                         'created_at'
                     ])
-                    ->where('status',2)
+                    ->where('status', 2)
                     ->with([
                         'business:id,business_name',
                         'category:id,name',
                         'subCategory:id,name',
                         'subSubCategory:id,name',
                         'hsn:id,hsn_code,igst',
-                        // =============================
-                        // PRIMARY VARIANT ONLY
-                        // =============================
+
                         'primaryVariant' => function ($q) {
 
                             $q->select([
@@ -82,45 +79,39 @@ class ProductReviewController extends Controller
                                 'short_description',
                                 'long_description'
                             ])
-
                             ->with([
 
-                                // SEO META
                                 'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
 
-                                // ATTRIBUTES
                                 'attributes' => function ($attr) {
 
                                     $attr->select([
                                         'id',
                                         'product_variant_id',
-                                        'attribute_id',
+                                        'attribute_master_id',
                                         'attribute_value_id'
                                     ])
-
                                     ->with([
                                         'attribute:id,name',
                                         'attributeValue:id,value'
                                     ]);
                                 },
 
-                                // ONLY ONE IMAGE
                                 'images' => function ($img) {
 
                                     $img->select([
                                         'id',
                                         'product_variant_id',
                                         'image_medium'
-                                    ])->limit(1);
+                                    ])
+                                    ->orderBy('id')
+                                    ->limit(1);
                                 }
                             ]);
                         }
                     ])
-
                     ->latest()
-
                     ->get()
-
                     ->map(function ($item) use ($type) {
 
                         $item->product_type = $type;
@@ -128,12 +119,9 @@ class ProductReviewController extends Controller
                         return $item;
                     });
 
-                $allProducts = $allProducts->concat($products);
+                $allProducts = $allProducts->merge($products);
             }
 
-            // =============================
-            // GLOBAL SORTING
-            // =============================
             $products = $allProducts
                 ->sortByDesc('created_at')
                 ->values();
@@ -146,12 +134,17 @@ class ProductReviewController extends Controller
         } catch (\Exception $e) {
 
             \Log::error(
-                'Product Index Error: ' . $e->getMessage()
+                'Product Index Error',
+                [
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine(),
+                ]
             );
 
             return back()->with(
                 'error',
-                'Something went wrong: ' . $e->getMessage()
+                'Something went wrong. Please try again.'
             );
         }
     }
