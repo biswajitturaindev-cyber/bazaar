@@ -3,6 +3,27 @@
 @section('title')
     Edit Product Review
 @endsection
+<style>
+    .alert-success-custom{
+        background:#d4edda;
+        color:#155724;
+        border:1px solid #c3e6cb;
+        padding:12px 15px;
+        border-radius:8px;
+        margin-bottom:15px;
+        font-weight:500;
+    }
+
+    .alert-error-custom{
+        background:#f8d7da;
+        color:#721c24;
+        border:1px solid #f5c6cb;
+        padding:12px 15px;
+        border-radius:8px;
+        margin-bottom:15px;
+        font-weight:500;
+    }
+</style>
 
 @section('breadcrumb')
     Edit Product Review
@@ -185,6 +206,16 @@
                     <select name="status" class="w-full border rounded-lg px-3 py-2">
                         <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>Approved</option>
                         <option value="2" {{ $product->status == 2 ? 'selected' : '' }}>Unapproved</option>
+                    </select>
+                </div>
+
+                {{-- Vendor Commission Approval Status --}}
+                <div>
+                    <label>Vendor Commission Approval Status</label>
+                    <select name="vendor_commission_approval_status" class="w-full border rounded-lg px-3 py-2">
+                        <option value="0" {{ $product->vendor_commission_approval_status == 0 ? 'selected' : '' }}>Waiting for Approval</option>
+                        <option value="1" {{ $product->vendor_commission_approval_status == 1 ? 'selected' : '' }}>Approved</option>
+                        <option value="2" {{ $product->vendor_commission_approval_status == 2 ? 'selected' : '' }}>Rejected</option>
                     </select>
                 </div>
 

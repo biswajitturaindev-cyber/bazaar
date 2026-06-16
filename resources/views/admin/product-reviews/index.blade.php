@@ -8,6 +8,30 @@
     Product Review Master List
 @endsection
 
+<style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 9999px;
+    }
+
+    .status-badge.pending {
+        background-color: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-badge.approved {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.rejected {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+</style>
 @section('content')
     <div class="grid grid-cols-1 lg:gap-16 md:gap-10">
         <div class="bg-white shadow-[0px_6px_16px_rgba(0,0,0,0.05)] rounded-xl">
@@ -30,15 +54,16 @@
 
                             <th class="px-3 py-4">Product Name</th>
 
-                            <th class="px-3 py-2">SKU</th>
-
                             <th class="px-3 py-2">HSN</th>
 
                             <th class="px-3 py-2">MRP</th>
 
                             <th class="px-3 py-2">Final Price</th>
 
-                            <th class="px-3 py-2">Description</th>
+                            <th class="px-3 py-2">Commission</th>
+
+                            <th class="px-3 py-2">Vendor Commission</th>
+                            <th class="px-3 py-2">Vendor Commission Approval Status</th>
 
                             <th class="px-3 py-2 text-center">Image</th>
 
@@ -102,10 +127,6 @@
                                     {{ $product->name ?? '-' }}
                                 </td>
 
-                                {{-- SKU --}}
-                                <td class="px-3 py-2">
-                                    {{ $variant?->sku ?? '-' }}
-                                </td>
 
                                 {{-- HSN --}}
                                 <td class="px-3 py-2">
@@ -122,9 +143,27 @@
                                     ₹{{ !empty($variant?->final_price) ? number_format($variant->final_price, 2) : '-' }}
                                 </td>
 
-                                {{-- DESCRIPTION --}}
-                                <td class="px-3 py-2 max-w-xs">
-                                    {{ \Illuminate\Support\Str::limit($variant?->short_description ?? '-', 50) }}
+                                {{-- Comm --}}
+                                <td class="px-3 py-2">
+                                    {{ $product->commission ?? '-' }}
+                                </td>
+
+                                {{-- VENDOR COMMISSION --}}
+                                <td class="px-3 py-2">
+                                    {{ $product->vendor_commission ?? '-' }}
+                                </td>
+
+                                {{-- VENDOR COMMISSION APPROVAL STATUS --}}
+                                <td class="px-3 py-2">
+                                    @if($product->vendor_commission_approval_status == 0)
+                                        <span class="status-badge pending">Waiting for Approval</span>
+
+                                    @elseif($product->vendor_commission_approval_status == 1)
+                                        <span class="status-badge approved">Approved</span>
+
+                                    @elseif($product->vendor_commission_approval_status == 2)
+                                        <span class="status-badge rejected">Rejected</span>
+                                    @endif
                                 </td>
 
                                 {{-- IMAGE --}}
