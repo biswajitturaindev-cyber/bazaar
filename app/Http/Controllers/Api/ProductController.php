@@ -34,129 +34,6 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index()
-    // {
-    //     try {
-
-    //         $modelMap = config('product.model_map');
-    //         $allProducts = collect();
-
-    //         $perPage = request()->get('per_page', 10);
-    //         $page = request()->get('page', 1);
-
-    //         // FILTERS
-    //         $businessId = decodeIdOrFail(request()->business_id);
-    //         foreach ($modelMap as $type => $modelClass) {
-
-    //             $products = $modelClass::query()
-    //                 ->select([
-    //                     'id',
-    //                     'name',
-    //                     'category_id',
-    //                     'sub_category_id',
-    //                     'sub_sub_category_id',
-    //                     'hsn_id',
-    //                     'status',
-    //                     'created_at'
-    //                 ])
-    //                 ->with([
-    //                     'category:id,name',
-    //                     'subCategory:id,name',
-    //                     'subSubCategory:id,name',
-    //                     'hsn:id,hsn_code,igst',
-
-    //                     // optimized variant loading
-    //                     'primaryVariant' => function ($q) {
-    //                         $q->select([
-    //                             'id',
-    //                             'sku',
-    //                             'barcode',
-    //                             'discount',
-    //                             'final_price',
-    //                             'product_id',
-    //                             'product_type',
-    //                             'selling_price',
-    //                             'mrp',
-    //                             'cost_price',
-    //                             'is_primary',
-    //                             'batch_no',
-    //                             'manufacture_date',
-    //                             'expiry_date',
-    //                             'short_description',
-    //                             'long_description'
-    //                         ])
-    //                         ->with([
-    //                             'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
-    //                             'attributes' => function ($attr) {
-    //                                 $attr->select([
-    //                                     'id',
-    //                                     'product_variant_id',
-    //                                     'attribute_master_id',
-    //                                     'attribute_value_id'
-    //                                 ])->with([
-    //                                     'attributeMaster:id,name',
-    //                                     'attributeValue:id,value,color_code'
-    //                                 ]);
-    //                             },
-
-    //                             // ONLY ONE IMAGE
-    //                             'images' => function ($img) {
-    //                                 $img->select([
-    //                                     'id',
-    //                                     'product_variant_id',
-    //                                     'image_medium'
-    //                                 ])->limit(1);
-    //                             }
-    //                         ]);
-    //                     }
-    //                 ])
-    //                 ->when($businessId, function ($q) use ($businessId) {
-    //                     $q->where('business_id', $businessId);
-    //                 })
-    //                 ->latest()
-    //                 ->get()
-    //                 ->map(function ($item) use ($type) {
-    //                     $item->product_type = $type;
-    //                     return $item;
-    //                 });
-
-    //             $allProducts = $allProducts->concat($products);
-    //         }
-
-    //         // global sort
-    //         $allProducts = $allProducts->sortByDesc('created_at')->values();
-
-    //         // manual pagination (lightweight)
-    //         $total = $allProducts->count();
-
-    //         $paginated = $allProducts
-    //             ->slice(($page - 1) * $perPage, $perPage)
-    //             ->values();
-
-    //         return response()->json([
-    //             'status'  => true,
-    //             'message' => 'Product list fetched successfully',
-    //             'data'    => ProductResource::collection($paginated),
-    //             'meta'    => [
-    //                 'current_page' => (int)$page,
-    //                 'per_page'     => (int)$perPage,
-    //                 'total'        => $total,
-    //                 'last_page'    => (int) ceil($total / $perPage),
-    //             ]
-    //         ], 200);
-
-    //     } catch (Exception $e) {
-
-    //         Log::error('Product Index Error: ' . $e->getMessage());
-
-    //         return response()->json([
-    //             'status'  => false,
-    //             'message' => 'Something went wrong',
-    //             'error'   => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function index()
     {
         try {
@@ -283,10 +160,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //DB::beginTransaction();
-
         try {
-
             // VALIDATION RULES (UPDATED FOR ENCODED IDS)
             $rules = [
                 'business_id' => 'required',
@@ -299,11 +173,6 @@ class ProductController extends Controller
 
                 'hsn_id' => 'nullable',
                 'has_variant' => 'nullable|boolean',
-
-                // 'variants.*.commission' => 'nullable|numeric',
-                // 'variants.*.vendor_commission' => 'nullable|numeric',
-                // 'variants.*.batch_no' => 'nullable',
-                // 'variants.*.vendor_commission_approval_status' => 'nullable|integer|in:0,1,2',
 
                 'commission' => 'nullable|numeric',
                 'vendor_commission' => 'nullable|numeric',
@@ -803,18 +672,33 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // Decode Product ID
+            $productId = decodeIdOrFail($id, 'Invalid Product ID');
+
+            // Validation
             $rules = [
                 'business_id' => 'required',
                 'category_id' => 'required',
+                'sub_category_id' => 'nullable',
+                'sub_sub_category_id' => 'nullable',
 
                 'name' => 'required|string',
+                'status' => 'required|integer',
+
                 'hsn_id' => 'nullable',
                 'has_variant' => 'nullable|boolean',
-                'status' => 'required|integer',
+
+                'commission' => 'nullable|numeric',
+                'vendor_commission' => 'nullable|numeric',
+                'batch_no' => 'nullable',
+                'vendor_commission_approval_status' => 'nullable|integer|in:0,1,2',
 
                 'variants' => 'required|array|min:1',
 
-                'variants.*.id' => 'nullable',
+                // Existing Variant ID (for update)
+                'variants.*.variant_id' => 'nullable',
+
                 'variants.*.sku' => 'nullable|string',
                 'variants.*.barcode' => 'nullable|string',
 
@@ -823,9 +707,11 @@ class ProductController extends Controller
                 'variants.*.selling_price' => 'nullable|numeric',
                 'variants.*.discount' => 'nullable|numeric',
                 'variants.*.final_price' => 'nullable|numeric',
+
                 'variants.*.stock' => 'nullable|integer',
-                'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.variant_status' => 'nullable|integer',
+
+                'variants.*.manufacture_date' => 'nullable|date',
                 'variants.*.expiry_date' => 'nullable|date',
 
                 'variants.*.short_description' => 'nullable|string|max:1000',
@@ -833,12 +719,10 @@ class ProductController extends Controller
 
                 'variants.*.is_primary' => 'nullable|boolean',
 
-                // IMAGES
                 'variants.*.images' => 'nullable|array',
-                'variants.*.images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+                'variants.*.images.*' => 'image|mimes:jpg,jpeg,png,webp|max:10000',
 
-                // ATTRIBUTES
-               'variants.*.attributes' => [
+                'variants.*.attributes' => [
                     Rule::requiredIf(fn () => $request->boolean('has_variant')),
                     'array',
                 ],
@@ -851,9 +735,6 @@ class ProductController extends Controller
                     Rule::requiredIf(fn () => $request->boolean('has_variant')),
                 ],
 
-                'variants.*.vendor_commission_approval_status' => 'nullable|integer|in:0,1,2',
-
-                // META
                 'variants.*.meta_title' => 'nullable|string',
                 'variants.*.meta_keyword' => 'nullable|string',
                 'variants.*.meta_description' => 'nullable|string',
@@ -861,139 +742,113 @@ class ProductController extends Controller
 
             $data = $request->validate($rules);
 
-            $productId = decodeIdOrFail($id);
+            // Decode IDs
+            $data['business_id'] = decodeIdOrFail($data['business_id']);
+            $data['category_id'] = decodeIdOrFail($data['category_id']);
 
-            $businessId = decodeIdOrFail($data['business_id']);
+            if (!empty($data['sub_category_id'])) {
+                $data['sub_category_id'] = decodeIdOrFail($data['sub_category_id']);
+            }
 
-            $business = Business::findOrFail($businessId);
+            if (!empty($data['sub_sub_category_id'])) {
+                $data['sub_sub_category_id'] = decodeIdOrFail($data['sub_sub_category_id']);
+            }
+
+            if (!empty($data['hsn_id'])) {
+                $data['hsn_id'] = decodeIdOrFail($data['hsn_id']);
+            }
+
+            $business = Business::findOrFail($data['business_id']);
 
             $tableMap = config('product.table_map');
-            $categoryId = $business->business_category_id;
+            $tableName = $tableMap[$business->business_category_id] ?? null;
 
-            if (!isset($tableMap[$categoryId])) {
+            if (!$tableName) {
                 throw new \Exception('Invalid business category mapping');
             }
 
-            $tableName = $tableMap[$categoryId];
-
-            // =============================
-            // CHECK PRODUCT
-            // =============================
-            $product = DB::table($tableName)->where('id', $productId)->first();
+            // Verify Product Exists
+            $product = DB::table($tableName)
+                ->where('id', $productId)
+                ->first();
 
             if (!$product) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'Product not found'
-                ], 404);
+                throw new \Exception('Product not found');
             }
 
-            // =============================
-            // UPDATE PRODUCT
-            // =============================
-            DB::table($tableName)->where('id', $productId)->update([
-                'name' => $data['name'],
-                'hsn_id' => !empty($data['hsn_id'])? decodeIdOrFail($data['hsn_id']): null,
-                'has_variant' => $data['has_variant'] ?? 0,
-                'status' => $data['status'],
-                'updated_at' => now(),
-            ]);
+            // Update Product
+            DB::table($tableName)
+                ->where('id', $productId)
+                ->update([
+                    'category_id' => $data['category_id'],
+                    'sub_category_id' => $data['sub_category_id'] ?? null,
+                    'sub_sub_category_id' => $data['sub_sub_category_id'] ?? null,
+                    'hsn_id' => $data['hsn_id'] ?? null,
+                    'name' => $data['name'],
+                    'has_variant' => $data['has_variant'] ?? 0,
+                    'status' => $data['status'],
+                    'commission' => $data['commission'] ?? null,
+                    'vendor_commission' => $data['vendor_commission'] ?? null,
+                    'vendor_commission_approval_status' => $data['vendor_commission_approval_status'] ?? 0,
+                    'batch_no' => $data['batch_no'] ?? null,
+                    'updated_at' => now(),
+                ]);
 
-            // =============================
-            // EXISTING VARIANTS
-            // =============================
-            $existingVariantIds = ProductVariant::where('product_id', $productId)
-                ->pluck('id')
-                ->toArray();
-
-            $incomingVariantIds = [];
+            $variantIds = [];
+            $existingVariantIds = [];
 
             foreach ($data['variants'] as $index => $variantData) {
 
-                $manufactureDate = !empty($variantData['manufacture_date'])
-                    ? \Carbon\Carbon::parse($variantData['manufacture_date'])->format('Y-m-d')
-                    : null;
+                $variantId = null;
 
-                $expiryDate = !empty($variantData['expiry_date'])
-                    ? \Carbon\Carbon::parse($variantData['expiry_date'])->format('Y-m-d')
-                    : null;
-
-                $sku = trim($variantData['sku'] ?? '');
-
-                if ($sku === '') {
-                    continue;
-                }
-
-                $query = ProductVariant::where('sku', $sku);
-
-                if (!empty($variantData['id'])) {
-                    $variantId = decodeIdOrFail($variantData['id']);
-                    $query->where('id', '!=', $variantId);
-                } else {
-                    $query->where('product_id', '!=', $productId);
-                }
-
-                if ($query->exists()) {
-                    throw ValidationException::withMessages([
-                        "variants.$index.sku" => ["SKU '{$sku}' already exists"]
-                    ]);
-                }
-
-                $variant = null;
-
-                if (!empty($variantData['id'])) {
-                    $variant = ProductVariant::find(
-                        decodeIdOrFail($variantData['id'])
+                if (!empty($variantData['variant_id'])) {
+                    $variantId = decodeIdOrFail(
+                        $variantData['variant_id'],
+                        'Invalid Variant ID'
                     );
-                }
 
-                if (!$variant) {
-                    $variant = ProductVariant::where('product_id', $productId)
-                        ->where('sku', $sku)
-                        ->first();
-                }
-
-                if ($variant) {
+                    $variant = ProductVariant::findOrFail($variantId);
 
                     $variant->update([
+                        'sku' => $variantData['sku'] ?? null,
                         'barcode' => $variantData['barcode'] ?? null,
                         'mrp' => $variantData['mrp'],
                         'cost_price' => $variantData['cost_price'] ?? null,
                         'selling_price' => $variantData['selling_price'] ?? null,
                         'discount' => $variantData['discount'] ?? 0,
-                        'final_price' => $variantData['final_price'],
+                        'final_price' => $variantData['final_price'] ?? null,
                         'short_description' => $variantData['short_description'] ?? null,
                         'long_description' => $variantData['long_description'] ?? null,
-                        'variant_status' => $variantData['variant_status'] ?? 0,
-                        'manufacture_date' => $manufactureDate,
-                        'expiry_date' => $expiryDate,
+                        'variant_status' => $variantData['variant_status'] ?? null,
+                        'manufacture_date' => $variantData['manufacture_date'] ?? null,
+                        'expiry_date' => $variantData['expiry_date'] ?? null,
                         'is_primary' => !empty($variantData['is_primary']),
                     ]);
-                }
-
-                else {
+                } else {
 
                     $variant = ProductVariant::create([
                         'product_id' => $productId,
-                        'product_type' => $categoryId,
-                        'sku' => $sku,
+                        'product_type' => $business->business_category_id,
+
+                        'sku' => $variantData['sku'] ?? null,
                         'barcode' => $variantData['barcode'] ?? null,
                         'mrp' => $variantData['mrp'],
                         'cost_price' => $variantData['cost_price'] ?? null,
                         'selling_price' => $variantData['selling_price'] ?? null,
                         'discount' => $variantData['discount'] ?? 0,
-                        'final_price' => $variantData['final_price'],
+                        'final_price' => $variantData['final_price'] ?? null,
                         'short_description' => $variantData['short_description'] ?? null,
                         'long_description' => $variantData['long_description'] ?? null,
-                        'variant_status' => $variantData['variant_status'] ?? 0,
-                        'manufacture_date' => $manufactureDate,
-                        'expiry_date' => $expiryDate,
+                        'variant_status' => $variantData['variant_status'] ?? null,
+                        'manufacture_date' => $variantData['manufacture_date'] ?? null,
+                        'expiry_date' => $variantData['expiry_date'] ?? null,
                         'is_primary' => !empty($variantData['is_primary']),
                     ]);
                 }
 
-                $incomingVariantIds[] = $variant->id;
+                $existingVariantIds[] = $variant->id;
 
+                // Stock Update
                 ProductVendorStock::updateOrCreate(
                     [
                         'product_variant_id' => $variant->id,
@@ -1004,6 +859,7 @@ class ProductController extends Controller
                     ]
                 );
 
+                // Meta Update
                 ProductVariantMeta::updateOrCreate(
                     ['product_variant_id' => $variant->id],
                     [
@@ -1013,157 +869,69 @@ class ProductController extends Controller
                     ]
                 );
 
+                // Attributes
                 DB::table('product_attribute_relations')
                     ->where('product_variant_id', $variant->id)
                     ->delete();
 
-                if (
-                    $request->boolean('has_variant') &&
-                    !empty($variantData['attributes']) &&
-                    is_array($variantData['attributes'])
-                ) {
+                if (!empty($variantData['attributes'])) {
 
                     $insertData = [];
 
                     foreach ($variantData['attributes'] as $attr) {
 
-                        $attributeMasterId = decodeIdOrFail(
-                            $attr['attribute_master_id']
-                        );
-
-                        $attributeValueId = decodeIdOrFail(
-                            $attr['attribute_value_id']
-                        );
-
-                        $exists = DB::table('attribute_values')
-                            ->where('id', $attributeValueId)
-                            ->where('attribute_master_id', $attributeMasterId)
-                            ->exists();
-
-                        if (!$exists) {
-                            throw new \Exception(
-                                'Selected attribute value does not belong to selected attribute'
-                            );
-                        }
-
                         $insertData[] = [
                             'product_variant_id' => $variant->id,
-                            'attribute_master_id' => $attributeMasterId,
-                            'attribute_value_id' => $attributeValueId,
+                            'attribute_master_id' => decodeIdOrFail($attr['attribute_master_id']),
+                            'attribute_value_id' => decodeIdOrFail($attr['attribute_value_id']),
                             'created_at' => now(),
                             'updated_at' => now(),
                         ];
                     }
 
-                    if (!empty($insertData)) {
+                    if ($insertData) {
                         DB::table('product_attribute_relations')->insert($insertData);
                     }
                 }
 
-                if ($request->hasFile("variants.$index.images")) {
-
-                    $manager = new ImageManager(new Driver());
-
-                    foreach ($request->file("variants.$index.images") as $file) {
-
-                        $filename = time() . '_' . uniqid();
-
-                        $large = $manager->read($file)->cover(600, 600);
-
-                        Storage::disk('public')->put(
-                            "products/large/{$filename}.webp",
-                            compressToTargetSize($large, 30)
-                        );
-
-                        $medium = $manager->read($file)->cover(150, 150);
-
-                        Storage::disk('public')->put(
-                            "products/medium/{$filename}.webp",
-                            compressToTargetSize($medium, 25)
-                        );
-
-                        $small = $manager->read($file)->cover(40, 40);
-
-                        Storage::disk('public')->put(
-                            "products/small/{$filename}.webp",
-                            compressToTargetSize($small, 15)
-                        );
-
-                        ProductImage::create([
-                            'business_category_id' => $business->business_category_id,
-                            'product_id' => $productId,
-                            'product_variant_id' => $variant->id,
-                            'image_large' => "products/large/{$filename}.webp",
-                            'image_medium' => "products/medium/{$filename}.webp",
-                            'image_small' => "products/small/{$filename}.webp",
-                        ]);
-                    }
-                }
+                $variantIds[] = $variant->id;
             }
 
-            $toDelete = array_diff($existingVariantIds, $incomingVariantIds);
-
-            if (!empty($toDelete)) {
-
-                ProductVendorStock::whereIn('product_variant_id', $toDelete)->delete();
-
-                ProductVariantMeta::whereIn('product_variant_id', $toDelete)->delete();
-
-                ProductImage::whereIn('product_variant_id', $toDelete)->delete();
-
-                DB::table('product_attribute_relations')
-                    ->whereIn('product_variant_id', $toDelete)
-                    ->delete();
-
-                ProductVariant::whereIn('id', $toDelete)->delete();
-            }
-
-
+            // Delete removed variants
+            ProductVariant::where('product_id', $productId)
+                ->whereNotIn('id', $existingVariantIds)
+                ->delete();
 
             DB::commit();
 
-            // FETCH UPDATED PRODUCT
-            $modelMap = config('product.model_map');
-
-            $modelClass = $modelMap[$categoryId];
-
-            $product = $modelClass::with([
-                'variants.attributes.attributeMaster',
-                'variants.attributes.attributeValue',
-                'variants.images',
-                'variants.meta',
-                'variants.stocks.business'
-            ])->findOrFail($productId);
-
             return response()->json([
                 'status' => true,
-                'data'   => new ProductResource($product)
-            ], 200);
+                'message' => 'Product updated successfully'
+            ]);
 
-        } catch (ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
 
             DB::rollBack();
 
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Validation error',
-                'errors'  => $e->errors()
+                'errors' => $e->errors()
             ], 422);
 
         } catch (\Exception $e) {
 
             DB::rollBack();
 
-            Log::error('Product Update Error: ' . $e->getMessage());
-
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'Something went wrong',
-                'error'   => config('app.debug') ? $e->getMessage() : null
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
