@@ -18,17 +18,19 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('attribute_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->foreignId('attribute_master_id')
+                ->nullable()
+                ->constrained('attribute_masters')
+                ->nullOnDelete();
 
             $table->foreignId('attribute_value_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                ->nullable()
+                ->constrained('attribute_values')
+                ->nullOnDelete();
 
-            $table->string('attribute_name');
+            $table->string('attribute_name')->nullable();
 
-            $table->string('attribute_value');
+            $table->string('attribute_value')->nullable();
 
             $table->timestamps();
         });
