@@ -14,35 +14,16 @@ return new class extends Migration
         Schema::create('order_addresses', function (Blueprint $table) {
 
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Order
-            |--------------------------------------------------------------------------
-            */
             $table->unsignedBigInteger('order_id');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Billing Address
-            |--------------------------------------------------------------------------
-            */
             $table->text('billing_address');
             $table->unsignedBigInteger('billing_city_id')->nullable();
             $table->unsignedBigInteger('billing_state_id')->nullable();
             $table->string('billing_pincode', 20)->nullable();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Shipping Address
-            |--------------------------------------------------------------------------
-            */
             $table->unsignedBigInteger('shipping_address_id')->nullable();
             $table->text('shipping_address');
             $table->unsignedBigInteger('shipping_city_id')->nullable();
             $table->unsignedBigInteger('shipping_state_id')->nullable();
             $table->string('shipping_pincode', 20)->nullable();
-
             $table->timestamps();
 
         });

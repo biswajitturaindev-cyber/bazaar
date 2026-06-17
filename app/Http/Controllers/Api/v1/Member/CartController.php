@@ -10,6 +10,7 @@ use App\Models\AttributeMaster;
 use App\Models\AttributeValue;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Models\CartAttribute;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Crypt;
 
 class CartController extends Controller
@@ -17,48 +18,6 @@ class CartController extends Controller
     /**
      * Get cart items
      */
-    // public function index(Request $request)
-    // {
-
-    //     try {
-
-    //         $request->validate([
-    //             'user_id' => 'required',
-    //         ]);
-
-    //         $userId = $request->user_id;
-
-    //         $cart = Cart::where('user_id', $userId)
-    //             ->latest('id')
-    //             ->get();
-
-    //         $kyc = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
-    //             ->where('carts.user_id', $userId)
-    //             ->select(
-    //                 'kyc_details.gst_no',
-    //                 'kyc_details.gst_state_code',
-    //                 'kyc_details.gst_address'
-    //             )
-    //             ->first();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Cart fetched successfully',
-    //             'total_items' => $cart->count(),
-    //             'vendor_gst_details' => $kyc,
-    //             'data' => CartResource::collection($cart),
-    //         ]);
-
-    //     } catch (\Throwable $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage(),
-    //             'line' => $e->getLine(),
-    //         ], 500);
-    //     }
-    // }
-
     public function index(Request $request)
     {
         try {
@@ -68,11 +27,8 @@ class CartController extends Controller
             ]);
 
             $userId = $request->user_id;
-
             $cart = Cart::with([
-
                 'business:id,business_name',
-
                 'productVariant' => function ($q) {
                     $q->select([
                         'id',
@@ -95,9 +51,7 @@ class CartController extends Controller
                         'attributeValue:id,value,color_code',
                     ]);
                 },
-
                 'kycDetail:id,business_id,gst_no,gst_state_code,gst_address',
-
             ])
             ->where('user_id', $userId)
             ->latest('id')
@@ -142,18 +96,17 @@ class CartController extends Controller
         try {
 
             $request->validate([
-
                 'user_id' => 'required|integer',
-                'business_id' => 'required',
-                'business_category_id' => 'required',
-                'product_id' => 'required',
-                'product_variant_id' => 'nullable',
+                'business_id' => 'required|string',
+                'business_category_id' => 'required|string',
+                'product_id' => 'required|string',
+                'product_variant_id' => 'nullable|string',
                 'quantity' => 'required|integer|min:1',
 
                 'attributes' => 'nullable|array',
-
-                'attributes.*.attribute_master_id' => 'required_with:attributes',
-                'attributes.*.attribute_value_id' => 'required_with:attributes',
+                'attributes.*' => 'array',
+                'attributes.*.attribute_master_id' => 'required_with:attributes|string',
+                'attributes.*.attribute_value_id' => 'required_with:attributes|string',
             ]);
 
             $userId = $request->user_id;
@@ -173,6 +126,7 @@ class CartController extends Controller
                 'Invalid product ID'
             );
 
+            $productVariant = null;
             $variantId = null;
 
             if ($request->filled('product_variant_id')) {
@@ -181,11 +135,19 @@ class CartController extends Controller
                     $request->product_variant_id,
                     'Invalid product variant ID'
                 );
+
+                $productVariant = ProductVariant::find($variantId);
+
+                if (!$productVariant) {
+                    throw new \Exception('Product variant not found');
+                }
             }
 
-
-            $existingBusinessId = Cart::where('user_id', $userId)
-                ->value('business_id');
+            // Check existing cart business
+            $existingBusinessId = Cart::where(
+                'user_id',
+                $userId
+            )->value('business_id');
 
             if (
                 $existingBusinessId &&
@@ -198,33 +160,28 @@ class CartController extends Controller
                 ], 422);
             }
 
+            // Resolve product model
             $modelClass = config('product.model_map')[
                 $businessCategoryId
             ] ?? null;
 
             if (!$modelClass) {
-
-                throw new \Exception(
-                    'Invalid business category'
-                );
+                throw new \Exception('Invalid business category');
             }
 
             $product = $modelClass::find($productId);
 
             if (!$product) {
-
-                throw new \Exception(
-                    'Product not found'
-                );
+                throw new \Exception('Product not found');
             }
 
+            // Decode attributes
             $decodedAttributes = collect(
                 $request->input('attributes', [])
             )
             ->map(function ($attr) {
 
                 return [
-
                     'attribute_master_id' => decodeIdOrFail(
                         $attr['attribute_master_id'],
                         'Invalid attribute ID'
@@ -240,10 +197,12 @@ class CartController extends Controller
             ->values()
             ->toArray();
 
+            // Generate hash for attribute combination
             $attributeHash = md5(
                 serialize($decodedAttributes)
             );
 
+            // Check existing cart item
             $cartItem = Cart::where([
                 'user_id'              => $userId,
                 'business_id'          => $businessId,
@@ -271,47 +230,72 @@ class CartController extends Controller
                     'product_id'           => $productId,
                     'product_variant_id'   => $variantId,
                     'quantity'             => $request->quantity,
-                    'product_name'         => $product->name ?? null,
+                    'product_name'         => $product->name,
                     'attribute_hash'       => $attributeHash,
+                    //'price'                => $productVariant?->final_price,
                 ]);
             }
 
-            foreach ($decodedAttributes as $attr) {
+            // Load all attributes in bulk (avoids N+1)
+            if (!empty($decodedAttributes)) {
 
-                $attributeMaster = AttributeMaster::find(
-                    $attr['attribute_master_id']
-                );
+                $masterIds = collect($decodedAttributes)
+                    ->pluck('attribute_master_id')
+                    ->unique()
+                    ->values();
 
-                $attributeValue = AttributeValue::find(
-                    $attr['attribute_value_id']
-                );
+                $valueIds = collect($decodedAttributes)
+                    ->pluck('attribute_value_id')
+                    ->unique()
+                    ->values();
 
-                if (
-                    !$attributeMaster ||
-                    !$attributeValue
-                ) {
-                    continue;
+                $attributeMasters = AttributeMaster::whereIn(
+                    'id',
+                    $masterIds
+                )->get()->keyBy('id');
+
+                $attributeValues = AttributeValue::whereIn(
+                    'id',
+                    $valueIds
+                )->get()->keyBy('id');
+
+                foreach ($decodedAttributes as $attr) {
+
+                    $attributeMaster = $attributeMasters->get(
+                        $attr['attribute_master_id']
+                    );
+
+                    $attributeValue = $attributeValues->get(
+                        $attr['attribute_value_id']
+                    );
+
+                    if (!$attributeMaster || !$attributeValue) {
+                        continue;
+                    }
+
+                    if (
+                        !$attributeValue ||
+                        $attributeValue->attribute_master_id != $attr['attribute_master_id']
+                    ) {
+                        throw new \Exception(
+                            'Invalid attribute selection.'
+                        );
+                    }
+
+
+                    CartAttribute::updateOrCreate(
+                        [
+                            'cart_id' => $cartItem->id,
+                            'attribute_master_id' => $attributeMaster->id,
+                        ],
+                        [
+                            'attribute_value_id'    => $attributeValue->id,
+                            'attribute_master_name' => $attributeMaster->name,
+                            'attribute_value'       => $attributeValue->value,
+                            'price'                 => $productVariant?->final_price,
+                        ]
+                    );
                 }
-
-                if (
-                    (int) $attributeValue->attribute_id !==
-                    (int) $attributeMaster->id
-                ) {
-                    continue;
-                }
-
-                CartAttribute::updateOrCreate(
-                    [
-                        'cart_id' => $cartItem->id,
-                        'attribute_master_id' => $attributeMaster->id,
-                    ],
-                    [
-                        'attribute_value_id' => $attributeValue->id,
-                        'attribute_master_name' => $attributeMaster->name,
-                        'attribute_value' => $attributeValue->value,
-                        'price' => $attributeValue->price ?? null,
-                    ]
-                );
             }
 
             return response()->json([
@@ -324,62 +308,43 @@ class CartController extends Controller
 
         } catch (\Throwable $e) {
 
+            \Log::error('Add To Cart Error', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
             ], 500);
         }
     }
-
-
-
     /**
      * Update quantity
      */
     public function update(Request $request, $id)
     {
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Request
-            |--------------------------------------------------------------------------
-            */
             $request->validate([
-                'quantity' => 'required|integer|min:1',
+                'quantity' => 'required|integer|min:1|max:100',
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Cart ID
-            |--------------------------------------------------------------------------
-            */
             $cartId = decodeIdOrFail(
                 $id,
                 'Invalid cart ID'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Find Cart Item
-            |--------------------------------------------------------------------------
-            */
             $cartItem = Cart::with([
                     'productVariant',
                     'productVariant.stocks',
                     'cartAttributes',
-                    'cartAttributes.attribute',
+                    'cartAttributes.attributeMaster',
                     'cartAttributes.attributeValue',
                 ])
-                ->where('id', $cartId)
-                ->first();
+                ->find($cartId);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Cart Not Found
-            |--------------------------------------------------------------------------
-            */
             if (!$cartItem) {
 
                 return response()->json([
@@ -388,55 +353,38 @@ class CartController extends Controller
                 ], 404);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Available Stock
-            |--------------------------------------------------------------------------
-            */
             $availableStock = $cartItem->productVariant
                 ? $cartItem->productVariant->stocks->sum('stock')
                 : 0;
 
-            /*
-            |--------------------------------------------------------------------------
-            | Check Stock
-            |--------------------------------------------------------------------------
-            */
-            if ($request->quantity > $availableStock) {
-
+            // Check stock only if stock is greater than 0
+            if (
+                $availableStock > 0 &&
+                $request->quantity > $availableStock
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Only ' . $availableStock . ' items available in stock',
                 ], 422);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update Quantity
-            |--------------------------------------------------------------------------
-            */
-            $cartItem->quantity = $request->quantity;
+            $cartItem->update([
+                'quantity' => $request->quantity,
+                'subtotal' => $cartItem->final_price
+                    ? ($cartItem->final_price * $request->quantity)
+                    : null,
+            ]);
 
-            $cartItem->save();
+            $cartItem->refresh();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Reload Fresh Data
-            |--------------------------------------------------------------------------
-            */
             $cartItem->load([
                 'productVariant',
                 'productVariant.stocks',
                 'cartAttributes',
-                'cartAttributes.attribute',
+                'cartAttributes.attributeMaster',
                 'cartAttributes.attributeValue',
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Success Response
-            |--------------------------------------------------------------------------
-            */
             return response()->json([
                 'success' => true,
                 'message' => 'Cart updated successfully',
@@ -444,7 +392,6 @@ class CartController extends Controller
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => $e->validator->errors()->first(),
@@ -452,42 +399,24 @@ class CartController extends Controller
             ], 422);
 
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Remove item
      */
     public function destroy($id)
     {
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Cart ID
-            |--------------------------------------------------------------------------
-            */
             $cartId = decodeIdOrFail(
                 $id,
                 'Invalid cart ID'
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Find Cart Item
-            |--------------------------------------------------------------------------
-            */
             $cartItem = Cart::find($cartId);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cart Item Not Found
-            |--------------------------------------------------------------------------
-            */
             if (!$cartItem) {
 
                 return response()->json([
@@ -495,26 +424,9 @@ class CartController extends Controller
                     'message' => 'Cart item not found',
                 ], 404);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Delete Cart Attributes
-            |--------------------------------------------------------------------------
-            */
             $cartItem->cartAttributes()->delete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Delete Cart Item
-            |--------------------------------------------------------------------------
-            */
             $cartItem->delete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | Success Response
-            |--------------------------------------------------------------------------
-            */
             return response()->json([
                 'success' => true,
                 'message' => 'Item removed from cart successfully',

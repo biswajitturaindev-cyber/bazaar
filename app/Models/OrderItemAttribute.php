@@ -8,10 +8,16 @@ class OrderItemAttribute extends Model
 {
     protected $fillable = [
         'order_item_id',
-        'attribute_id',
+        'attribute_master_id',
         'attribute_value_id',
         'attribute_name',
         'attribute_value',
+    ];
+
+    protected $casts = [
+        'order_item_id' => 'integer',
+        'attribute_master_id' => 'integer',
+        'attribute_value_id' => 'integer',
     ];
 
     /*
@@ -23,19 +29,24 @@ class OrderItemAttribute extends Model
     public function orderItem()
     {
         return $this->belongsTo(
-            OrderItem::class
+            OrderItem::class,
+            'order_item_id'
         );
     }
 
-    public function attribute()
+    public function attributeMaster()
     {
-        return $this->belongsTo(Attribute::class);
+        return $this->belongsTo(
+            AttributeMaster::class,
+            'attribute_master_id'
+        );
     }
 
     public function attributeValue()
     {
         return $this->belongsTo(
-            AttributeValue::class
+            AttributeValue::class,
+            'attribute_value_id'
         );
     }
 }

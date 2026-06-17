@@ -32,7 +32,6 @@ return new class extends Migration
 
             $table->unsignedBigInteger('changed_by')->nullable();
 
-
             $table->timestamps();
         });
     }

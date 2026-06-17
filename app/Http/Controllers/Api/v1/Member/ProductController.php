@@ -54,7 +54,8 @@ class ProductController extends Controller
                         'status',
                         'created_at'
                     ])
-                    ->where('status', 1);
+                    ->where('status', 1)
+                    ->where('vendor_commission_approval_status', 1);
 
                 // Apply Filters
                 if ($businessId) {

@@ -101,14 +101,14 @@ class OrderController extends Controller
             $userId = (int) $request->user_id;
 
             $cartItems = Cart::with([
-                    'productVariant',
-                    'productVariant.stocks',
-                    'cartAttributes',
-                    'cartAttributes.attribute',
-                    'cartAttributes.attributeValue',
-                ])
-                ->where('user_id', $userId)
-                ->get();
+                'productVariant',
+                'productVariant.stocks',
+                'cartAttributes',
+                'cartAttributes.attributeMaster',
+                'cartAttributes.attributeValue',
+            ])
+            ->where('user_id', $userId)
+            ->get();
 
             if ($cartItems->isEmpty()) {
 
@@ -133,8 +133,7 @@ class OrderController extends Controller
                 $totalItems += $cart->quantity;
             }
 
-            $itemsTotal = $request->itemsTotal
-                ?? $calculatedItemsTotal;
+            $itemsTotal = $request->itemsTotal ?? $calculatedItemsTotal;
 
             $discountAmount = $request->discountAmount ?? 0;
 
@@ -169,14 +168,28 @@ class OrderController extends Controller
             $nextId = $lastOrder
                 ? ($lastOrder->id + 1)
                 : 1;
-            $orderNo = 'ORD-'
-                . now()->format('Ymd')
-                . '-'
-                . str_pad($nextId, 4, '0', STR_PAD_LEFT);
-            $invoiceNo = 'INV-'
-                . now()->format('Ymd')
-                . '-'
-                . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            $orderNo = 'OD/' . now()->format('ymdHis');
+
+
+            $nextId = (Order::max('id') ?? 0) + 1;
+
+            $currentYear = now()->year;
+
+            if (now()->month >= 4) {
+                $fyStart = substr($currentYear, -2);
+                $fyEnd = substr($currentYear + 1, -2);
+            } else {
+                $fyStart = substr($currentYear - 1, -2);
+                $fyEnd = substr($currentYear, -2);
+            }
+
+            $invoiceNo = sprintf(
+                'INV/%s-%s/%s/%04d',
+                $fyStart,
+                $fyEnd,
+                now()->format('m'),
+                $nextId
+            );
 
             $firstCartItem = $cartItems->first();
 
@@ -329,10 +342,11 @@ class OrderController extends Controller
                 ]);
 
                 foreach ($cart->cartAttributes as $attribute) {
+
                     $orderItem->attributes()->create([
-                        'attribute_id' => $attribute->attribute_id,
+                        'attribute_master_id' => $attribute->attribute_master_id,
                         'attribute_value_id' => $attribute->attribute_value_id,
-                        'attribute_name' => $attribute->attribute_name,
+                        'attribute_name' => $attribute->attribute_master_name,
                         'attribute_value' => $attribute->attribute_value,
                     ]);
                 }
