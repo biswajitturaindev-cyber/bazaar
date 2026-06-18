@@ -80,8 +80,11 @@ class ProductResource extends JsonResource
             'mrp' => optional($this->primaryVariant)->mrp,
             'cost_price' => optional($this->primaryVariant)->cost_price,
             'selling_price' => optional($this->primaryVariant)->selling_price,
+            // 'image' => $image
+            // ? url('storage/' . $image->image_medium)
+            // : null,
             'image' => $image
-            ? url('storage/' . $image->image_medium)
+            ? url('storage/' . $image->image_large)
             : null,
             'table' => $this->getTable(),
         ];
