@@ -398,25 +398,49 @@ class ProductController extends Controller
                 // IMAGES
                 if ($request->hasFile("variants.$index.images")) {
 
+                    // Delete old images
+                    $oldImages = ProductImage::where(
+                        'product_variant_id',
+                        $variant->id
+                    )->get();
+
+                    foreach ($oldImages as $oldImage) {
+
+                        Storage::disk('public')->delete([
+                            $oldImage->image_large,
+                            $oldImage->image_medium,
+                            $oldImage->image_small,
+                        ]);
+
+                        $oldImage->delete();
+                    }
+
                     $manager = new ImageManager(new Driver());
 
                     foreach ($request->file("variants.$index.images") as $file) {
 
+                        if (!$file || !$file->isValid()) {
+                            continue;
+                        }
+
                         $filename = time() . '_' . uniqid();
 
                         $large = $manager->read($file)->cover(600, 600);
+
                         Storage::disk('public')->put(
                             "products/large/{$filename}.webp",
                             compressToTargetSize($large, 30)
                         );
 
                         $medium = $manager->read($file)->cover(150, 150);
+
                         Storage::disk('public')->put(
                             "products/medium/{$filename}.webp",
                             compressToTargetSize($medium, 25)
                         );
 
                         $small = $manager->read($file)->cover(40, 40);
+
                         Storage::disk('public')->put(
                             "products/small/{$filename}.webp",
                             compressToTargetSize($small, 15)
@@ -897,10 +921,12 @@ class ProductController extends Controller
                 $variantIds[] = $variant->id;
 
 
-                $files = $request->file("variants.$index.images");
+                $files = collect($request->file("variants.$index.images", []))
+                    ->filter(fn ($file) => $file && $file->isValid());
 
-                if (!empty($files) && is_array($files)) {
-                    // Delete old images
+                if ($files->isNotEmpty()) {
+
+                    // Delete old images only when valid files exist
                     $oldImages = ProductImage::where(
                         'product_variant_id',
                         $variant->id
@@ -917,14 +943,9 @@ class ProductController extends Controller
                         $oldImage->delete();
                     }
 
-                    // Upload new images
                     $manager = new ImageManager(new Driver());
 
                     foreach ($files as $file) {
-
-                        if (!$file || !$file->isValid()) {
-                            continue;
-                        }
 
                         $filename = (string) Str::uuid();
 
@@ -951,16 +972,14 @@ class ProductController extends Controller
 
                         ProductImage::create([
                             'business_category_id' => $business->business_category_id,
-                            'product_id'           => $productId,
-                            'product_variant_id'   => $variant->id,
-                            'image_large'          => "products/large/{$filename}.webp",
-                            'image_medium'         => "products/medium/{$filename}.webp",
-                            'image_small'          => "products/small/{$filename}.webp",
+                            'product_id' => $productId,
+                            'product_variant_id' => $variant->id,
+                            'image_large' => "products/large/{$filename}.webp",
+                            'image_medium' => "products/medium/{$filename}.webp",
+                            'image_small' => "products/small/{$filename}.webp",
                         ]);
                     }
                 }
-
-            }
 
             // Delete removed variants
             ProductVariant::where('product_id', $productId)
