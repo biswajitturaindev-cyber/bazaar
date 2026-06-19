@@ -998,9 +998,9 @@ class ProductController extends Controller
     //     }
     // }
 
+
     public function update(Request $request, string $id)
     {
-        //dd($request->all());
         DB::beginTransaction();
 
         try {
@@ -1028,7 +1028,6 @@ class ProductController extends Controller
 
                 'variants' => 'required|array|min:1',
 
-                // Existing Variant ID (for update)
                 'variants.*.variant_id' => 'nullable',
 
                 'variants.*.sku' => 'nullable|string',
@@ -1075,25 +1074,26 @@ class ProductController extends Controller
             $data = $request->validate($rules);
 
             // Decode IDs
-            $data['business_id'] = decodeIdOrFail($data['business_id']);
-            $data['category_id'] = decodeIdOrFail($data['category_id']);
+            $data['business_id'] = decodeIdOrFail($data['business_id'], 'Invalid Business ID');
+            $data['category_id'] = decodeIdOrFail($data['category_id'], 'Invalid Category ID');
 
             if (!empty($data['sub_category_id'])) {
-                $data['sub_category_id'] = decodeIdOrFail($data['sub_category_id']);
+                $data['sub_category_id'] = decodeIdOrFail($data['sub_category_id'], 'Invalid Sub Category ID');
             }
 
             if (!empty($data['sub_sub_category_id'])) {
-                $data['sub_sub_category_id'] = decodeIdOrFail($data['sub_sub_category_id']);
+                $data['sub_sub_category_id'] = decodeIdOrFail($data['sub_sub_category_id'], 'Invalid Sub Sub Category ID');
             }
 
             if (!empty($data['hsn_id'])) {
-                $data['hsn_id'] = decodeIdOrFail($data['hsn_id']);
+                $data['hsn_id'] = decodeIdOrFail($data['hsn_id'], 'Invalid HSN ID');
             }
 
             $business = Business::findOrFail($data['business_id']);
 
             $tableMap = config('product.table_map');
-            $tableName = $tableMap[$business->business_category_id] ?? null;
+            $categoryId = $business->business_category_id;
+            $tableName = $tableMap[$categoryId] ?? null;
 
             if (!$tableName) {
                 throw new \Exception('Invalid business category mapping');
@@ -1128,22 +1128,11 @@ class ProductController extends Controller
 
             $existingVariantIds = [];
 
-            // -------------------------------------------------------
-            // FIX: Retrieve all uploaded variant files once up-front
-            // using direct array access instead of dot-notation, which
-            // Laravel does NOT resolve for file inputs.
-            // -------------------------------------------------------
-            $allVariantFiles = $request->file('variants') ?? [];
-
             foreach ($data['variants'] as $index => $variantData) {
 
-                $variantId = null;
-
                 if (!empty($variantData['variant_id'])) {
-                    $variantId = decodeIdOrFail(
-                        $variantData['variant_id'],
-                        'Invalid Variant ID'
-                    );
+
+                    $variantId = decodeIdOrFail($variantData['variant_id'], 'Invalid Variant ID');
 
                     $variant = ProductVariant::findOrFail($variantId);
 
@@ -1167,7 +1156,7 @@ class ProductController extends Controller
 
                     $variant = ProductVariant::create([
                         'product_id' => $productId,
-                        'product_type' => $business->business_category_id,
+                        'product_type' => $categoryId,
 
                         'sku' => $variantData['sku'] ?? null,
                         'barcode' => $variantData['barcode'] ?? null,
@@ -1198,90 +1187,118 @@ class ProductController extends Controller
                     ]
                 );
 
-                // Meta Update
-                ProductVariantMeta::updateOrCreate(
-                    ['product_variant_id' => $variant->id],
-                    [
-                        'meta_title' => $variantData['meta_title'] ?? null,
-                        'meta_keyword' => $variantData['meta_keyword'] ?? null,
-                        'meta_description' => $variantData['meta_description'] ?? null,
-                    ]
-                );
+                // Meta Update — only save if at least one meta field is present (matches store)
+                if (
+                    !empty($variantData['meta_title']) ||
+                    !empty($variantData['meta_keyword']) ||
+                    !empty($variantData['meta_description'])
+                ) {
+                    ProductVariantMeta::updateOrCreate(
+                        ['product_variant_id' => $variant->id],
+                        [
+                            'meta_title' => $variantData['meta_title'] ?? null,
+                            'meta_keyword' => $variantData['meta_keyword'] ?? null,
+                            'meta_description' => $variantData['meta_description'] ?? null,
+                        ]
+                    );
+                }
 
-                // Attributes
+                // Attributes — delete old, re-insert with existence checks (matches store)
                 DB::table('product_attribute_relations')
                     ->where('product_variant_id', $variant->id)
                     ->delete();
 
-                if (!empty($variantData['attributes'])) {
-
+                if (
+                    $request->boolean('has_variant') &&
+                    !empty($variantData['attributes']) &&
+                    is_array($variantData['attributes'])
+                ) {
                     $insertData = [];
 
                     foreach ($variantData['attributes'] as $attr) {
 
-                        $insertData[] = [
-                            'product_variant_id' => $variant->id,
-                            'attribute_master_id' => decodeIdOrFail($attr['attribute_master_id']),
-                            'attribute_value_id' => decodeIdOrFail($attr['attribute_value_id']),
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
+                        if (
+                            !empty($attr['attribute_master_id']) &&
+                            !empty($attr['attribute_value_id'])
+                        ) {
+                            $attributeMasterId = decodeIdOrFail(
+                                $attr['attribute_master_id'],
+                                'Invalid Attribute Master ID'
+                            );
+
+                            $attributeValueId = decodeIdOrFail(
+                                $attr['attribute_value_id'],
+                                'Invalid Attribute Value ID'
+                            );
+
+                            if (
+                                !DB::table('attribute_masters')
+                                    ->where('id', $attributeMasterId)
+                                    ->exists()
+                            ) {
+                                throw new \Exception('Attribute master not found');
+                            }
+
+                            if (
+                                !DB::table('attribute_values')
+                                    ->where('id', $attributeValueId)
+                                    ->where('attribute_master_id', $attributeMasterId)
+                                    ->exists()
+                            ) {
+                                throw new \Exception(
+                                    'Selected attribute value does not belong to the selected attribute'
+                                );
+                            }
+
+                            $insertData[] = [
+                                'product_variant_id' => $variant->id,
+                                'attribute_master_id' => $attributeMasterId,
+                                'attribute_value_id' => $attributeValueId,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
                     }
 
-                    if ($insertData) {
+                    if (!empty($insertData)) {
                         DB::table('product_attribute_relations')->insert($insertData);
                     }
                 }
 
-                // -------------------------------------------------------
-                // FIX: Use direct array access on $allVariantFiles instead
-                // of $request->file("variants.$index.images") — Laravel
-                // does not resolve dot-notation keys for uploaded files.
-                // -------------------------------------------------------
-                $files = collect($allVariantFiles[$index]['images'] ?? [])
-                    ->filter(fn ($file) => $file && $file->isValid());
+                // Images — same pattern as store: hasFile check + per-index dot notation
+                if ($request->hasFile("variants.$index.images")) {
 
-                if ($files->isNotEmpty()) {
-
-                    // Delete old images
-                    $oldImages = ProductImage::where(
-                        'product_variant_id',
-                        $variant->id
-                    )->get();
+                    // Delete old images first
+                    $oldImages = ProductImage::where('product_variant_id', $variant->id)->get();
 
                     foreach ($oldImages as $oldImage) {
-
                         Storage::disk('public')->delete([
                             $oldImage->image_large,
                             $oldImage->image_medium,
                             $oldImage->image_small,
                         ]);
-
                         $oldImage->delete();
                     }
 
                     $manager = new ImageManager(new Driver());
 
-                    foreach ($files as $file) {
+                    foreach ($request->file("variants.$index.images") as $file) {
 
                         $filename = time() . '_' . uniqid();
 
                         $large = $manager->read($file)->cover(600, 600);
-
                         Storage::disk('public')->put(
                             "products/large/{$filename}.webp",
                             compressToTargetSize($large, 30)
                         );
 
                         $medium = $manager->read($file)->cover(150, 150);
-
                         Storage::disk('public')->put(
                             "products/medium/{$filename}.webp",
                             compressToTargetSize($medium, 25)
                         );
 
                         $small = $manager->read($file)->cover(40, 40);
-
                         Storage::disk('public')->put(
                             "products/small/{$filename}.webp",
                             compressToTargetSize($small, 15)
@@ -1297,10 +1314,9 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-
             }
 
-            // Delete removed variants
+            // Delete variants that were removed from the request
             ProductVariant::where('product_id', $productId)
                 ->whereNotIn('id', $existingVariantIds)
                 ->delete();
