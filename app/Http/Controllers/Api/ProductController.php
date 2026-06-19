@@ -956,67 +956,74 @@ class ProductController extends Controller
                 // }
 
 
-                if ($request->hasFile("variants.$index.images")) {
+                if (
+                    $request->hasFile("variants.$index.images") &&
+                    collect($request->file("variants.$index.images"))
+                        ->filter(fn ($file) => $file && $file->isValid())
+                        ->count() > 0
+                ) {
 
-                    // Delete old images
-                    $oldImages = ProductImage::where(
-                        'product_variant_id',
-                        $variant->id
-                    )->get();
+                        if ($request->hasFile("variants.$index.images")) {
 
-                    foreach ($oldImages as $oldImage) {
+                            // Delete old images
+                            $oldImages = ProductImage::where(
+                                'product_variant_id',
+                                $variant->id
+                            )->get();
 
-                        Storage::disk('public')->delete([
-                            $oldImage->image_large,
-                            $oldImage->image_medium,
-                            $oldImage->image_small,
-                        ]);
+                            foreach ($oldImages as $oldImage) {
 
-                        $oldImage->delete();
-                    }
+                                Storage::disk('public')->delete([
+                                    $oldImage->image_large,
+                                    $oldImage->image_medium,
+                                    $oldImage->image_small,
+                                ]);
 
-                    $manager = new ImageManager(new Driver());
+                                $oldImage->delete();
+                            }
 
-                    foreach ($request->file("variants.$index.images") as $file) {
+                            $manager = new ImageManager(new Driver());
 
-                        if (!$file || !$file->isValid()) {
-                            continue;
+                            foreach ($request->file("variants.$index.images") as $file) {
+
+                                if (!$file || !$file->isValid()) {
+                                    continue;
+                                }
+
+                                $filename = time() . '_' . uniqid();
+
+                                $large = $manager->read($file)->cover(600, 600);
+
+                                Storage::disk('public')->put(
+                                    "products/large/{$filename}.webp",
+                                    compressToTargetSize($large, 30)
+                                );
+
+                                $medium = $manager->read($file)->cover(150, 150);
+
+                                Storage::disk('public')->put(
+                                    "products/medium/{$filename}.webp",
+                                    compressToTargetSize($medium, 25)
+                                );
+
+                                $small = $manager->read($file)->cover(40, 40);
+
+                                Storage::disk('public')->put(
+                                    "products/small/{$filename}.webp",
+                                    compressToTargetSize($small, 15)
+                                );
+
+                                ProductImage::create([
+                                    'business_category_id' => $business->business_category_id,
+                                    'product_id' => $productId,
+                                    'product_variant_id' => $variant->id,
+                                    'image_large' => "products/large/{$filename}.webp",
+                                    'image_medium' => "products/medium/{$filename}.webp",
+                                    'image_small' => "products/small/{$filename}.webp",
+                                ]);
+                            }
                         }
-
-                        $filename = time() . '_' . uniqid();
-
-                        $large = $manager->read($file)->cover(600, 600);
-
-                        Storage::disk('public')->put(
-                            "products/large/{$filename}.webp",
-                            compressToTargetSize($large, 30)
-                        );
-
-                        $medium = $manager->read($file)->cover(150, 150);
-
-                        Storage::disk('public')->put(
-                            "products/medium/{$filename}.webp",
-                            compressToTargetSize($medium, 25)
-                        );
-
-                        $small = $manager->read($file)->cover(40, 40);
-
-                        Storage::disk('public')->put(
-                            "products/small/{$filename}.webp",
-                            compressToTargetSize($small, 15)
-                        );
-
-                        ProductImage::create([
-                            'business_category_id' => $business->business_category_id,
-                            'product_id' => $productId,
-                            'product_variant_id' => $variant->id,
-                            'image_large' => "products/large/{$filename}.webp",
-                            'image_medium' => "products/medium/{$filename}.webp",
-                            'image_small' => "products/small/{$filename}.webp",
-                        ]);
-                    }
                 }
-
 
             }
 
