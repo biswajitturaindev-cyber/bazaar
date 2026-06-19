@@ -956,74 +956,137 @@ class ProductController extends Controller
                 // }
 
 
-                if (
-                    $request->hasFile("variants.$index.images") &&
-                    collect($request->file("variants.$index.images"))
-                        ->filter(fn ($file) => $file && $file->isValid())
-                        ->count() > 0
-                ) {
+                // if (
+                //     $request->hasFile("variants.$index.images") &&
+                //     collect($request->file("variants.$index.images"))
+                //         ->filter(fn ($file) => $file && $file->isValid())
+                //         ->count() > 0
+                // ) {
 
-                        if ($request->hasFile("variants.$index.images")) {
+                //         if ($request->hasFile("variants.$index.images")) {
 
-                            // Delete old images
-                            $oldImages = ProductImage::where(
-                                'product_variant_id',
-                                $variant->id
-                            )->get();
+                //             // Delete old images
+                //             $oldImages = ProductImage::where(
+                //                 'product_variant_id',
+                //                 $variant->id
+                //             )->get();
 
-                            foreach ($oldImages as $oldImage) {
+                //             foreach ($oldImages as $oldImage) {
 
-                                Storage::disk('public')->delete([
-                                    $oldImage->image_large,
-                                    $oldImage->image_medium,
-                                    $oldImage->image_small,
-                                ]);
+                //                 Storage::disk('public')->delete([
+                //                     $oldImage->image_large,
+                //                     $oldImage->image_medium,
+                //                     $oldImage->image_small,
+                //                 ]);
 
-                                $oldImage->delete();
-                            }
+                //                 $oldImage->delete();
+                //             }
 
-                            $manager = new ImageManager(new Driver());
+                //             $manager = new ImageManager(new Driver());
 
-                            foreach ($request->file("variants.$index.images") as $file) {
+                //             foreach ($request->file("variants.$index.images") as $file) {
 
-                                if (!$file || !$file->isValid()) {
-                                    continue;
-                                }
+                //                 if (!$file || !$file->isValid()) {
+                //                     continue;
+                //                 }
 
-                                $filename = time() . '_' . uniqid();
+                //                 $filename = time() . '_' . uniqid();
 
-                                $large = $manager->read($file)->cover(600, 600);
+                //                 $large = $manager->read($file)->cover(600, 600);
 
-                                Storage::disk('public')->put(
-                                    "products/large/{$filename}.webp",
-                                    compressToTargetSize($large, 30)
-                                );
+                //                 Storage::disk('public')->put(
+                //                     "products/large/{$filename}.webp",
+                //                     compressToTargetSize($large, 30)
+                //                 );
 
-                                $medium = $manager->read($file)->cover(150, 150);
+                //                 $medium = $manager->read($file)->cover(150, 150);
 
-                                Storage::disk('public')->put(
-                                    "products/medium/{$filename}.webp",
-                                    compressToTargetSize($medium, 25)
-                                );
+                //                 Storage::disk('public')->put(
+                //                     "products/medium/{$filename}.webp",
+                //                     compressToTargetSize($medium, 25)
+                //                 );
 
-                                $small = $manager->read($file)->cover(40, 40);
+                //                 $small = $manager->read($file)->cover(40, 40);
 
-                                Storage::disk('public')->put(
-                                    "products/small/{$filename}.webp",
-                                    compressToTargetSize($small, 15)
-                                );
+                //                 Storage::disk('public')->put(
+                //                     "products/small/{$filename}.webp",
+                //                     compressToTargetSize($small, 15)
+                //                 );
 
-                                ProductImage::create([
-                                    'business_category_id' => $business->business_category_id,
-                                    'product_id' => $productId,
-                                    'product_variant_id' => $variant->id,
-                                    'image_large' => "products/large/{$filename}.webp",
-                                    'image_medium' => "products/medium/{$filename}.webp",
-                                    'image_small' => "products/small/{$filename}.webp",
-                                ]);
-                            }
-                        }
+                //                 ProductImage::create([
+                //                     'business_category_id' => $business->business_category_id,
+                //                     'product_id' => $productId,
+                //                     'product_variant_id' => $variant->id,
+                //                     'image_large' => "products/large/{$filename}.webp",
+                //                     'image_medium' => "products/medium/{$filename}.webp",
+                //                     'image_small' => "products/small/{$filename}.webp",
+                //                 ]);
+                //             }
+                //         }
+                // }
+
+
+                $files = collect($request->file("variants.$index.images", []))
+                    ->filter(fn ($file) => $file && $file->isValid());
+
+                if ($files->isNotEmpty()) {
+
+                    // Delete old images
+                    $oldImages = ProductImage::where(
+                        'product_variant_id',
+                        $variant->id
+                    )->get();
+
+                    foreach ($oldImages as $oldImage) {
+
+                        Storage::disk('public')->delete([
+                            $oldImage->image_large,
+                            $oldImage->image_medium,
+                            $oldImage->image_small,
+                        ]);
+
+                        $oldImage->delete();
+                    }
+
+                    $manager = new ImageManager(new Driver());
+
+                    foreach ($files as $file) {
+
+                        $filename = time() . '_' . uniqid();
+
+                        $large = $manager->read($file)->cover(600, 600);
+
+                        Storage::disk('public')->put(
+                            "products/large/{$filename}.webp",
+                            compressToTargetSize($large, 30)
+                        );
+
+                        $medium = $manager->read($file)->cover(150, 150);
+
+                        Storage::disk('public')->put(
+                            "products/medium/{$filename}.webp",
+                            compressToTargetSize($medium, 25)
+                        );
+
+                        $small = $manager->read($file)->cover(40, 40);
+
+                        Storage::disk('public')->put(
+                            "products/small/{$filename}.webp",
+                            compressToTargetSize($small, 15)
+                        );
+
+                        ProductImage::create([
+                            'business_category_id' => $business->business_category_id,
+                            'product_id' => $productId,
+                            'product_variant_id' => $variant->id,
+                            'image_large' => "products/large/{$filename}.webp",
+                            'image_medium' => "products/medium/{$filename}.webp",
+                            'image_small' => "products/small/{$filename}.webp",
+                        ]);
+                    }
                 }
+
+
 
             }
 
