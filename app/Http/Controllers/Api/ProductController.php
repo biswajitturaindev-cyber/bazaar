@@ -897,9 +897,10 @@ class ProductController extends Controller
                 $variantIds[] = $variant->id;
 
 
-                if ($request->hasFile("variants.$index.images")) {
+                $files = $request->file("variants.$index.images");
 
-                    // Remove old images
+                if (!empty($files) && is_array($files)) {
+                    // Delete old images
                     $oldImages = ProductImage::where(
                         'product_variant_id',
                         $variant->id
@@ -916,9 +917,14 @@ class ProductController extends Controller
                         $oldImage->delete();
                     }
 
+                    // Upload new images
                     $manager = new ImageManager(new Driver());
 
-                    foreach ($request->file("variants.$index.images") as $file) {
+                    foreach ($files as $file) {
+
+                        if (!$file || !$file->isValid()) {
+                            continue;
+                        }
 
                         $filename = (string) Str::uuid();
 
@@ -953,8 +959,6 @@ class ProductController extends Controller
                         ]);
                     }
                 }
-
-
 
             }
 
