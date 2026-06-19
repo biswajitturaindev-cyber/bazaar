@@ -1352,7 +1352,6 @@ class ProductController extends Controller
     //     }
     // }
 
-
     public function update(Request $request, string $id)
     {
         DB::beginTransaction();
@@ -1478,19 +1477,26 @@ class ProductController extends Controller
                     'updated_at' => now(),
                 ]);
 
+            // ---------------------------------------------------------------
+            // Pre-load existing variants ordered by ID so we can match them
+            // positionally when no variant_id is sent in the request.
+            // e.g. request variant[0] (no variant_id) → maps to DB variant id=1
+            //      request variant[1] (no variant_id) → maps to DB variant id=2
+            // ---------------------------------------------------------------
+            $existingVariants = ProductVariant::where('product_id', $productId)
+                ->orderBy('id')
+                ->get()
+                ->values(); // re-index to 0,1,2...
+
             $existingVariantIds = [];
 
             foreach ($data['variants'] as $index => $variantData) {
 
-                // $oldVariantId: the variant whose images need migrating
-                // when no variant_id is sent (new variant branch).
-                $oldVariantId = null;
-
                 if (!empty($variantData['variant_id'])) {
 
-                    // -------------------------------------------------------
-                    // UPDATE existing variant
-                    // -------------------------------------------------------
+                    // -----------------------------------------------------------
+                    // UPDATE path — variant_id explicitly provided
+                    // -----------------------------------------------------------
                     $variantId = decodeIdOrFail($variantData['variant_id'], 'Invalid Variant ID');
                     $variant = ProductVariant::findOrFail($variantId);
 
@@ -1512,42 +1518,56 @@ class ProductController extends Controller
 
                 } else {
 
-                    // -------------------------------------------------------
-                    // CREATE new variant (no variant_id sent)
-                    //
-                    // Collect ALL existing variant IDs for this product so
-                    // their orphaned images are cleaned up after the new
-                    // variant is created (see image section below).
-                    // -------------------------------------------------------
-                    $oldVariantIds = ProductVariant::where('product_id', $productId)
-                        ->pluck('id')
-                        ->toArray();
+                    // -----------------------------------------------------------
+                    // NO variant_id sent — match by position in the existing list.
+                    // If a matching existing variant is found at this index, UPDATE
+                    // it in place (avoids creating a new row and keeps images
+                    // correctly associated).
+                    // If no existing variant at this index, CREATE a new one.
+                    // -----------------------------------------------------------
+                    $matchedExisting = $existingVariants->get($index); // null-safe
 
-                    $variant = ProductVariant::create([
-                        'product_id' => $productId,
-                        'product_type' => $categoryId,
+                    if ($matchedExisting) {
 
-                        'sku' => $variantData['sku'] ?? null,
-                        'barcode' => $variantData['barcode'] ?? null,
-                        'mrp' => $variantData['mrp'],
-                        'cost_price' => $variantData['cost_price'] ?? null,
-                        'selling_price' => $variantData['selling_price'] ?? null,
-                        'discount' => $variantData['discount'] ?? 0,
-                        'final_price' => $variantData['final_price'] ?? null,
-                        'short_description' => $variantData['short_description'] ?? null,
-                        'long_description' => $variantData['long_description'] ?? null,
-                        'variant_status' => $variantData['variant_status'] ?? null,
-                        'manufacture_date' => $variantData['manufacture_date'] ?? null,
-                        'expiry_date' => $variantData['expiry_date'] ?? null,
-                        'is_primary' => !empty($variantData['is_primary']),
-                    ]);
+                        $variant = $matchedExisting;
 
-                    // Move all images from old variants to the new variant
-                    // so they appear under the correct variant_id and are
-                    // cleaned up properly if new images are uploaded below.
-                    if (!empty($oldVariantIds)) {
-                        ProductImage::whereIn('product_variant_id', $oldVariantIds)
-                            ->update(['product_variant_id' => $variant->id]);
+                        $variant->update([
+                            'sku' => $variantData['sku'] ?? null,
+                            'barcode' => $variantData['barcode'] ?? null,
+                            'mrp' => $variantData['mrp'],
+                            'cost_price' => $variantData['cost_price'] ?? null,
+                            'selling_price' => $variantData['selling_price'] ?? null,
+                            'discount' => $variantData['discount'] ?? 0,
+                            'final_price' => $variantData['final_price'] ?? null,
+                            'short_description' => $variantData['short_description'] ?? null,
+                            'long_description' => $variantData['long_description'] ?? null,
+                            'variant_status' => $variantData['variant_status'] ?? null,
+                            'manufacture_date' => $variantData['manufacture_date'] ?? null,
+                            'expiry_date' => $variantData['expiry_date'] ?? null,
+                            'is_primary' => !empty($variantData['is_primary']),
+                        ]);
+
+                    } else {
+
+                        // Genuinely new variant (more variants sent than exist in DB)
+                        $variant = ProductVariant::create([
+                            'product_id' => $productId,
+                            'product_type' => $categoryId,
+
+                            'sku' => $variantData['sku'] ?? null,
+                            'barcode' => $variantData['barcode'] ?? null,
+                            'mrp' => $variantData['mrp'],
+                            'cost_price' => $variantData['cost_price'] ?? null,
+                            'selling_price' => $variantData['selling_price'] ?? null,
+                            'discount' => $variantData['discount'] ?? 0,
+                            'final_price' => $variantData['final_price'] ?? null,
+                            'short_description' => $variantData['short_description'] ?? null,
+                            'long_description' => $variantData['long_description'] ?? null,
+                            'variant_status' => $variantData['variant_status'] ?? null,
+                            'manufacture_date' => $variantData['manufacture_date'] ?? null,
+                            'expiry_date' => $variantData['expiry_date'] ?? null,
+                            'is_primary' => !empty($variantData['is_primary']),
+                        ]);
                     }
                 }
 
@@ -1642,15 +1662,14 @@ class ProductController extends Controller
                     }
                 }
 
-                // -------------------------------------------------------
                 // Images
-                // By this point $variant->id always has the correct images
-                // on it (either it's an existing variant, or old images were
-                // reassigned to the new variant above).
-                // -------------------------------------------------------
+                // $variant->id is always correct here:
+                // - update path: same variant, images already on it
+                // - positional match path: same variant, images already on it
+                // - new variant path: genuinely new, no old images to worry about
                 if ($request->hasFile("variants.$index.images")) {
 
-                    // Delete old images (now correctly pointing to $variant->id)
+                    // Delete old images for this specific variant
                     $oldImages = ProductImage::where('product_variant_id', $variant->id)->get();
 
                     foreach ($oldImages as $oldImage) {
@@ -1698,7 +1717,7 @@ class ProductController extends Controller
                 }
             }
 
-            // Delete variants removed from the request + their images
+            // Delete variants removed from the request + their images from storage
             $removedVariants = ProductVariant::where('product_id', $productId)
                 ->whereNotIn('id', $existingVariantIds)
                 ->get();
@@ -1749,6 +1768,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
