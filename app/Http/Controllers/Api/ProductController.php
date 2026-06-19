@@ -1352,6 +1352,7 @@ class ProductController extends Controller
     //     }
     // }
 
+
     public function update(Request $request, string $id)
     {
         DB::beginTransaction();
@@ -1481,14 +1482,16 @@ class ProductController extends Controller
 
             foreach ($data['variants'] as $index => $variantData) {
 
-                // Track the old variant ID before create/update
-                // so we can reassign its images if a new variant replaces it.
+                // $oldVariantId: the variant whose images need migrating
+                // when no variant_id is sent (new variant branch).
                 $oldVariantId = null;
 
                 if (!empty($variantData['variant_id'])) {
 
+                    // -------------------------------------------------------
+                    // UPDATE existing variant
+                    // -------------------------------------------------------
                     $variantId = decodeIdOrFail($variantData['variant_id'], 'Invalid Variant ID');
-
                     $variant = ProductVariant::findOrFail($variantId);
 
                     $variant->update([
@@ -1509,16 +1512,16 @@ class ProductController extends Controller
 
                 } else {
 
-                    // ------------------------------------------------------------
-                    // No variant_id sent — this is treated as a new variant.
-                    // But if there is already exactly one variant for this product,
-                    // carry its images over by remembering its ID, so the image
-                    // delete/re-insert below targets the right row.
-                    // ------------------------------------------------------------
-                    $existingVariant = ProductVariant::where('product_id', $productId)->first();
-                    if ($existingVariant) {
-                        $oldVariantId = $existingVariant->id;
-                    }
+                    // -------------------------------------------------------
+                    // CREATE new variant (no variant_id sent)
+                    //
+                    // Collect ALL existing variant IDs for this product so
+                    // their orphaned images are cleaned up after the new
+                    // variant is created (see image section below).
+                    // -------------------------------------------------------
+                    $oldVariantIds = ProductVariant::where('product_id', $productId)
+                        ->pluck('id')
+                        ->toArray();
 
                     $variant = ProductVariant::create([
                         'product_id' => $productId,
@@ -1539,11 +1542,11 @@ class ProductController extends Controller
                         'is_primary' => !empty($variantData['is_primary']),
                     ]);
 
-                    // Reassign existing images from old variant to the new variant
-                    // so they are not orphaned (and will be cleaned up below if
-                    // new images are uploaded).
-                    if ($oldVariantId) {
-                        ProductImage::where('product_variant_id', $oldVariantId)
+                    // Move all images from old variants to the new variant
+                    // so they appear under the correct variant_id and are
+                    // cleaned up properly if new images are uploaded below.
+                    if (!empty($oldVariantIds)) {
+                        ProductImage::whereIn('product_variant_id', $oldVariantIds)
                             ->update(['product_variant_id' => $variant->id]);
                     }
                 }
@@ -1639,11 +1642,15 @@ class ProductController extends Controller
                     }
                 }
 
+                // -------------------------------------------------------
                 // Images
+                // By this point $variant->id always has the correct images
+                // on it (either it's an existing variant, or old images were
+                // reassigned to the new variant above).
+                // -------------------------------------------------------
                 if ($request->hasFile("variants.$index.images")) {
 
-                    // Delete old images on the current variant
-                    // (already reassigned above if variant was newly created)
+                    // Delete old images (now correctly pointing to $variant->id)
                     $oldImages = ProductImage::where('product_variant_id', $variant->id)->get();
 
                     foreach ($oldImages as $oldImage) {
@@ -1691,14 +1698,15 @@ class ProductController extends Controller
                 }
             }
 
-            // Delete variants that were removed from the request
-            // Their images are also cleaned up here
+            // Delete variants removed from the request + their images
             $removedVariants = ProductVariant::where('product_id', $productId)
                 ->whereNotIn('id', $existingVariantIds)
                 ->get();
 
             foreach ($removedVariants as $removedVariant) {
+
                 $orphanImages = ProductImage::where('product_variant_id', $removedVariant->id)->get();
+
                 foreach ($orphanImages as $orphanImage) {
                     Storage::disk('public')->delete([
                         $orphanImage->image_large,
@@ -1707,6 +1715,7 @@ class ProductController extends Controller
                     ]);
                     $orphanImage->delete();
                 }
+
                 $removedVariant->delete();
             }
 
