@@ -13,6 +13,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -493,42 +494,111 @@ class OrderController extends Controller
         ]);
     }
 
+    // public function invoice($encoded_id)
+    // {
+    //     try {
+    //         $orderId = decodeIdOrFail($encoded_id);
+    //         $order = Order::with([
+    //             'items',
+    //             'addresses',
+    //             'business',
+    //         ])->findOrFail($orderId);
+    //         $address = $order->addresses->first();
+
+    //         $business = $order->business;
+    //         $pdf = Pdf::loadView(
+    //             'pdf.order-invoice-pos',
+    //             compact(
+    //                 'order',
+    //                 'address',
+    //                 'business'
+    //             )
+    //         );
+
+    //         $pdf->setPaper('A5', 'portrait');
+    //         return $pdf->stream(
+    //             $order->invoice_no . '.pdf'
+    //         );
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+
+    // public function invoice($encoded_id)
+    // {
+    //     try {
+
+    //         $orderId = decodeIdOrFail($encoded_id);
+
+    //         $order = Order::with([
+    //             'items',
+    //             'addresses',
+    //             'business',
+    //         ])->findOrFail($orderId);
+
+    //         $address = $order->addresses->first();
+    //         $business = $order->business;
+
+    //         $pdf = Pdf::loadView(
+    //             'pdf.order-invoice-pos',
+    //             compact(
+    //                 'order',
+    //                 'address',
+    //                 'business'
+    //             )
+    //         );
+
+    //         $pdf->setPaper('A5', 'portrait');
+
+    //         $fileName = $order->invoice_no . '.pdf';
+
+    //         $path = 'invoices/' . $fileName;
+
+    //         Storage::disk('public')->put(
+    //             $path,
+    //             $pdf->output()
+    //         );
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'invoice_url' => asset(
+    //                 'storage/' . $path
+    //             ),
+    //         ]);
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+
+
+
     public function invoice($encoded_id)
     {
         try {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Order ID
-            |--------------------------------------------------------------------------
-            */
             $orderId = decodeIdOrFail($encoded_id);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Get Order
-            |--------------------------------------------------------------------------
-            */
             $order = Order::with([
                 'items',
                 'addresses',
                 'business',
             ])->findOrFail($orderId);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Get Address & Business
-            |--------------------------------------------------------------------------
-            */
             $address = $order->addresses->first();
-
             $business = $order->business;
 
-            /*
-            |--------------------------------------------------------------------------
-            | Generate PDF
-            |--------------------------------------------------------------------------
-            */
             $pdf = Pdf::loadView(
                 'pdf.order-invoice-pos',
                 compact(
@@ -538,21 +608,43 @@ class OrderController extends Controller
                 )
             );
 
-            // A5 size similar to your screenshot
             $pdf->setPaper('A5', 'portrait');
 
-            return $pdf->stream(
-                $order->invoice_no . '.pdf'
+            $fileName = $order->invoice_no . '.pdf';
+            $path = 'invoices/' . $fileName;
+
+            // Create directory if not exists
+            if (!Storage::disk('public')->exists('invoices')) {
+                Storage::disk('public')->makeDirectory('invoices');
+            }
+
+            Storage::disk('public')->put(
+                $path,
+                $pdf->output()
             );
 
-        } catch (\Exception $e) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice generated successfully',
+                'invoice_no' => $order->invoice_no,
+                'invoice_url' => asset('storage/' . $path),
+            ]);
+
+        } catch (\Throwable $e) {
+
+            \Log::error('Invoice Generation Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Unable to generate invoice',
             ], 500);
         }
     }
+
 
     /**
      * Cancel Item
