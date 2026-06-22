@@ -42,7 +42,7 @@ class CartController extends Controller
                         'discount',
                         'final_price',
                         'is_primary',
-                    ]);
+                    ])->with('images');
                 },
 
                 'cartAttributes' => function ($q) {
