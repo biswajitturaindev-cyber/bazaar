@@ -57,10 +57,20 @@ class CartController extends Controller
             ->latest('id')
             ->get();
 
+            $kyc = Cart::leftJoin('kyc_details', 'kyc_details.business_id', '=', 'carts.business_id')
+                ->where('carts.user_id', $userId)
+                ->select(
+                    'kyc_details.gst_no',
+                    'kyc_details.gst_state_code',
+                    'kyc_details.gst_address'
+                )
+                ->first();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cart fetched successfully',
                 'total_items' => $cart->count(),
+                'vendor_gst_details' => $kyc,
                 'data' => CartResource::collection($cart),
             ]);
 

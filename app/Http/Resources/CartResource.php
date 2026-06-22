@@ -15,20 +15,7 @@ class CartResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Resolve Product
-        |--------------------------------------------------------------------------
-        */
-
         $product = $this->product();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Resolve Variant
-        |--------------------------------------------------------------------------
-        */
-
         $variant = null;
 
         if (!empty($this->product_variant_id)) {
@@ -38,24 +25,15 @@ class CartResource extends JsonResource
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Resolve Product Image
-        |--------------------------------------------------------------------------
-        */
-
         $productImage = ProductImage::query()
-
             ->where(
                 'business_category_id',
                 $this->business_category_id
             )
-
             ->where(
                 'product_id',
                 $this->product_id
             )
-
             ->when(
                 !empty($this->product_variant_id),
 
@@ -67,16 +45,8 @@ class CartResource extends JsonResource
                     );
                 }
             )
-
             ->latest('id')
-
             ->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Image URL
-        |--------------------------------------------------------------------------
-        */
 
         $imageUrl = null;
 
@@ -89,40 +59,16 @@ class CartResource extends JsonResource
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Final Price
-        |--------------------------------------------------------------------------
-        */
-
         $finalPrice = round(
             (float) ($variant->final_price ?? 0),
             2
         );
 
         return [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Cart Info
-            |--------------------------------------------------------------------------
-            */
-
             'id' => Hashids::encode(
                 $this->id
             ),
-
-            /*
-            |--------------------------------------------------------------------------
-            | User Details
-            |--------------------------------------------------------------------------
-            */
             'user' => $this->user_id,
-            /*
-            |--------------------------------------------------------------------------
-            | Business Details
-            |--------------------------------------------------------------------------
-            */
             'business' => [
                 'id' => $this->business
                     ? Hashids::encode($this->business->id)
@@ -130,25 +76,16 @@ class CartResource extends JsonResource
 
                 'name' => $this->business->business_name ?? null,
 
-                'gst_no' => $this->gst_no ?? null,
-                'gst_state_code' => $this->gst_state_code ?? null,
-                'gst_address' => $this->gst_address ?? null,
+                'gst_no' => $this->kycDetail?->gst_no,
+                'gst_state_code' => $this->kycDetail?->gst_state_code,
+                'gst_address' => $this->kycDetail?->gst_address,
             ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | Product Details
-            |--------------------------------------------------------------------------
-            */
-
             'business_category_id' => Hashids::encode(
                 $this->business_category_id
             ),
-
             'product_id' => Hashids::encode(
                 $this->product_id
             ),
-
             'product_variant_id' => !empty(
                 $this->product_variant_id
             )
@@ -158,25 +95,14 @@ class CartResource extends JsonResource
                 : null,
 
             'product_name' => $this->product_name,
-
             'quantity' => (int) $this->quantity,
-
             'image' => $imageUrl,
-
             'product' => [
-
                 'name' => $product->name ?? null,
-
                 'final_price' => $finalPrice,
-
                 'image' => $imageUrl,
             ],
 
-            /*
-            |--------------------------------------------------------------------------
-            | Selected Attributes
-            |--------------------------------------------------------------------------
-            */
             'attributes' => $this->whenLoaded(
                 'cartAttributes',
 
@@ -186,21 +112,17 @@ class CartResource extends JsonResource
                         function ($attr) {
 
                             return [
-
                                 'attribute_master_id' => Hashids::encode(
                                     $attr->attribute_master_id
                                 ),
-
                                 'attribute_value_id' => Hashids::encode(
                                     $attr->attribute_value_id
                                 ),
-
                                 'attribute_name' => $attr->attribute_master_name
                                     ?? $attr->attributeMaster?->name,
 
                                 'attribute_value' => $attr->attribute_value
                                     ?? $attr->attributeValue?->value,
-
                                 'color_code' => $attr->attributeValue?->color_code,
                             ];
                         }
