@@ -16,11 +16,14 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductReviewController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VendorCommissionController;
 use App\Http\Controllers\Admin\VendorProductController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::redirect('/', '/admin/login');
 
 Auth::routes();
 
@@ -189,6 +192,16 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('vendors.products', VendorProductController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Vendor Commission Master
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('vendor-commissions', VendorCommissionController::class);
+
+
+
 
     });
 });
