@@ -176,49 +176,98 @@ class ProductReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
-    {
+    // public function show($id)
+    // {
 
+    //     try {
+
+    //         $modelMap = config('product.model_map');
+
+    //         $product = null;
+
+    //         foreach ($modelMap as $type => $modelClass) {
+
+    //             $product = $modelClass::with([
+
+    //                 'category',
+    //                 'subCategory',
+    //                 'subSubCategory',
+    //                 'hsn',
+
+    //                 'variants.meta',
+
+    //                 'variants.attributes.attribute',
+    //                 'variants.attributes.attributeValue',
+
+    //                 'variants.images',
+
+    //                 'variants.stocks.business'
+
+    //             ])->find($id);
+
+    //             if ($product) {
+    //                 break;
+    //             }
+    //         }
+
+    //         if (!$product) {
+
+    //             return redirect()
+    //                 ->back()
+    //                 ->with('error', 'Product not found');
+    //         }
+
+    //         return view(
+    //             'admin.product-reviews.show',
+    //             compact('product')
+    //         );
+
+    //     } catch (\Exception $e) {
+
+    //         \Log::error(
+    //             'Product Show Error: ' . $e->getMessage()
+    //         );
+
+    //         return redirect()
+    //             ->back()
+    //             ->with(
+    //                 'error',
+    //                 'Something went wrong'
+    //             );
+    //     }
+    // }
+
+    public function show(Request $request, $id)
+    {
         try {
 
-            // =============================
-            // DECODE PRODUCT ID
-            // =============================
+            $businessId = $request->business_id;
+
             $modelMap = config('product.model_map');
 
             $product = null;
 
-            // =============================
-            // SEARCH PRODUCT IN ALL MODELS
-            // =============================
             foreach ($modelMap as $type => $modelClass) {
 
                 $product = $modelClass::with([
-
                     'category',
                     'subCategory',
                     'subSubCategory',
                     'hsn',
-
                     'variants.meta',
-
                     'variants.attributes.attribute',
                     'variants.attributes.attributeValue',
-
                     'variants.images',
-
                     'variants.stocks.business'
-
-                ])->find($id);
+                ])
+                ->where('business_id', $businessId) // optional filter
+                ->find($id);
 
                 if ($product) {
                     break;
                 }
             }
 
-            // =============================
-            // PRODUCT NOT FOUND
-            // =============================
             if (!$product) {
 
                 return redirect()
@@ -228,7 +277,7 @@ class ProductReviewController extends Controller
 
             return view(
                 'admin.product-reviews.show',
-                compact('product')
+                compact('product', 'businessId')
             );
 
         } catch (\Exception $e) {
@@ -245,6 +294,7 @@ class ProductReviewController extends Controller
                 );
         }
     }
+
 
     /**
      * Show the form for editing the specified resource.
