@@ -127,6 +127,11 @@ class Order extends Model
         return $this->belongsTo(Business::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function businessCategory()
     {
         return $this->belongsTo(
