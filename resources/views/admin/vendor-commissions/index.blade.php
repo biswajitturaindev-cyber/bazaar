@@ -1,5 +1,26 @@
 @extends('admin.layouts.master')
 
+<style>
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+</style>
+
 @section('title')
     Vendor Commission Report
 @endsection
@@ -502,7 +523,7 @@
                 <!-- Table Area -->
                 <div class="p-6">
 
-                    <div class="overflow-auto max-h-[600px]">
+                    <div class="overflow-y-auto overflow-x-auto max-h-[70vh] custom-scroll">
 
                         <table class="w-full border-collapse">
 
