@@ -195,11 +195,10 @@
                                 </td>
 
                                 {{-- ACTION --}}
-                                <td class="px-3 py-2">
+                                {{-- <td class="px-3 py-2">
 
                                     <div class="flex items-center justify-center gap-2">
 
-                                        {{-- VIEW PRODUCT DETAILS --}}
                                         <a href="{{ route('product-reviews.show', $product->id) }}"
                                             class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs">
                                             View Details
@@ -207,7 +206,21 @@
 
                                     </div>
 
+                                </td> --}}
+
+                                <td class="px-3 py-2">
+
+                                    <div class="flex items-center justify-center gap-2">
+
+                                        <a href="{{ route('product-reviews.show', $product->id) }}?business_id={{ $product->business_id }}"
+                                            class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs">
+                                            View Details
+                                        </a>
+
+                                    </div>
+
                                 </td>
+
 
                             </tr>
 
