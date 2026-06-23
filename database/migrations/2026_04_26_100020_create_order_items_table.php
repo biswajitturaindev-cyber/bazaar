@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->foreignId('product_variant_id')->nullable()->constrained('product_variants')->nullOnDelete();
             $table->string('product_name');
+            $table->decimal('product_commission', 10, 2)->default(0);
             $table->string('sku')->nullable();
 
             // GST Invoice Fields
