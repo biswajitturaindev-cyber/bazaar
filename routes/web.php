@@ -199,7 +199,10 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('vendor-commissions', VendorCommissionController::class);
-
+        Route::get(
+            '/vendor-commissions/invoices/{businessId}',
+            [VendorCommissionController::class, 'invoiceList']
+        )->name('vendor-commissions.invoice-list');
 
 
 

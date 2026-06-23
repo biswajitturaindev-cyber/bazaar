@@ -169,7 +169,7 @@ class OrderController extends Controller
             $nextId = $lastOrder
                 ? ($lastOrder->id + 1)
                 : 1;
-            $orderNo = 'OD/' . now()->format('ymdHis');
+            $orderNo = 'OD' . now()->format('ymdHis');
 
 
             $nextId = (Order::max('id') ?? 0) + 1;
@@ -281,15 +281,26 @@ class OrderController extends Controller
                     );
                 }
 
-                $availableStock = $cart->productVariant
-                    ->stocks
-                    ->sum('stock');
+                // $availableStock = $cart->productVariant
+                //     ->stocks
+                //     ->sum('stock');
 
-                if ($cart->quantity > $availableStock) {
+                // if ($cart->quantity > $availableStock) {
+
+                //     throw new \Exception(
+                //         $cart->product_name
+                //         . ' stock unavailable'
+                //     );
+                // }
+
+                $availableStock = $cart->productVariant
+                    ? $cart->productVariant->stocks->sum('stock')
+                    : 0;
+
+                if ($availableStock > 0 && $cart->quantity > $availableStock) {
 
                     throw new \Exception(
-                        $cart->product_name
-                        . ' stock unavailable'
+                        $cart->product_name . ' stock unavailable'
                     );
                 }
 
