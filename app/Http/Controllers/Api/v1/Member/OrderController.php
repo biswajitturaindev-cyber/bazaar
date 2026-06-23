@@ -310,14 +310,17 @@ class OrderController extends Controller
                 $product = $cart->product();
 
                 $hsnCode = null;
+                $commission = null;
 
                 if ($product) {
                     $hsnCode = $product->hsn_id ?? null;
+                    $commission = $product->commission ?? null;
                 }
 
                 $orderItem = $order->items()->create([
 
                     'product_id' => $cart->product_id,
+                    'product_commission' => $commission,
                     'product_variant_id' => $cart->product_variant_id,
                     'product_name' => $cart->product_name,
                     'sku' => $cart->productVariant->sku ?? null,
@@ -493,96 +496,6 @@ class OrderController extends Controller
             'data' => new OrderResource($order)
         ]);
     }
-
-    // public function invoice($encoded_id)
-    // {
-    //     try {
-    //         $orderId = decodeIdOrFail($encoded_id);
-    //         $order = Order::with([
-    //             'items',
-    //             'addresses',
-    //             'business',
-    //         ])->findOrFail($orderId);
-    //         $address = $order->addresses->first();
-
-    //         $business = $order->business;
-    //         $pdf = Pdf::loadView(
-    //             'pdf.order-invoice-pos',
-    //             compact(
-    //                 'order',
-    //                 'address',
-    //                 'business'
-    //             )
-    //         );
-
-    //         $pdf->setPaper('A5', 'portrait');
-    //         return $pdf->stream(
-    //             $order->invoice_no . '.pdf'
-    //         );
-
-    //     } catch (\Exception $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-
-    // public function invoice($encoded_id)
-    // {
-    //     try {
-
-    //         $orderId = decodeIdOrFail($encoded_id);
-
-    //         $order = Order::with([
-    //             'items',
-    //             'addresses',
-    //             'business',
-    //         ])->findOrFail($orderId);
-
-    //         $address = $order->addresses->first();
-    //         $business = $order->business;
-
-    //         $pdf = Pdf::loadView(
-    //             'pdf.order-invoice-pos',
-    //             compact(
-    //                 'order',
-    //                 'address',
-    //                 'business'
-    //             )
-    //         );
-
-    //         $pdf->setPaper('A5', 'portrait');
-
-    //         $fileName = $order->invoice_no . '.pdf';
-
-    //         $path = 'invoices/' . $fileName;
-
-    //         Storage::disk('public')->put(
-    //             $path,
-    //             $pdf->output()
-    //         );
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'invoice_url' => asset(
-    //                 'storage/' . $path
-    //             ),
-    //         ]);
-
-    //     } catch (\Exception $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-
-
 
     public function invoice($encoded_id)
     {
