@@ -221,8 +221,8 @@ body{
 <div class="invoice-wrapper">
 <div class="profile-section">
 
-    @if(!empty($business->kycDetail->shop_photo))
-        <img src="{{ public_path('storage/'.$business->shop_photo) }}">
+    @if(!empty($logo))
+        <img src="{{ $logo }}" width="120" alt="Logo">
     @endif
 
     <div class="shop-name">
@@ -231,13 +231,19 @@ body{
 
     <div class="profile-info">
         <strong>Phone Number:</strong>
-        {{ $business->mobile ?? '-' }}
+        {{ $business->user->mobile ?? '-' }}
     </div>
 
     <div class="profile-info">
         <strong>Address:</strong>
         {{ $business->address->address_line_1 ?? '-' }}, {{ $business->address->address_line_2 ?? '-' }}, {{ $business->address->pincode ?? '-' }}
     </div>
+
+     <div class="profile-info">
+        <strong>GST Number:</strong>
+        {{ $business->gst_number ?? '-' }}
+    </div>
+
 
 </div>
 
@@ -272,7 +278,7 @@ body{
 
 <div class="section">
     <strong>Customer :</strong>
-    {{ $address->mobile ?? $address->phone ?? '-' }}
+     {{ $address->phone ?? '-' }}
 </div>
 
 <div class="dashed"></div>
@@ -302,11 +308,11 @@ body{
                 </td>
 
                 <td class="text-right">
-                    ₹{{ number_format($item->selling_price,2) }}
+                    ₹{{ number_format($item->final_price,2) }}
                 </td>
 
                 <td class="text-right">
-                    ₹{{ number_format($item->total_amount,2) }}
+                    ₹{{ number_format($item->subtotal,2) }}
                 </td>
             </tr>
 
@@ -332,7 +338,7 @@ body{
 
             <td class="text-right">
                 <strong>Sub Total :</strong>
-                ₹{{ number_format($order->sub_total,2) }}
+                ₹{{ number_format($order->items->sum('subtotal'),2) }}
             </td>
         </tr>
 
@@ -358,7 +364,12 @@ body{
         <tr>
             <td>
                 <strong>Payment :</strong>
-                {{ strtoupper($order->payment_method ?? 'Cash') }}
+                {{ match($order->payment_method) {
+                    0 => 'WALLET',
+                    1 => 'ONLINE',
+                    2 => 'COD',
+                    default => 'CASH'
+                } }}
             </td>
 
             <td class="text-right">

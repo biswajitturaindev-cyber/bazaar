@@ -15,6 +15,7 @@ return new class extends Migration
 
             $table->id();
             $table->unsignedBigInteger('order_id');
+            $table->string('phone', 20)->nullable();
             $table->text('billing_address');
             $table->unsignedBigInteger('billing_city_id')->nullable();
             $table->unsignedBigInteger('billing_state_id')->nullable();
