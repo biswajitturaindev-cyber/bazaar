@@ -648,4 +648,77 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    /**
+     * Cancel Order
+     */
+    public function cancelOrders(Request $request)
+    {
+        $request->validate([
+            'order_id'         => 'required',
+            'cancel_reason_id' => 'required',
+            'cancel_note'      => 'nullable|string|max:500',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $orderId = decodeIdOrFail(
+                $request->order_id,
+                'Invalid order ID'
+            );
+
+            $cancelReasonId = decodeIdOrFail(
+                $request->cancel_reason_id,
+                'Invalid cancel reason ID'
+            );
+
+            $order = Order::with('items')->findOrFail($orderId);
+
+            if ($order->order_status == 5) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order already cancelled',
+                ], 422);
+            }
+
+            // Cancel all order items
+            OrderItem::where('order_id', $order->id)
+                ->where('status', '!=', 'cancelled')
+                ->update([
+                    'status'           => 'cancelled',
+                    'cancel_reason_id' => $cancelReasonId,
+                    'cancel_note'      => $request->cancel_note,
+                    'cancelled_by'     => 'customer',
+                    'cancelled_at'     => now(),
+                ]);
+
+            // Cancel order
+            $order->update([
+                'order_status'     => 5,
+                'cancel_reason_id' => $cancelReasonId,
+                'cancel_note'      => $request->cancel_note,
+                'cancelled_at'     => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order cancelled successfully',
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel order',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }
