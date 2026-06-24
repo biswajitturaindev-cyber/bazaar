@@ -508,6 +508,7 @@ class OrderController extends Controller
         ]);
     }
 
+    /*
     public function invoice($encoded_id)
     {
         try {
@@ -528,7 +529,8 @@ class OrderController extends Controller
                 compact(
                     'order',
                     'address',
-                    'business'
+                    'business',
+                    'logo'
                 )
             );
 
@@ -565,6 +567,91 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to generate invoice',
+            ], 500);
+        }
+    }
+    */
+
+    public function invoice($encoded_id)
+    {
+        try {
+
+            $orderId = decodeIdOrFail($encoded_id);
+
+            $order = Order::with([
+                'items',
+                'addresses',
+                'business.kycDetail',
+            ])->findOrFail($orderId);
+
+            $address = $order->addresses->first();
+            $business = $order->business;
+
+            // Default logo variable
+            $logo = null;
+
+            if (
+                $business &&
+                $business->kycDetail &&
+                !empty($business->kycDetail->shop_photo)
+            ) {
+
+                $imagePath = public_path(
+                    'storage/' . $business->kycDetail->shop_photo
+                );
+
+                if (file_exists($imagePath)) {
+
+                    $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
+                    $imageData = file_get_contents($imagePath);
+
+                    $logo = 'data:image/' . $extension . ';base64,' . base64_encode($imageData);
+                }
+            }
+
+            $pdf = Pdf::loadView(
+                'pdf.order-invoice-pos',
+                compact(
+                    'order',
+                    'address',
+                    'business',
+                    'logo'
+                )
+            );
+
+            $pdf->setPaper('A5', 'portrait');
+
+            $fileName = str_replace('/', '-', $order->invoice_no) . '.pdf';
+            $path = 'invoices/' . $fileName;
+
+            if (!Storage::disk('public')->exists('invoices')) {
+                Storage::disk('public')->makeDirectory('invoices');
+            }
+
+            Storage::disk('public')->put(
+                $path,
+                $pdf->output()
+            );
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'Invoice generated successfully',
+                'invoice_no'   => $order->invoice_no,
+                'invoice_url'  => asset('storage/' . $path),
+            ]);
+
+        } catch (\Throwable $e) {
+
+            \Log::error('Invoice Generation Error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to generate invoice',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }

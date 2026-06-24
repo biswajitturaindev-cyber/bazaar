@@ -15,6 +15,8 @@ class OrderAddress extends Model
     protected $fillable = [
         'order_id',
 
+        'phone',
+
         'billing_address',
         'billing_city_id',
         'billing_state_id',
