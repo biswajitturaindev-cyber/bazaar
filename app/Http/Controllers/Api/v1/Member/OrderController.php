@@ -62,6 +62,8 @@ class OrderController extends Controller
 
                 'user_id' => 'required|integer',
 
+                'phone'   => 'nullable|string',
+
                 // Billing Address
                 'billing_address' => 'required|string',
                 'billing_city_id' => 'nullable|integer',
@@ -257,6 +259,8 @@ class OrderController extends Controller
 
             $order->addresses()->create([
 
+                'phone' => $request->phone,
+
                 // Billing
                 'billing_address' => $request->billing_address,
                 'billing_city_id' => $request->billing_city_id,
@@ -280,18 +284,6 @@ class OrderController extends Controller
                         . ' variant not found'
                     );
                 }
-
-                // $availableStock = $cart->productVariant
-                //     ->stocks
-                //     ->sum('stock');
-
-                // if ($cart->quantity > $availableStock) {
-
-                //     throw new \Exception(
-                //         $cart->product_name
-                //         . ' stock unavailable'
-                //     );
-                // }
 
                 $availableStock = $cart->productVariant
                     ? $cart->productVariant->stocks->sum('stock')
