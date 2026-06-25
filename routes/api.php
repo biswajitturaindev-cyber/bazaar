@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/states', [StateController::class, 'index']);
     Route::apiResource('kyc-details', KycDetailController::class);
     Route::post('kyc-details/update/shop-image', [KycDetailController::class, 'updateShopImage']);
-    Route::post('/kyc-details-commission-distribution/{kyc_id}', [KycDetailController::class, 'updateCommissionDistribution']);
+    Route::post('/kyc-details-commission-destribution/{kyc_id}', [KycDetailController::class, 'updateCommissionDistribution']);
     Route::apiResource('store-operational', StoreOperationalController::class);
 
     /*
