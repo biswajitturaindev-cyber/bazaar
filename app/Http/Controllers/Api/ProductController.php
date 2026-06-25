@@ -56,6 +56,7 @@ class ProductController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'has_variant',
                         'batch_no',
                         'status',
                         'created_at'
@@ -486,6 +487,7 @@ class ProductController extends Controller
      */
     public function show(Request $request, $id)
     {
+
         try {
             $decoded = Hashids::decode($id);
 
@@ -551,6 +553,7 @@ class ProductController extends Controller
                         'sub_category_id',
                         'sub_sub_category_id',
                         'hsn_id',
+                        'has_variant',
                         'commission',
                         'vendor_commission',
                         'vendor_commission_approval_status',
