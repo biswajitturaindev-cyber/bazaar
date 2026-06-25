@@ -335,11 +335,39 @@ class OrderController extends Controller
 
             /*
             |--------------------------------------------------------------------------
+            | Get Product Model
+            |--------------------------------------------------------------------------
+            */
+            $modelMap = config('product.model_map');
+
+            $productModel = $modelMap[$order->business_category_id] ?? null;
+
+            if ($productModel && $order->items->isNotEmpty()) {
+
+                $products = $productModel::select(
+                        'id',
+                        'commission',
+                        'vendor_commission'
+                    )
+                    ->whereIn('id', $order->items->pluck('product_id')->unique())
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($order->items as $item) {
+
+                    $product = $products->get($item->product_id);
+
+                    $item->commission = $product->commission ?? 0;
+                    $item->vendor_commission = $product->vendor_commission ?? 0;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
             | Get Address & Business
             |--------------------------------------------------------------------------
             */
             $address = $order->addresses->first();
-
             $business = $order->business;
 
             /*
