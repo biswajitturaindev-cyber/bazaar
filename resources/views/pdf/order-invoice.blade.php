@@ -345,6 +345,17 @@
 
     </table>
 
+    @php
+        $itemsTotal = $order->items->sum('subtotal');
+        $taxTotal = $order->items->sum('tax_amount'); // or gst_amount if that's your column
+
+        $grandTotal = $itemsTotal
+            - $order->discount_amount
+            + $order->platform_charge
+            + $order->delivery_charge
+            + $taxTotal;
+    @endphp
+
     <!-- TOTALS -->
     <table class="totals-table">
 

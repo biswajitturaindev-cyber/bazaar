@@ -326,7 +326,9 @@ class OrderController extends Controller
             |--------------------------------------------------------------------------
             */
             $order = Order::with([
-                'items',
+                'items' => function ($query) {
+                    $query->where('status', '!=', 'cancelled');
+                },
                 'addresses',
                 'business',
             ])->findOrFail($orderId);
@@ -359,10 +361,6 @@ class OrderController extends Controller
             | Stream PDF
             |--------------------------------------------------------------------------
             */
-            // return $pdf->stream(
-            //     $order->invoice_no . '.pdf'
-            // );
-
             $filename = str_replace(['/', '\\'], '-', $order->invoice_no);
 
             return $pdf->stream($filename . '.pdf');
