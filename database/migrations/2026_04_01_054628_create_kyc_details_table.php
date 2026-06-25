@@ -45,6 +45,8 @@ return new class extends Migration
             $table->string('address_proof')->nullable();
             $table->tinyInteger('address_proof_status')->default(0)->comment('0=Pending,1=Approved,2=Rejected');
 
+            $table->boolean('commission_distribution')->default(0)->index()->comment('1=Accepted,0=Not Accepted');
+
             $table->timestamps();
         });
     }

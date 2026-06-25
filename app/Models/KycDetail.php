@@ -28,7 +28,8 @@ class KycDetail extends Model
         'fssai_license_status',
         'fssai_license_no',
         'address_proof',
-        'address_proof_status'
+        'address_proof_status',
+        'commission_distribution',
     ];
 
     protected $casts = [
@@ -39,6 +40,7 @@ class KycDetail extends Model
         'trade_license_status' => 'integer',
         'fssai_license_status' => 'integer',
         'address_proof_status' => 'integer',
+        'commission_distribution' => 'boolean',
     ];
     // protected $appends = ['id'];
 

@@ -53,6 +53,11 @@ class KycDetailResource extends JsonResource
                 null,
                 $this->address_proof_status
             ),
+
+            'commission_distribution' => (bool) $this->commission_distribution,
+            'commission_distribution_label' => $this->commission_distribution
+                ? 'Accepted'
+                : 'Not Accepted',
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }
