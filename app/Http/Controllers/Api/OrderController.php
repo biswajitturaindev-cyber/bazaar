@@ -359,9 +359,13 @@ class OrderController extends Controller
             | Stream PDF
             |--------------------------------------------------------------------------
             */
-            return $pdf->stream(
-                $order->invoice_no . '.pdf'
-            );
+            // return $pdf->stream(
+            //     $order->invoice_no . '.pdf'
+            // );
+
+            $filename = str_replace(['/', '\\'], '-', $order->invoice_no);
+
+            return $pdf->stream($filename . '.pdf');
 
         } catch (\Exception $e) {
 
