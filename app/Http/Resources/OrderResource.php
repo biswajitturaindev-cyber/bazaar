@@ -101,6 +101,9 @@ class OrderResource extends JsonResource
                         'product_name' => $item->product_name,
                         'sku' => $item->sku,
 
+                        'commission' => (float) ($item->commission ?? 0),
+                        'vendor_commission' => (float) ($item->vendor_commission ?? 0),
+
                         /*
                         |--------------------------------------------------------------------------
                         | Product Image
