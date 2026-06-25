@@ -419,4 +419,36 @@ class KycDetailController extends Controller
             ], 500);
         }
     }
+
+    public function updateCommissionDistribution(Request $request, $kyc_id)
+    {
+        try {
+
+            $request->validate([
+                'commission_distribution' => 'required|boolean',
+            ]);
+
+            $id = decodeIdOrFail($kyc_id);
+
+            $kyc = KycDetail::findOrFail($id);
+
+            $kyc->update([
+                'commission_distribution' => $request->commission_distribution,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Commission distribution updated successfully.',
+                'data' => new KycDetailResource($kyc->fresh()),
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
