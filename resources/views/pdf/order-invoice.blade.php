@@ -292,13 +292,27 @@
 
                 <td>
 
-                    @if(!empty($snapshot['image']))
+                    @php
 
-                        <img
-                            src="{{ public_path('storage/'.$snapshot['image']) }}"
-                            class="product-image"
-                        >
+                    $productImage = null;
 
+                    if(!empty($snapshot['image'])){
+
+                        $path = public_path('storage/'.$snapshot['image']);
+
+                        if(file_exists($path)){
+
+                            $ext = pathinfo($path, PATHINFO_EXTENSION);
+
+                            $productImage = 'data:image/'.$ext.';base64,'.base64_encode(file_get_contents($path));
+                        }
+
+                    }
+
+                    @endphp
+
+                    @if($productImage)
+                        <img src="{{ $productImage }}" class="product-image">
                     @endif
 
                 </td>
