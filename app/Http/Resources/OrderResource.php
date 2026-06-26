@@ -104,6 +104,25 @@ class OrderResource extends JsonResource
                         'commission' => (float) ($item->commission ?? 0),
                         'vendor_commission' => (float) ($item->vendor_commission ?? 0),
 
+                        'commission_percent' => (float) (
+                            ($item->commission ?? 0) == 0
+                                ? ($item->vendor_commission ?? 0)
+                                : ($item->commission ?? 0)
+                        ),
+
+                        'commission_amount' => round(
+                            (
+                                $item->subtotal *
+                                (
+                                    ($item->commission ?? 0) == 0
+                                        ? ($item->vendor_commission ?? 0)
+                                        : ($item->commission ?? 0)
+                                )
+                            ) / 100,
+                            2
+                        ),
+
+
                         /*
                         |--------------------------------------------------------------------------
                         | Product Image
