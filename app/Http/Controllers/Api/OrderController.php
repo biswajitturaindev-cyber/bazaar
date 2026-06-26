@@ -16,65 +16,6 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index(Request $request)
-    // {
-    //     try {
-
-    //         $query = Order::with([
-    //             'business',
-    //             'businessCategory',
-
-    //             'items',
-    //             'items.attributes',
-    //             'items.cancelReason',
-
-    //             'addresses',
-    //             'statusHistories',
-    //         ]);
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Filter By Business
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         if ($request->filled('business_id')) {
-
-    //             $decoded = decodeIdOrFail(
-    //                 $request->business_id,
-    //                 'Invalid business ID'
-    //             );
-
-    //             $query->where(
-    //                 'business_id',
-    //                 $decoded
-    //             );
-    //         }
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Orders
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         $orders = $query
-    //             ->latest()
-    //             ->get();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => OrderResource::collection($orders)
-    //         ]);
-
-    //     } catch (\Exception $e) {
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function index(Request $request)
     {
         try {
@@ -224,21 +165,19 @@ class OrderController extends Controller
 
             $order = Order::findOrFail($orderId);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update Order
-            |--------------------------------------------------------------------------
-            */
-
             $order->update([
                 'order_status' => $data['order_status']
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Create Status History
-            |--------------------------------------------------------------------------
-            */
+            // If order confirmed, confirm all pending items
+            if ((int) $data['order_status'] === 1) {
+
+                $order->items()
+                    ->where('status', 'pending')
+                    ->update([
+                        'status' => 'confirmed'
+                    ]);
+            }
 
             OrderStatusHistory::create([
                 'order_id' => $order->id,
