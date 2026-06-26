@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\BusinessCategoryController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CommissionReportController;
 use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
 use App\Http\Controllers\Api\MasterProductController;
@@ -204,6 +205,18 @@ Route::middleware('auth:sanctum')->group(function () {
         'cancel-reasons',
         RedemptionCancelReasonController::class
     )->only(['index']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Commission Report
+    |--------------------------------------------------------------------------
+    */
+    Route::resource(
+        'commission-reports',
+        CommissionReportController::class
+    )->only(['index', 'show']);
+
+
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {
