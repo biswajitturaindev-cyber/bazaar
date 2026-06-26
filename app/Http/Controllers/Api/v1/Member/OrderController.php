@@ -317,7 +317,9 @@ class OrderController extends Controller
 
                 if ($product) {
                     $hsnCode = $product->hsn_id ?? null;
-                    $commission = $product->commission ?? null;
+                    $commission = ($product->commission == 0)
+                                ? $product->vendor_commission
+                                : $product->commission;
                 }
 
                 $orderItem = $order->items()->create([
