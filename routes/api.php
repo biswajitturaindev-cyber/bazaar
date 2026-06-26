@@ -211,11 +211,8 @@ Route::middleware('auth:sanctum')->group(function () {
     | Commission Report
     |--------------------------------------------------------------------------
     */
-    Route::resource(
-        'commission-reports',
-        CommissionReportController::class
-    )->only(['index', 'show']);
-
+    Route::resource('commission-reports',CommissionReportController::class);
+    Route::get('commission-reports/{order}/invoice-details', [CommissionReportController::class, 'invoiceDetails']);
 
 });
 

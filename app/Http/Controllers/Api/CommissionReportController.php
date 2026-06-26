@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CommissionReportResource;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ class CommissionReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-        public function index(Request $request)
+    public function index(Request $request)
     {
         try {
 
@@ -25,128 +27,90 @@ class CommissionReportController extends Controller
                 'to_date' => 'required_if:type,custom|date|after_or_equal:from_date',
             ]);
 
-            $orders = Order::with([
+            $businessId = decodeIdOrFail(
+                $request->business_id,
+                'Invalid business ID'
+            );
+
+            $query = Order::with([
                 'items' => function ($query) {
                     $query->where('status', 'confirmed');
                 }
-            ]);
+            ])
+            ->where('business_id', $businessId)
+            ->where('order_status', 1);
 
             switch ($request->type) {
 
                 case 'today':
-
-                    $orders->whereDate('created_at', Carbon::today());
-
+                    $query->whereDate('created_at', Carbon::today());
                     break;
 
                 case 'month':
-
-                    $orders->whereMonth('created_at', Carbon::now()->month)
-                        ->whereYear('created_at', Carbon::now()->year);
-
+                    $query->whereMonth('created_at', now()->month)
+                          ->whereYear('created_at', now()->year);
                     break;
 
                 case 'fy':
 
                     [$startYear, $endYear] = explode('-', $request->financial_year);
 
-                    $startDate = Carbon::create($startYear, 4, 1)->startOfDay();
-
-                    $endDate = Carbon::create('20' . $endYear, 3, 31)->endOfDay();
-
-                    $orders->whereBetween('created_at', [
-                        $startDate,
-                        $endDate
+                    $query->whereBetween('created_at', [
+                        Carbon::create($startYear, 4, 1)->startOfDay(),
+                        Carbon::create('20'.$endYear, 3, 31)->endOfDay(),
                     ]);
 
                     break;
 
                 case 'custom':
 
-                    $orders->whereBetween('created_at', [
+                    $query->whereBetween('created_at', [
                         Carbon::parse($request->from_date)->startOfDay(),
-                        Carbon::parse($request->to_date)->endOfDay()
+                        Carbon::parse($request->to_date)->endOfDay(),
                     ]);
 
                     break;
             }
 
-            $orders = $orders->latest()->get();
-
-            $report = [];
-
-            $slNo = 1;
-
-            $grandTotalItems = 0;
-            $grandOrderAmount = 0;
-            $grandCommissionPercent = 0;
-            $grandCommissionAmount = 0;
-
-            foreach ($orders as $order) {
-
-                $items = $order->items;
-
-                if ($items->isEmpty()) {
-                    continue;
-                }
-
-                // Total Confirmed Items
-                $totalItems = $items->count();
-
-                // Sum of confirmed order item subtotal
-                $orderAmount = $items->sum('subtotal');
-
-                // Sum of product commission %
-                $commissionPercent = $items->sum('product_commission');
-
-                // Commission Amount
-                $commissionAmount = 0;
-
-                foreach ($items as $item) {
-
-                    $commissionAmount +=
-                        ($item->subtotal * $item->product_commission) / 100;
-                }
-
-                // Grand Totals
-                $grandTotalItems += $totalItems;
-                $grandOrderAmount += $orderAmount;
-                $grandCommissionPercent += $commissionPercent;
-                $grandCommissionAmount += $commissionAmount;
-
-                $report[] = [
-
-                    'sl_no' => $slNo++,
-
-                    'invoice_no' => $order->invoice_no,
-
-                    'total_items' => $totalItems,
-
-                    'order_amount' => number_format($orderAmount, 2, '.', ''),
-
-                    'commission_percent' => number_format($commissionPercent, 2, '.', ''),
-
-                    'commission_amount' => number_format($commissionAmount, 2, '.', ''),
-                ];
-            }
+            $orders = $query->latest()->get();
 
             return response()->json([
-                'status' => true,
+                'success' => true,
                 'message' => 'Commission Report',
-                'data' => $report,
+                'data' => CommissionReportResource::collection($orders),
+
                 'summary' => [
-                    'total_orders' => count($report),
-                    'total_items' => $grandTotalItems,
-                    'total_order_amount' => number_format($grandOrderAmount, 2, '.', ''),
-                    'total_commission_percent' => number_format($grandCommissionPercent, 2, '.', ''),
-                    'total_commission_amount' => number_format($grandCommissionAmount, 2, '.', ''),
+                    'total_orders' => $orders->count(),
+                    'total_items' => $orders->sum(fn($order) => $order->items->count()),
+                    'total_order_amount' => number_format(
+                        $orders->sum(fn($order) => $order->items->sum('subtotal')),
+                        2,
+                        '.',
+                        ''
+                    ),
+                    'total_commission_percent' => number_format(
+                        $orders->sum(fn($order) => $order->items->sum('product_commission')),
+                        2,
+                        '.',
+                        ''
+                    ),
+                    'total_commission_amount' => number_format(
+                        $orders->sum(function ($order) {
+                            return $order->items->sum(function ($item) {
+                                return ($item->subtotal * $item->product_commission) / 100;
+                            });
+                        }),
+                        2,
+                        '.',
+                        ''
+                    ),
                 ]
-            ], 200);
+            ]);
 
         } catch (ValidationException $e) {
 
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'Validation Error',
                 'errors' => $e->errors()
             ], 422);
@@ -160,12 +124,13 @@ class CommissionReportController extends Controller
             ]);
 
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'Something went wrong.',
-                'error' => $e->getMessage(), // Remove in production
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -214,4 +179,80 @@ class CommissionReportController extends Controller
     {
         //
     }
+
+    /**
+     * Display the invoice details for a specific order.
+     */
+    public function invoiceDetails($id)
+    {
+        try {
+
+            $orderId = decodeIdOrFail(
+                $id,
+                'Invalid order ID'
+            );
+
+            $order = Order::with([
+                'business',
+                'businessCategory',
+
+                'items' => function ($query) {
+                    $query->where('status', 'confirmed');
+                },
+                
+                'items.attributes',
+                'items.cancelReason',
+                'items.variant.images',
+
+                'addresses',
+                'statusHistories',
+            ])->findOrFail($orderId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Commission & Vendor Commission
+            |--------------------------------------------------------------------------
+            */
+
+            $modelMap = config('product.model_map');
+
+            $productModel = $modelMap[$order->business_category_id] ?? null;
+
+            if ($productModel && $order->items->isNotEmpty()) {
+
+                $products = $productModel::select(
+                        'id',
+                        'commission',
+                        'vendor_commission'
+                    )
+                    ->whereIn(
+                        'id',
+                        $order->items->pluck('product_id')->unique()
+                    )
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($order->items as $item) {
+
+                    $product = $products->get($item->product_id);
+
+                    $item->commission = $product->commission ?? 0;
+                    $item->vendor_commission = $product->vendor_commission ?? 0;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => new OrderResource($order),
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }
