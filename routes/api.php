@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\RedemptionCancelReasonController;
+use App\Http\Controllers\Api\SalesReportController;
 use App\Http\Controllers\Api\StateController;
 use App\Http\Controllers\Api\StoreOperationalController;
 use App\Http\Controllers\Api\SubCategoryController;
@@ -213,6 +214,16 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::resource('commission-reports',CommissionReportController::class);
     Route::get('commission-reports/{order}/invoice-details', [CommissionReportController::class, 'invoiceDetails']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Report
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('sales-reports', SalesReportController::class);
+    Route::get('sales-reports/{member_id}/orders',[SalesReportController::class, 'orderDetails']);
+
+
 
 });
 
