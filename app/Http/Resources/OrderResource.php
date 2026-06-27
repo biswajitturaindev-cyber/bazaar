@@ -181,13 +181,13 @@ class OrderResource extends JsonResource
 
                         'attributes' => $item->attributes
                             ->unique(function ($attr) {
-                                return $attr->attribute_id . '-' . $attr->attribute_value_id;
+                                return $attr->attribute_master_id . '-' . $attr->attribute_value_id;
                             })
                             ->values()
                             ->map(function ($attr) {
 
                                 return [
-                                    'attribute_id' => $attr->attribute_id,
+                                    'attribute_id' => $attr->attribute_master_id,
                                     'attribute_value_id' => $attr->attribute_value_id,
                                     'name' => $attr->attribute_name,
                                     'value' => $attr->attribute_value,

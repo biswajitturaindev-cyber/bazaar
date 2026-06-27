@@ -16,6 +16,102 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     try {
+
+    //         $query = Order::with([
+    //             'business',
+    //             'businessCategory',
+
+    //             'items',
+    //             'items.attributes',
+    //             'items.cancelReason',
+
+    //             'addresses',
+    //             'statusHistories',
+    //         ]);
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Filter By Business
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         if ($request->filled('business_id')) {
+
+    //             $decoded = decodeIdOrFail(
+    //                 $request->business_id,
+    //                 'Invalid business ID'
+    //             );
+
+    //             $query->where(
+    //                 'business_id',
+    //                 $decoded
+    //             );
+    //         }
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Orders
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $orders = $query
+    //             ->latest()
+    //             ->get();
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Load Commission & Vendor Commission
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $modelMap = config('product.model_map');
+
+    //         foreach ($orders as $order) {
+
+    //             $productModel = $modelMap[$order->business_category_id] ?? null;
+
+    //             if (!$productModel || $order->items->isEmpty()) {
+    //                 continue;
+    //             }
+
+    //             $products = $productModel::select(
+    //                     'id',
+    //                     'commission',
+    //                     'vendor_commission'
+    //                 )
+    //                 ->whereIn(
+    //                     'id',
+    //                     $order->items->pluck('product_id')->unique()
+    //                 )
+    //                 ->get()
+    //                 ->keyBy('id');
+
+    //             foreach ($order->items as $item) {
+
+    //                 $product = $products->get($item->product_id);
+
+    //                 $item->commission = $product->commission ?? 0;
+    //                 $item->vendor_commission = $product->vendor_commission ?? 0;
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'data' => OrderResource::collection($orders)
+    //         ]);
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function index(Request $request)
     {
         try {
@@ -23,11 +119,9 @@ class OrderController extends Controller
             $query = Order::with([
                 'business',
                 'businessCategory',
-
                 'items',
                 'items.attributes',
                 'items.cancelReason',
-
                 'addresses',
                 'statusHistories',
             ]);
@@ -45,21 +139,49 @@ class OrderController extends Controller
                     'Invalid business ID'
                 );
 
-                $query->where(
-                    'business_id',
-                    $decoded
-                );
+                $query->where('business_id', $decoded);
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Orders
+            | Search
             |--------------------------------------------------------------------------
             */
 
+            if ($request->filled('search')) {
+
+                $search = trim($request->search);
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('order_no', 'LIKE', "%{$search}%")
+                        ->orWhere('invoice_no', 'LIKE', "%{$search}%")
+                        ->orWhere('transaction_id', 'LIKE', "%{$search}%")
+                        ->orWhere('billing_name', 'LIKE', "%{$search}%")
+                        ->orWhere('billing_mobile', 'LIKE', "%{$search}%")
+                        ->orWhere('shipping_name', 'LIKE', "%{$search}%")
+                        ->orWhere('shipping_mobile', 'LIKE', "%{$search}%")
+                        ->orWhere('status', 'LIKE', "%{$search}%")
+                        ->orWhere('payment_status', 'LIKE', "%{$search}%")
+
+                        ->orWhereHas('items', function ($itemQuery) use ($search) {
+                            $itemQuery->where('product_name', 'LIKE', "%{$search}%")
+                                ->orWhere('sku', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pagination
+            |--------------------------------------------------------------------------
+            */
+
+            $perPage = (int) $request->input('per_page', 10);
+
             $orders = $query
                 ->latest()
-                ->get();
+                ->paginate($perPage);
 
             /*
             |--------------------------------------------------------------------------
@@ -100,7 +222,18 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => OrderResource::collection($orders)
+                'message' => 'Orders fetched successfully.',
+                'data' => OrderResource::collection($orders),
+
+                'pagination' => [
+                    'current_page' => $orders->currentPage(),
+                    'per_page'     => $orders->perPage(),
+                    'total'        => $orders->total(),
+                    'last_page'    => $orders->lastPage(),
+                    'from'         => $orders->firstItem(),
+                    'to'           => $orders->lastItem(),
+                    'has_more'     => $orders->hasMorePages(),
+                ]
             ]);
 
         } catch (\Exception $e) {
@@ -111,6 +244,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Show the form for creating a new resource.
