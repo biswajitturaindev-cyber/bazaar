@@ -35,125 +35,152 @@ class ProductController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        try {
+{
+    try {
 
-            $modelMap = config('product.model_map');
-            $allProducts = collect();
+        $modelMap = config('product.model_map');
+        $allProducts = collect();
 
-            $perPage = request()->get('per_page', 10);
-            $page = request()->get('page', 1);
+        $perPage = request()->get('per_page', 10);
+        $page = request()->get('page', 1);
+        $search = request()->get('search');
 
-            $businessId = decodeIdOrFail(request()->business_id);
+        $businessId = decodeIdOrFail(request()->business_id);
 
-            foreach ($modelMap as $type => $modelClass) {
+        foreach ($modelMap as $type => $modelClass) {
 
-                $products = $modelClass::query()
-                    ->select([
-                        'id',
-                        'name',
-                        'category_id',
-                        'sub_category_id',
-                        'sub_sub_category_id',
-                        'hsn_id',
-                        'has_variant',
-                        'batch_no',
-                        'status',
-                        'created_at'
-                    ])
-                    ->with([
-                        'category:id,name',
-                        'subCategory:id,name',
-                        'subSubCategory:id,name',
-                        'hsn:id,hsn_code,igst',
+            $products = $modelClass::query()
+                ->select([
+                    'id',
+                    'name',
+                    'category_id',
+                    'sub_category_id',
+                    'sub_sub_category_id',
+                    'hsn_id',
+                    'has_variant',
+                    'batch_no',
+                    'status',
+                    'created_at'
+                ])
+                ->with([
+                    'category:id,name',
+                    'subCategory:id,name',
+                    'subSubCategory:id,name',
+                    'hsn:id,hsn_code,igst',
 
-                        'primaryVariant' => function ($q) {
-                            $q->select([
-                                'id',
-                                'sku',
-                                'barcode',
-                                'discount',
-                                'final_price',
-                                'product_id',
-                                'product_type',
-                                'selling_price',
-                                'mrp',
-                                'cost_price',
-                                'is_primary',
-                                'manufacture_date',
-                                'expiry_date',
-                                'short_description',
-                                'long_description'
-                            ])
-                            ->with([
-                                'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
+                    'primaryVariant' => function ($q) {
+                        $q->select([
+                            'id',
+                            'sku',
+                            'barcode',
+                            'discount',
+                            'final_price',
+                            'product_id',
+                            'product_type',
+                            'selling_price',
+                            'mrp',
+                            'cost_price',
+                            'is_primary',
+                            'manufacture_date',
+                            'expiry_date',
+                            'short_description',
+                            'long_description'
+                        ])
+                        ->with([
+                            'meta:id,product_variant_id,meta_title,meta_keyword,meta_description',
 
-                                'attributes' => function ($attr) {
-                                    $attr->select([
-                                        'id',
-                                        'product_variant_id',
-                                        'attribute_master_id',
-                                        'attribute_value_id'
-                                    ])
-                                    ->with([
-                                        'attributeMaster:id,name',
-                                        'attributeValue:id,value,color_code',
-                                    ]);
-                                },
+                            'attributes' => function ($attr) {
+                                $attr->select([
+                                    'id',
+                                    'product_variant_id',
+                                    'attribute_master_id',
+                                    'attribute_value_id'
+                                ])
+                                ->with([
+                                    'attributeMaster:id,name',
+                                    'attributeValue:id,value,color_code',
+                                ]);
+                            },
 
-                                'images' => function ($img) {
-                                    $img->select([
-                                        'id',
-                                        'product_variant_id',
-                                        'image_large'
-                                    ])->limit(1);
-                                }
-                            ]);
-                        }
-                    ])
-                    ->when($businessId, function ($q) use ($businessId) {
-                        $q->where('business_id', $businessId);
-                    })
-                    ->latest()
-                    ->get()
-                    ->map(function ($item) use ($type) {
-                        $item->product_type = $type;
-                        return $item;
+                            'images' => function ($img) {
+                                $img->select([
+                                    'id',
+                                    'product_variant_id',
+                                    'image_large'
+                                ])->limit(1);
+                            }
+                        ]);
+                    }
+                ])
+
+                ->when($businessId, function ($q) use ($businessId) {
+                    $q->where('business_id', $businessId);
+                })
+
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($query) use ($search) {
+
+                        // Product Name
+                        $query->where('name', 'like', "%{$search}%")
+
+                            // Category
+                            ->orWhereHas('category', function ($cat) use ($search) {
+                                $cat->where('name', 'like', "%{$search}%");
+                            })
+
+                            // Sub Category
+                            ->orWhereHas('subCategory', function ($sub) use ($search) {
+                                $sub->where('name', 'like', "%{$search}%");
+                            })
+
+                            // SKU & Barcode
+                            ->orWhereHas('primaryVariant', function ($variant) use ($search) {
+                                $variant->where('sku', 'like', "%{$search}%")
+                                        ->orWhere('barcode', 'like', "%{$search}%");
+                            });
                     });
+                })
 
-                $allProducts = $allProducts->concat($products);
-            }
+                ->latest()
+                ->get()
+                ->map(function ($item) use ($type) {
+                    $item->product_type = $type;
+                    return $item;
+                });
 
-            $allProducts = $allProducts->sortByDesc('created_at')->values();
-
-            $total = $allProducts->count();
-
-            $paginated = $allProducts
-                ->slice(($page - 1) * $perPage, $perPage)
-                ->values();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Product list fetched successfully',
-                'data' => ProductResource::collection($paginated),
-                'meta' => [
-                    'current_page' => (int) $page,
-                    'per_page' => (int) $perPage,
-                    'total' => $total,
-                    'last_page' => (int) ceil($total / $perPage),
-                ]
-            ]);
-
-        } catch (\Throwable $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ], 500);
+            $allProducts = $allProducts->concat($products);
         }
+
+        $allProducts = $allProducts->sortByDesc('created_at')->values();
+
+        $total = $allProducts->count();
+
+        $paginated = $allProducts
+            ->slice(($page - 1) * $perPage, $perPage)
+            ->values();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product list fetched successfully',
+            'data' => ProductResource::collection($paginated),
+            'meta' => [
+                'current_page' => (int) $page,
+                'per_page' => (int) $perPage,
+                'total' => $total,
+                'last_page' => (int) ceil($total / $perPage),
+            ]
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ], 500);
     }
+}
 
 
     /**
