@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\MemberLoyaltyWallet;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
+use App\Models\VendorLoyaltyWallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -304,6 +306,79 @@ class OrderController extends Controller
                     ->update([
                         'status' => 'confirmed'
                     ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Member Loyalty Wallet
+                |--------------------------------------------------------------------------
+                */
+
+                if ($order->user_id) {
+
+                    $lastWallet = MemberLoyaltyWallet::where('member_id', $order->user_id)
+                        ->latest('id')
+                        ->first();
+
+                    $opening = $lastWallet?->closing_points ?? 0;
+
+                   $points = $order->items()
+                            ->where('status', 'confirmed')
+                            ->sum('subtotal');
+
+                    if (!MemberLoyaltyWallet::where('order_id', $order->id)->exists()) {
+
+                        MemberLoyaltyWallet::create([
+                            'member_id'        => $order->user_id,
+                            'order_id'         => $order->id,
+                            'transaction_no'   => 'MLW-' . now()->format('YmdHis') . '-' . $order->id,
+                            'transaction_type' => 'credit',
+                            'source'           => 'order',
+                            'points'           => $points,
+                            'opening_points'   => $opening,
+                            'closing_points'   => $opening + $points,
+                            'remarks'          => 'Loyalty points for Order ' . $order->order_no,
+                            'status'           => 'approved',
+                        ]);
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Vendor Loyalty Wallet
+                |--------------------------------------------------------------------------
+                */
+
+                if ($order->business_id) {
+
+                    if (!VendorLoyaltyWallet::where('order_id', $order->id)->exists()) {
+
+                        $lastWallet = VendorLoyaltyWallet::where('business_id', $order->business_id)
+                            ->latest('id')
+                            ->first();
+
+                        $opening = $lastWallet?->closing_points ?? 0;
+
+                        $vendorPoints = $order->items()
+                            ->where('status', OrderItem::STATUS_CONFIRMED)
+                            ->sum('subtotal');
+
+                        $closing = $opening + $vendorPoints;
+
+                        VendorLoyaltyWallet::create([
+                            'business_id'      => $order->business_id,
+                            'order_id'         => $order->id,
+                            'transaction_no'   => 'VLW-' . now()->format('YmdHis') . '-' . $order->id,
+                            'transaction_type' => 'credit',
+                            'source'           => 'order',
+                            'points'           => $vendorPoints,
+                            'opening_points'   => $opening,
+                            'closing_points'   => $closing,
+                            'remarks'          => 'Vendor commission for Order ' . $order->order_no,
+                            'status'           => 'approved',
+                        ]);
+                    }
+                }
             }
 
             OrderStatusHistory::create([
