@@ -154,20 +154,13 @@ class OrderController extends Controller
 
                 $query->where(function ($q) use ($search) {
 
-                    $q->where('order_no', 'LIKE', "%{$search}%")
-                        ->orWhere('invoice_no', 'LIKE', "%{$search}%")
-                        ->orWhere('transaction_id', 'LIKE', "%{$search}%")
-                        ->orWhere('billing_name', 'LIKE', "%{$search}%")
-                        ->orWhere('billing_mobile', 'LIKE', "%{$search}%")
-                        ->orWhere('shipping_name', 'LIKE', "%{$search}%")
-                        ->orWhere('shipping_mobile', 'LIKE', "%{$search}%")
-                        ->orWhere('status', 'LIKE', "%{$search}%")
-                        ->orWhere('payment_status', 'LIKE', "%{$search}%")
+                    $q->where('order_no', 'like', "%{$search}%")
+                    ->orWhere('invoice_no', 'like', "%{$search}%")
+                    ->orWhereHas('items', function ($itemQuery) use ($search) {
+                        $itemQuery->where('product_name', 'like', "%{$search}%")
+                                    ->orWhere('sku', 'like', "%{$search}%");
+                    });
 
-                        ->orWhereHas('items', function ($itemQuery) use ($search) {
-                            $itemQuery->where('product_name', 'LIKE', "%{$search}%")
-                                ->orWhere('sku', 'LIKE', "%{$search}%");
-                        });
                 });
             }
 
