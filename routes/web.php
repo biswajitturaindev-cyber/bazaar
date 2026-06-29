@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\BusinessSubCategoryController;
 use App\Http\Controllers\Admin\HsnController;
 use App\Http\Controllers\Admin\KycDetailController;
 use App\Http\Controllers\Admin\MasterProductController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductReviewController;
@@ -204,7 +205,13 @@ Route::prefix('admin')->group(function () {
             [VendorCommissionController::class, 'invoiceList']
         )->name('vendor-commissions.invoice-list');
 
-
-
+        /*
+        |--------------------------------------------------------------------------
+        | Orders
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('orders', OrderController::class);
+        Route::get('orders/{id}',          [OrderController::class, 'show'])->name('admin.orders.show');
+        Route::get('orders/{id}/invoice',  [OrderController::class, 'invoice'])->name('admin.orders.invoice');
     });
 });
