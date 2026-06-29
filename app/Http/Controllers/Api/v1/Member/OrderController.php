@@ -23,31 +23,40 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = $request->user_id;
+        try {
 
-        $orders = Order::with([
-            'business',
-            'businessCategory',
+            $userId = $request->user_id;
+            $perPage = $request->get('per_page', 10);
 
-            'items',
-            'items.attributes',
+            $orders = Order::with([
+                    'business',
+                    'businessCategory',
 
-            'addresses',
-            'addresses.billingCity',
-            'addresses.billingState',
-            'addresses.shippingCity',
-            'addresses.shippingState',
+                    'items',
+                    'items.attributes',
 
-            'statusHistories',
-        ])
-        ->where('user_id', $userId)
-        ->latest()
-        ->get();
+                    'addresses',
+                    'addresses.billingCity',
+                    'addresses.billingState',
+                    'addresses.shippingCity',
+                    'addresses.shippingState',
 
-        return response()->json([
-            'success' => true,
-            'data'    => OrderResource::collection($orders)
-        ]);
+                    'statusHistories',
+                ])
+                ->where('user_id', $userId)
+                ->latest()
+                ->paginate($perPage);
+
+            return OrderResource::collection($orders);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch orders.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
