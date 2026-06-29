@@ -13,48 +13,70 @@ class MasterProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index()
+    public function index()
     {
-        $businessCategoryId = request()->filled('business_category_id')
-            ? decodeIdOrFail(request()->business_category_id)
-            : null;
+        try {
 
-        $products = MasterProduct::with([
-                'category',
-                'subCategory',
-                'subSubCategory',
-                'hsn',
-                'primaryImage',
-                'images'
-            ])
+            $businessCategoryId = request()->filled('business_category_id')
+                ? decodeIdOrFail(request()->business_category_id)
+                : null;
 
-            ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
+            $search = request()->get('search');
 
-                $q->join(
-                        'business_category_mappings',
-                        'business_category_mappings.category_id',
-                        '=',
-                        'master_products.category_id'
-                    )
+            $products = MasterProduct::with([
+                    'category',
+                    'subCategory',
+                    'subSubCategory',
+                    'hsn',
+                    'primaryImage',
+                    'images'
+                ])
 
-                    ->where(
-                        'business_category_mappings.business_category_id',
-                        $businessCategoryId
-                    )
+                ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
+                    $q->join(
+                            'business_category_mappings',
+                            'business_category_mappings.category_id',
+                            '=',
+                            'master_products.category_id'
+                        )
+                        ->where(
+                            'business_category_mappings.business_category_id',
+                            $businessCategoryId
+                        )
+                        ->select('master_products.*')
+                        ->distinct();
+                })
 
-                    // IMPORTANT
-                    ->select('master_products.*')
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($query) use ($search) {
+                        $query->where('master_products.name', 'like', "%{$search}%")
+                            ->orWhere('master_products.description', 'like', "%{$search}%")
+                            ->orWhereHas('category', function ($q) use ($search) {
+                                $q->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('subCategory', function ($q) use ($search) {
+                                $q->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('subSubCategory', function ($q) use ($search) {
+                                $q->where('name', 'like', "%{$search}%");
+                            });
+                    });
+                })
 
-                    // Avoid duplicate products
-                    ->distinct();
-            })
+                ->latest('master_products.created_at')
+                ->get();
 
-            ->latest('master_products.created_at')
-            ->get();
+            return MasterProductResource::collection($products);
 
-        return MasterProductResource::collection($products);
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch products.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
     /**
      * Store a newly created resource in storage.
      */
