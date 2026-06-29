@@ -22,6 +22,7 @@ class MasterProductController extends Controller
                 : null;
 
             $search = request()->get('search');
+            $perPage = request()->get('per_page', 10);
 
             $products = MasterProduct::with([
                     'category',
@@ -31,7 +32,6 @@ class MasterProductController extends Controller
                     'primaryImage',
                     'images'
                 ])
-
                 ->when($businessCategoryId, function ($q) use ($businessCategoryId) {
                     $q->join(
                             'business_category_mappings',
@@ -46,7 +46,6 @@ class MasterProductController extends Controller
                         ->select('master_products.*')
                         ->distinct();
                 })
-
                 ->when($search, function ($q) use ($search) {
                     $q->where(function ($query) use ($search) {
                         $query->where('master_products.name', 'like', "%{$search}%")
@@ -62,9 +61,8 @@ class MasterProductController extends Controller
                             });
                     });
                 })
-
                 ->latest('master_products.created_at')
-                ->get();
+                ->paginate($perPage);
 
             return MasterProductResource::collection($products);
 
