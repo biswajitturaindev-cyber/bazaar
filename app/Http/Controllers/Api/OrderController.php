@@ -450,94 +450,106 @@ class OrderController extends Controller
         }
     }
 
+    // public function invoice($encoded_id)
+    // {
+    //     try {
+    //         $orderId = decodeIdOrFail($encoded_id);
+
+    //         $order = Order::with([
+    //             'items' => function ($query) {
+    //                 $query->where('status', '!=', 'cancelled');
+    //             },
+    //             'addresses',
+    //             'business',
+    //         ])->findOrFail($orderId);
+
+    //         $modelMap = config('product.model_map');
+
+    //         $productModel = $modelMap[$order->business_category_id] ?? null;
+
+    //         if ($productModel && $order->items->isNotEmpty()) {
+
+    //             $products = $productModel::select(
+    //                     'id',
+    //                     'commission',
+    //                     'vendor_commission'
+    //                 )
+    //                 ->whereIn('id', $order->items->pluck('product_id')->unique())
+    //                 ->get()
+    //                 ->keyBy('id');
+
+    //             foreach ($order->items as $item) {
+
+    //                 $product = $products->get($item->product_id);
+
+    //                 $item->commission = $product->commission ?? 0;
+    //                 $item->vendor_commission = $product->vendor_commission ?? 0;
+    //             }
+    //         }
+
+    //         $address = $order->addresses->first();
+    //         $business = $order->business;
+    //         $pdf = Pdf::loadView(
+    //             'pdf.order-invoice',
+    //             compact(
+    //                 'order',
+    //                 'address',
+    //                 'business'
+    //             )
+    //         );
+
+    //         $filename = str_replace(['/', '\\'], '-', $order->invoice_no);
+
+    //         return $pdf->stream($filename . '.pdf');
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+
     public function invoice($encoded_id)
     {
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Decode Order ID
-            |--------------------------------------------------------------------------
-            */
             $orderId = decodeIdOrFail($encoded_id);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Order
-            |--------------------------------------------------------------------------
-            */
             $order = Order::with([
                 'items' => function ($query) {
                     $query->where('status', '!=', 'cancelled');
                 },
                 'addresses',
-                'business',
+                'business.address',
+                'business.contact',
+                'business.kycDetail'
             ])->findOrFail($orderId);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Get Product Model
-            |--------------------------------------------------------------------------
-            */
-            $modelMap = config('product.model_map');
-
-            $productModel = $modelMap[$order->business_category_id] ?? null;
-
-            if ($productModel && $order->items->isNotEmpty()) {
-
-                $products = $productModel::select(
-                        'id',
-                        'commission',
-                        'vendor_commission'
-                    )
-                    ->whereIn('id', $order->items->pluck('product_id')->unique())
-                    ->get()
-                    ->keyBy('id');
-
-                foreach ($order->items as $item) {
-
-                    $product = $products->get($item->product_id);
-
-                    $item->commission = $product->commission ?? 0;
-                    $item->vendor_commission = $product->vendor_commission ?? 0;
-                }
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Address & Business
-            |--------------------------------------------------------------------------
-            */
             $address = $order->addresses->first();
             $business = $order->business;
-            /*
-            |--------------------------------------------------------------------------
-            | Generate PDF
-            |--------------------------------------------------------------------------
-            */
+
+            $businessAddress = optional($business)->address;
+            $businessContact = optional($business)->contact;
+            $kycDetail = optional($business)->kycDetail;
             $pdf = Pdf::loadView(
                 'pdf.order-invoice',
                 compact(
                     'order',
                     'address',
-                    'business'
+                    'business',
+                    'businessAddress',
+                    'businessContact',
+                    'kycDetail'
                 )
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Stream PDF
-            |--------------------------------------------------------------------------
-            */
             $filename = str_replace(['/', '\\'], '-', $order->invoice_no);
-
             return $pdf->stream($filename . '.pdf');
-
-        } catch (\Exception $e) {
-
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to generate invoice.',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
