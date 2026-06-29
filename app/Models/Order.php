@@ -203,7 +203,8 @@ class Order extends Model
         return [
             self::METHOD_WALLET => 'Wallet',
             self::METHOD_ONLINE => 'Online',
-            self::METHOD_COD    => 'COD',
+            //self::METHOD_COD    => 'COD',
+            self::METHOD_COD    => 'By hand',
         ][$this->payment_method] ?? 'Unknown';
     }
 
