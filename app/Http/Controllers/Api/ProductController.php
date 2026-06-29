@@ -653,7 +653,7 @@ class ProductController extends Controller
                                     $img->select([
                                         'id',
                                         'product_variant_id',
-                                        'image_medium'
+                                        'image_large'
                                     ]);
                                 },
 
