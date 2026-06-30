@@ -24,12 +24,12 @@ class StoreOperationalDetail extends Model
     ];
 
 
-    protected $appends = ['id'];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     public function business()
     {

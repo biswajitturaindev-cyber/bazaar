@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use Vinkla\Hashids\Facades\Hashids;
 class StoreOperationalResource extends JsonResource
 {
     /**
@@ -15,19 +15,17 @@ class StoreOperationalResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => Hashids::encode($this->id),
 
             'delivery_type' => $this->delivery_type,
             'delivery_radius' => (float) ($this->delivery_radius ?? 0),
 
-            'serviceable_pincode' => $this->serviceable_pincode
-                ? explode(',', $this->serviceable_pincode)
-                : [],
+            'serviceable_pincode' => $this->serviceable_pincode,
 
             'timings' => $this->whenLoaded('timings', function () {
                 return $this->timings->map(function ($timing) {
                     return [
-                        'id' => $timing->id,
+                        'id' => Hashids::encode($timing->id),
                         'opening_time' => $timing->opening_time,
                         'closing_time' => $timing->closing_time,
                     ];
