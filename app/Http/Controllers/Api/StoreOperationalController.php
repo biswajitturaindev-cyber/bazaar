@@ -70,6 +70,7 @@ class StoreOperationalController extends Controller
 
         try {
 
+            // Decode business_id
             $decoded = Hashids::decode($request->business_id);
 
             if (empty($decoded)) {
@@ -83,7 +84,44 @@ class StoreOperationalController extends Controller
                 'business_id' => $decoded[0]
             ]);
 
+            /*
+            |--------------------------------------------------------------------------
+            | Normalize Serviceable Pincode
+            |--------------------------------------------------------------------------
+            | Supports:
+            | serviceable_pincode[] = 721447
+            | serviceable_pincode[] = 721448
+            |
+            | OR
+            |
+            | serviceable_pincode = "721447,721448"
+            |--------------------------------------------------------------------------
+            */
 
+            $pincodes = $request->serviceable_pincode;
+
+            if (!empty($pincodes)) {
+
+                if (!is_array($pincodes)) {
+
+                    $pincodes = explode(',', $pincodes);
+
+                } else {
+
+                    $pincodes = collect($pincodes)
+                        ->flatMap(fn($item) => explode(',', $item))
+                        ->map(fn($item) => trim($item))
+                        ->filter()
+                        ->values()
+                        ->toArray();
+                }
+
+                $request->merge([
+                    'serviceable_pincode' => $pincodes
+                ]);
+            }
+
+            // Validation
             $validated = $request->validate([
                 'business_id' => 'required|exists:businesses,id',
 
@@ -91,7 +129,7 @@ class StoreOperationalController extends Controller
                 'delivery_radius' => 'nullable|numeric|min:0',
 
                 'serviceable_pincode' => 'nullable|array',
-                'serviceable_pincode.*' => 'nullable|digits:6',
+                'serviceable_pincode.*' => 'digits:6',
 
                 'status' => 'required|boolean',
 
@@ -100,13 +138,33 @@ class StoreOperationalController extends Controller
                 'timings.*.closing_time' => 'required|date_format:H:i',
             ]);
 
-            $validated['serviceable_pincode'] = isset($validated['serviceable_pincode'])
+            // Validate each timing
+            foreach ($validated['timings'] as $index => $timing) {
+
+                if (strtotime($timing['closing_time']) <= strtotime($timing['opening_time'])) {
+
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Validation error',
+                        'errors' => [
+                            "timings.$index.closing_time" => [
+                                'Closing time must be after opening time.'
+                            ]
+                        ]
+                    ], 422);
+                }
+            }
+
+            // Convert pincode array to comma-separated string
+            $validated['serviceable_pincode'] = !empty($validated['serviceable_pincode'])
                 ? implode(',', $validated['serviceable_pincode'])
                 : null;
 
-            // Create or Update Store Operational Detail
+            // Create or Update Store
             $store = StoreOperationalDetail::updateOrCreate(
-                ['business_id' => $validated['business_id']],
+                [
+                    'business_id' => $validated['business_id']
+                ],
                 [
                     'delivery_type' => $validated['delivery_type'],
                     'delivery_radius' => $validated['delivery_radius'] ?? null,
@@ -115,14 +173,13 @@ class StoreOperationalController extends Controller
                 ]
             );
 
-            dd($store);
             // Remove old timings
             $store->timings()->delete();
 
-            // Insert new timings
+            // Save new timings
             foreach ($validated['timings'] as $timing) {
+
                 $store->timings()->create([
-                    'store_operational_detail_id' => Hashids::decode($store->id)[0],
                     'opening_time' => $timing['opening_time'],
                     'closing_time' => $timing['closing_time'],
                 ]);
@@ -133,7 +190,9 @@ class StoreOperationalController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Saved successfully',
-                'data' => new StoreOperationalResource($store->load('timings'))
+                'data' => new StoreOperationalResource(
+                    $store->load('timings')
+                )
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -225,12 +284,41 @@ class StoreOperationalController extends Controller
                 ], 404);
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Normalize Serviceable Pincode
+            |--------------------------------------------------------------------------
+            */
+
+            $pincodes = $request->serviceable_pincode;
+
+            if (!empty($pincodes)) {
+
+                if (!is_array($pincodes)) {
+
+                    $pincodes = explode(',', $pincodes);
+
+                } else {
+
+                    $pincodes = collect($pincodes)
+                        ->flatMap(fn($item) => explode(',', $item))
+                        ->map(fn($item) => trim($item))
+                        ->filter()
+                        ->values()
+                        ->toArray();
+                }
+
+                $request->merge([
+                    'serviceable_pincode' => $pincodes
+                ]);
+            }
+
             $validated = $request->validate([
                 'delivery_type' => 'required|in:self,platform,both',
                 'delivery_radius' => 'nullable|numeric|min:0',
 
                 'serviceable_pincode' => 'nullable|array',
-                'serviceable_pincode.*' => 'nullable|digits:6',
+                'serviceable_pincode.*' => 'digits:6',
 
                 'status' => 'required|boolean',
 
@@ -239,10 +327,11 @@ class StoreOperationalController extends Controller
                 'timings.*.closing_time' => 'required|date_format:H:i',
             ]);
 
-            // Validate opening/closing times
+            // Validate timings
             foreach ($validated['timings'] as $index => $timing) {
 
                 if (strtotime($timing['closing_time']) <= strtotime($timing['opening_time'])) {
+
                     return response()->json([
                         'status' => false,
                         'message' => 'Validation error',
@@ -255,12 +344,12 @@ class StoreOperationalController extends Controller
                 }
             }
 
-            // Convert pincode array to comma-separated string
-            $validated['serviceable_pincode'] = isset($validated['serviceable_pincode'])
+            // Convert pincode array to string
+            $validated['serviceable_pincode'] = !empty($validated['serviceable_pincode'])
                 ? implode(',', $validated['serviceable_pincode'])
                 : null;
 
-            // Update store details
+            // Update store
             $store->update([
                 'delivery_type' => $validated['delivery_type'],
                 'delivery_radius' => $validated['delivery_radius'] ?? null,
@@ -268,11 +357,11 @@ class StoreOperationalController extends Controller
                 'status' => $validated['status'],
             ]);
 
-            // Delete existing timings
+            // Replace timings
             $store->timings()->delete();
 
-            // Insert new timings
             foreach ($validated['timings'] as $timing) {
+
                 $store->timings()->create([
                     'opening_time' => $timing['opening_time'],
                     'closing_time' => $timing['closing_time'],
@@ -284,7 +373,9 @@ class StoreOperationalController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Updated successfully',
-                'data' => new StoreOperationalResource($store->load('timings'))
+                'data' => new StoreOperationalResource(
+                    $store->load('timings')
+                )
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
