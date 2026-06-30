@@ -121,7 +121,7 @@ class StoreOperationalController extends Controller
             // Insert new timings
             foreach ($validated['timings'] as $timing) {
                 $store->timings()->create([
-                    'store_operational_detail_id' => $store->getRawOriginal('id'),
+                    'store_operational_detail_id' => Hashids::decode($store->id)[0],
                     'opening_time' => $timing['opening_time'],
                     'closing_time' => $timing['closing_time'],
                 ]);
