@@ -115,6 +115,7 @@ class StoreOperationalController extends Controller
                 ]
             );
 
+            dd($store);
             // Remove old timings
             $store->timings()->delete();
 
