@@ -53,7 +53,11 @@ class StoreOperationalDetail extends Model
 
     public function timings()
     {
-        return $this->hasMany(StoreOperationalTiming::class);
+        return $this->hasMany(
+            StoreOperationalTiming::class,
+            'store_operational_detail_id',
+            'id'
+        );
     }
 
     // Check store open or not
