@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Vinkla\Hashids\Facades\Hashids;
-
+use Carbon\Carbon;
 class StoreOperationalDetail extends Model
 {
     protected $table = 'store_operational_details';
 
     protected $fillable = [
         'business_id',
-        'opening_time',
-        'closing_time',
+        //'opening_time',
+        //'closing_time',
         'delivery_type',
         'delivery_radius',
         'serviceable_pincode',
@@ -50,16 +50,25 @@ class StoreOperationalDetail extends Model
             : $value;
     }
 
-    // Check store open or not
-    public function isOpenNow()
+
+    public function timings()
     {
-        $now = now()->format('H:i:s');
+        return $this->hasMany(StoreOperationalTiming::class);
+    }
 
-        // Overnight case (10 PM → 2 AM)
-        if ($this->closing_time < $this->opening_time) {
-            return ($now >= $this->opening_time || $now <= $this->closing_time);
-        }
+    // Check store open or not
+    public function isOpenNow(): bool
+    {
+        $now = Carbon::now()->format('H:i:s');
 
-        return ($now >= $this->opening_time && $now <= $this->closing_time);
+        $timings = $this->relationLoaded('timings')
+            ? $this->timings
+            : $this->timings()->get();
+
+        return $timings->contains(function ($timing) use ($now) {
+            return $timing->status
+                && $now >= $timing->opening_time
+                && $now <= $timing->closing_time;
+        });
     }
 }
