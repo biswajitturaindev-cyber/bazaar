@@ -19,6 +19,10 @@ class StoreOperationalTiming extends Model
      */
     public function storeOperationalDetail()
     {
-        return $this->belongsTo(StoreOperationalDetail::class);
+        return $this->belongsTo(
+            StoreOperationalDetail::class,
+            'store_operational_detail_id',
+            'id'
+        );
     }
 }

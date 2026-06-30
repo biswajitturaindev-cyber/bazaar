@@ -22,14 +22,12 @@ class StoreOperationalResource extends JsonResource
 
             'serviceable_pincode' => $this->serviceable_pincode,
 
-            'timings' => $this->whenLoaded('timings', function () {
-                return $this->timings->map(function ($timing) {
-                    return [
-                        'id' => Hashids::encode($timing->id),
-                        'opening_time' => $timing->opening_time,
-                        'closing_time' => $timing->closing_time,
-                    ];
-                });
+            'timings' => $this->timings->map(function ($timing) {
+                return [
+                    'id' => Hashids::encode($timing->id),
+                    'opening_time' => $timing->opening_time,
+                    'closing_time' => $timing->closing_time,
+                ];
             }),
 
             'status' => $this->status,
