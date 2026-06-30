@@ -17,16 +17,26 @@ class StoreOperationalResource extends JsonResource
         return [
             'id' => $this->id,
 
-            'opening_time' => $this->opening_time,
-            'closing_time' => $this->closing_time,
-
             'delivery_type' => $this->delivery_type,
-            'delivery_radius' => (float) $this->delivery_radius,
+            'delivery_radius' => (float) ($this->delivery_radius ?? 0),
 
-            'serviceable_pincode' => $this->serviceable_pincode,
+            'serviceable_pincode' => $this->serviceable_pincode
+                ? explode(',', $this->serviceable_pincode)
+                : [],
+
+            'timings' => $this->whenLoaded('timings', function () {
+                return $this->timings->map(function ($timing) {
+                    return [
+                        'id' => $timing->id,
+                        'opening_time' => $timing->opening_time,
+                        'closing_time' => $timing->closing_time,
+                    ];
+                });
+            }),
 
             'status' => $this->status,
-            'status_label' => $this->status == 1 ? 'Active' : 'Inactive',
+            'status_label' => $this->status ? 'Active' : 'Inactive',
+
             'is_open_now' => $this->isOpenNow(),
 
             'created_at' => $this->created_at?->toDateTimeString(),

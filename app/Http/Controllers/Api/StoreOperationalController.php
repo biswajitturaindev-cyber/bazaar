@@ -14,21 +14,43 @@ class StoreOperationalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $store = StoreOperationalDetail::first();
+        try {
 
-        if (!$store) {
+            $decoded = Hashids::decode($request->business_id);
+
+            if (empty($decoded)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business ID'
+                ], 400);
+            }
+
+            $store = StoreOperationalDetail::with('timings')
+                ->where('business_id', $decoded[0])
+                ->first();
+
+            if (!$store) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Store not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => new StoreOperationalResource($store)
+            ]);
+
+        } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => 'Store not found'
-            ], 404);
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'data' => new StoreOperationalResource($store)
-        ]);
     }
 
     /**
@@ -47,7 +69,7 @@ class StoreOperationalController extends Controller
         DB::beginTransaction();
 
         try {
-            // Decode business_id FIRST
+
             $decoded = Hashids::decode($request->business_id);
 
             if (empty($decoded)) {
@@ -58,43 +80,57 @@ class StoreOperationalController extends Controller
             }
 
             $request->merge([
-                'business_id' => $decoded[0] // replace with real ID
+                'business_id' => $decoded[0]
             ]);
 
-            // Validation
             $validated = $request->validate([
                 'business_id' => 'required|exists:businesses,id',
 
-                'opening_time' => 'required',
-                'closing_time' => 'required|after:opening_time',
-
                 'delivery_type' => 'required|in:self,platform,both',
-
                 'delivery_radius' => 'nullable|numeric|min:0',
 
                 'serviceable_pincode' => 'nullable|array',
                 'serviceable_pincode.*' => 'nullable|digits:6',
 
                 'status' => 'required|boolean',
+
+                'timings' => 'required|array|min:1',
+                'timings.*.opening_time' => 'required|date_format:H:i',
+                'timings.*.closing_time' => 'required|date_format:H:i',
             ]);
 
-            // Convert pincode array to comma-separated string
             $validated['serviceable_pincode'] = isset($validated['serviceable_pincode'])
                 ? implode(',', $validated['serviceable_pincode'])
                 : null;
 
-            // Save / Update using business_id
+            // Create or Update Store Operational Detail
             $store = StoreOperationalDetail::updateOrCreate(
                 ['business_id' => $validated['business_id']],
-                $validated
+                [
+                    'delivery_type' => $validated['delivery_type'],
+                    'delivery_radius' => $validated['delivery_radius'] ?? null,
+                    'serviceable_pincode' => $validated['serviceable_pincode'],
+                    'status' => $validated['status'],
+                ]
             );
+
+            // Remove old timings
+            $store->timings()->delete();
+
+            // Insert new timings
+            foreach ($validated['timings'] as $timing) {
+                $store->timings()->create([
+                    'opening_time' => $timing['opening_time'],
+                    'closing_time' => $timing['closing_time'],
+                ]);
+            }
 
             DB::commit();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Saved successfully',
-                'data' => new StoreOperationalResource($store)
+                'data' => new StoreOperationalResource($store->load('timings'))
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {

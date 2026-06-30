@@ -19,8 +19,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             // Store Timing
-            $table->time('opening_time');
-            $table->time('closing_time');
+            //$table->time('opening_time');
+            //$table->time('closing_time');
 
             // Delivery Type
             $table->enum('delivery_type', ['self', 'platform', 'both']);
