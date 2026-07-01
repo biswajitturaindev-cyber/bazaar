@@ -163,10 +163,145 @@ class AttributeMasterSeeder extends Seeder
         }
 
 
+        $attributesEducationStationery = [
+                'Book / Pen / Pencil' => ['Piece', 'Pack', 'Box', 'Dozen', 'Gross', 'Set', 'Pair', 'Bundle', 'Ream', 'Carton', 'Case', 'Pallet', 'Roll', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Sheet'],
+                'Stationery Goods' => ['Piece', 'Pack', 'Box', 'Dozen', 'Ream', 'Quire', 'Bundle', 'Roll', 'Carton', 'Set', 'Gross', 'Pallet', 'Ounce', 'Gram', 'Case', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Block', 'Sheet', 'Envelope', 'Folder', 'File', 'Bale', 'Tub', 'Tin'],
+        ];
+
+        foreach ($attributesEducationStationery as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 6)
+                ->where('name', $subCategoryName)
+                ->first();
+
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
+
+        $attributesAgricultureNature = [
+            'Agriculture' => ['Acre', 'Hectare', 'Ton', 'Kilogram', 'Pound', 'Bushel', 'Bale', 'Quintal'],
+            'Nursery (Plants / Flowers)' => ['Piece', 'Pot', 'Tray', 'Flat', 'Seedling', 'Bulb', 'Pack', 'Bundle'],
+            'Nursery (Fish)' => ['Piece', 'Fingerling', 'Fry', 'Kilogram', 'Pound', 'Tank', 'Batch'],
+            'Flower Shop' => ['Stem', 'Bunch', 'Bouquet', 'Dozen', 'Piece', 'Arrangement', 'Box'],
+        ];
+
+        foreach ($attributesAgricultureNature as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 7)
+                ->where('name', $subCategoryName)
+                ->first();
+
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
+
+        $attributesRetailGeneral = [
+            'Gift Shop' => ['Piece', 'Box', 'Set', 'Dozen', 'Hamper', 'Packet', 'Pair', 'Gross', 'Score', 'Carton', 'Pallet', 'Bag', 'Bundle', 'Roll', 'Crate', 'Sack', 'Tin', 'Tube', 'Jar', 'Basket', 'Pouch', 'Case', 'Tray', 'Pack', 'Bale', 'Lot', 'Assortment', 'Kit', 'Collection'],
+            'Printing Press' => ['Page', 'Sheet', 'Ream', 'Book', 'Copy', 'Roll', 'Bundle', 'Square Foot', 'Quire', 'Bale', 'Folio', 'Pica', 'Point', 'Em', 'En', 'Pixel', 'Inch', 'Centimeter', 'Millimeter', 'Meter', 'Yard', 'Column', 'Line', 'Paragraph', 'Word', 'Character', 'Booklet', 'Pamphlet', 'Leaf'],
+            'Sculptor Making' => ['Piece', 'Statue', 'Bust', 'Inch', 'Foot', 'Centimeter', 'Kilogram', 'Ton', 'Cubic Meter', 'Block', 'Slab', 'Stone', 'Gram', 'Pound', 'Ounce', 'Cubic Foot', 'Cubic Inch', 'Meter', 'Millimeter', 'Yard', 'Square Meter', 'Square Foot', 'Square Inch', 'Liter', 'Milliliter', 'Gallon', 'Carat', 'Tola', 'Troy Ounce'],
+            'Agarbatti Sticks' => ['Stick', 'Box', 'Packet', 'Dozen', 'Kilogram', 'Gram', 'Bundle', 'Gross', 'Carton', 'Fluid Ounce', 'Drop', 'Milliliter', 'Liter', 'Ounce', 'Pound', 'Ton', 'Piece', 'Set', 'Pair', 'Score', 'Bale', 'Crate', 'Pallet', 'Bag', 'Sack', 'Tin', 'Tube', 'Jar', 'Pouch'],
+            'Dashakarma (Puja Items)' => ['Packet', 'Piece', 'Set', 'Kit', 'Gram', 'Kilogram', 'Bottle', 'Dozen', 'Tola', 'Seer', 'Maund', 'Chatak', 'Pao', 'Ratti', 'Masha', 'Bhori', 'Liter', 'Milliliter', 'Drop', 'Spoon', 'Cup', 'Bowl', 'Plate', 'Thali', 'Box', 'Bag', 'Sack', 'Bundle', 'Roll'],
+        ];
+        foreach ($attributesRetailGeneral as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 8)
+                ->where('name', $subCategoryName)
+                ->first();
+
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
 
 
+        $attributesHealthMedical = [
+            'Medication (Weight)' => ['Kilogram (kg)', 'Gram (g)', 'Milligram (mg)', 'Microgram (mcg)', 'Nanogram (ng)', 'Picogram (pg)', 'Milliequivalent (mEq)', 'Ounce (oz)'],
+            'Medication (Volume)' => ['Liter (L)', 'Deciliter (dL)', 'Milliliter (mL)', 'Microliter (µL)', 'Cubic Centimeter (cc)', 'Drop (gtt)', 'Teaspoonful (tsp)', 'Tablespoonful (Tbsp)', 'Fluid Ounce (fl oz)', 'Pint (pt)', 'Gallon (gal)'],
+            'Medical Supplies' => ['Piece (pc)', 'Box (bx)', 'Pack (pk)', 'Roll (rl)', 'Pair (pr)', 'Set (st)', 'Kit (kt)', 'Case (cs)', 'Carton (ctn)', 'Bottle (btl)', 'Vial (vl)', 'Ampoule (amp)', 'Tube (tb)', 'Jar (jr)', 'Packet (pkt)'],
+        ];
+        foreach ($attributesHealthMedical as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 9)
+                ->where('name', $subCategoryName)
+                ->first();
 
+            if (!$subCategory) {
+                continue;
+            }
 
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
+
+        $attributesSportsAndOthers = [
+            'Sports' => ['Piece', 'Pair', 'Set', 'Kit', 'Dozen', 'Box', 'Pack', 'Gross', 'Carton', 'Bundle', 'Seconds', 'Minutes', 'Meters per Second', 'Kilometers per Hour', 'Miles per Hour', 'Beats per Minute', 'VO2 Max', 'Joules', 'Kilograms', 'Pounds', 'Grams', 'Repetitions', 'Sets', 'Rounds', 'Meters', 'Centimeters', 'Millimeters', 'Feet', 'Inches', 'Yards', 'Square Meters', 'Square Feet'],
+        ];
+
+        foreach ($attributesSportsAndOthers as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 10)
+                ->where('name', $subCategoryName)
+                ->first();
+
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
+
+        $attributesElectronics = [
+                    'Electronics & Accessories' => ['Piece', 'Pair', 'Set', 'Kit', 'Box', 'Pack', 'Packet', 'Carton', 'Case', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Millimeter', 'Inch', 'Foot', 'Gram', 'Kilogram', 'Ounce', 'Pound', 'Milliliter', 'Liter', 'Volt', 'Watt', 'Ampere', 'Ampere-hour (Ah)', 'mAh', 'kWh', 'TB', 'GB'],
+                    ];
+        foreach ($attributesElectronics as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 11)
+                ->where('name', $subCategoryName)
+                ->first();
+
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
 
     }
 }
