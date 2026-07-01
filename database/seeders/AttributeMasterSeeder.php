@@ -56,12 +56,12 @@ class AttributeMasterSeeder extends Seeder
 
 
         $attributesConstructionHardware = [
-                'Hardware Shop' => ['Piece', 'Nos', 'Pair', 'Set', 'Gram', 'Kilogram', 'Quintal', 'Millimeter', 'Inch', 'Feet', 'Meter', 'Packet', 'Box', 'Bundle', 'Carton', 'Kit', 'sq.ft', 'sq.m', 'Milliliter', 'Liter'],
-                'Builders' => ['Piece', 'Nos', 'Pair', 'Set', 'Gram', 'Kilogram', 'Quintal', 'Millimeter', 'Inch', 'Feet', 'Meter', 'Packet', 'Box', 'Bundle', 'Carton', 'Kit', 'sq.ft', 'sq.m', 'Milliliter', 'Liter'],
-                'Marbel Shop' => ['sq.ft', 'sq.m', 'Box', 'Carton', 'Piece', 'Slab', 'Pallet', 'Truck Load'],
-                'Electric Material' => ['Piece', 'Nos', 'Set', 'Meter', 'Feet', 'Roll', 'Coil', 'Gram', 'Kilogram', 'Milliliter', 'Liter', 'Packet', 'Box', 'Carton', 'Kit', 'Watt', 'Volt', 'Ampere'],
-                'Ply Shop' => ['sq.ft', 'sq.m', 'Sheet', 'Board', 'Millimeter', 'Feet', 'Bundle', 'Pack', 'Lot', 'Roll'],
-                'Home Paint' => ['Milliliter', 'Liter', 'Can', 'Bucket', 'Drum', 'Bottle', 'sq.ft', 'sq.m', 'Piece', 'Set'],
+            'Hardware Shop' => ['Piece', 'Nos', 'Pair', 'Set', 'Gram', 'Kilogram', 'Quintal', 'Millimeter', 'Inch', 'Feet', 'Meter', 'Packet', 'Box', 'Bundle', 'Carton', 'Kit', 'sq.ft', 'sq.m', 'Milliliter', 'Liter'],
+            'Builders' => ['Piece', 'Nos', 'Pair', 'Set', 'Gram', 'Kilogram', 'Quintal', 'Millimeter', 'Inch', 'Feet', 'Meter', 'Packet', 'Box', 'Bundle', 'Carton', 'Kit', 'sq.ft', 'sq.m', 'Milliliter', 'Liter'],
+            'Marbel Shop' => ['sq.ft', 'sq.m', 'Box', 'Carton', 'Piece', 'Slab', 'Pallet', 'Truck Load'],
+            'Electric Material' => ['Piece', 'Nos', 'Set', 'Meter', 'Feet', 'Roll', 'Coil', 'Gram', 'Kilogram', 'Milliliter', 'Liter', 'Packet', 'Box', 'Carton', 'Kit', 'Watt', 'Volt', 'Ampere'],
+            'Ply Shop' => ['sq.ft', 'sq.m', 'Sheet', 'Board', 'Millimeter', 'Feet', 'Bundle', 'Pack', 'Lot', 'Roll'],
+            'Home Paint' => ['Milliliter', 'Liter', 'Can', 'Bucket', 'Drum', 'Bottle', 'sq.ft', 'sq.m', 'Piece', 'Set'],
         ];
         foreach ($attributesConstructionHardware as $subCategoryName => $names) {
 
@@ -84,9 +84,9 @@ class AttributeMasterSeeder extends Seeder
 
 
         $attributesHomeLiving = [
-                'Furniture' => ['Piece', 'Set', 'Combo', 'Feet', 'Inch', 'Meter', 'Box', 'Carton', 'Color', 'Wood', 'Metal', 'Finish', 'Design', 'Centimeter', 'Millimeter', 'Yard', 'Kilogram', 'Pound', 'Pair'],
-                'Home Decoration' => ['Piece', 'Set', 'Combo Pack', 'Feet', 'Inch', 'Meter', 'Box', 'Carton', 'Color', 'Wood', 'Metal', 'Finish', 'Design', 'Centimeter', 'Millimeter', 'Yard', 'Pair', 'Gram', 'Ounce', 'Bundle', 'Roll'],
-                'Home Interior' => ['sq.ft', 'sq.m', 'Running Feet', 'Meter', 'Piece', 'Set', 'Sheet', 'Board', 'Liter', 'Milliliter', 'Package', 'Project', 'Lot', 'Centimeter', 'Millimeter', 'Yard', 'Gallon', 'Pint', 'Quart', 'Cubic Meter', 'Cubic Feet', 'Roll', 'Bundle', 'Tile', 'Slab'],
+            'Furniture' => ['Piece', 'Set', 'Combo', 'Feet', 'Inch', 'Meter', 'Box', 'Carton', 'Color', 'Wood', 'Metal', 'Finish', 'Design', 'Centimeter', 'Millimeter', 'Yard', 'Kilogram', 'Pound', 'Pair'],
+            'Home Decoration' => ['Piece', 'Set', 'Combo Pack', 'Feet', 'Inch', 'Meter', 'Box', 'Carton', 'Color', 'Wood', 'Metal', 'Finish', 'Design', 'Centimeter', 'Millimeter', 'Yard', 'Pair', 'Gram', 'Ounce', 'Bundle', 'Roll'],
+            'Home Interior' => ['sq.ft', 'sq.m', 'Running Feet', 'Meter', 'Piece', 'Set', 'Sheet', 'Board', 'Liter', 'Milliliter', 'Package', 'Project', 'Lot', 'Centimeter', 'Millimeter', 'Yard', 'Gallon', 'Pint', 'Quart', 'Cubic Meter', 'Cubic Feet', 'Roll', 'Bundle', 'Tile', 'Slab'],
         ];
         foreach ($attributesHomeLiving as $subCategoryName => $names) {
 
@@ -109,13 +109,13 @@ class AttributeMasterSeeder extends Seeder
 
 
         $attributesFashionLifestyle = [
-                'Fashion' => ['Piece', 'Set', 'Pair', 'Size', 'Color', 'Material', 'Combo Pack', 'Family Pack', 'Meter', 'Yard', 'Dozen', 'Bundle', 'Pack', 'Roll'],
-                'Shoes' => ['Pair', 'Piece', 'Set', 'Size', 'Color', 'Material', 'Combo Pack', 'Box', 'Carton', 'Dozen', 'UK Size', 'US Size'],
-                'Watches' => ['Piece', 'Set', 'Combo Pack', 'Dial', 'Color', 'Strap', 'Pack', 'Box', 'Gift Box', 'Pair', 'Carton', 'Case', 'Display Box'],
-                'Bags & Luggage' => ['Piece', 'Liter', 'Size', 'Color', 'Material', 'Type', 'Set', 'Combo Pack', 'Box', 'Carton', 'Pair', 'Pack', 'Bag', 'Sack'],
-                'Boutiques' => ['Piece', 'Set', 'Meter', 'Yard', 'Size', 'Color', 'Material', 'Combo Pack', 'Design', 'Box', 'Cover', 'Bag', 'Roll', 'Bundle', 'Spool', 'Dozen'],
-                'Cosmetics & Imitation' => ['Piece', 'Milliliter', 'Gram', 'Shade', 'Color', 'Skin Type', 'Pack', 'Combo Pack', 'Kit', 'Box', 'Pair', 'Set', 'Bottle', 'Tube', 'Jar', 'Palette', 'Sachet', 'Pump', 'Spray', 'Ounce'],
-                'Jewellery' => ['Gram', 'Milligram', 'Piece', 'Pair', 'Purity', 'Carat', 'Point', 'Box', 'Set', 'Color', 'Clarity', 'Cut', 'Origin', 'Ounce', 'Troy Ounce', 'Karat', 'String', 'Strand'],
+            'Fashion' => ['Piece', 'Set', 'Pair', 'Size', 'Color', 'Material', 'Combo Pack', 'Family Pack', 'Meter', 'Yard', 'Dozen', 'Bundle', 'Pack', 'Roll'],
+            'Shoes' => ['Pair', 'Piece', 'Set', 'Size', 'Color', 'Material', 'Combo Pack', 'Box', 'Carton', 'Dozen', 'UK Size', 'US Size'],
+            'Watches' => ['Piece', 'Set', 'Combo Pack', 'Dial', 'Color', 'Strap', 'Pack', 'Box', 'Gift Box', 'Pair', 'Carton', 'Case', 'Display Box'],
+            'Bags & Luggage' => ['Piece', 'Liter', 'Size', 'Color', 'Material', 'Type', 'Set', 'Combo Pack', 'Box', 'Carton', 'Pair', 'Pack', 'Bag', 'Sack'],
+            'Boutiques' => ['Piece', 'Set', 'Meter', 'Yard', 'Size', 'Color', 'Material', 'Combo Pack', 'Design', 'Box', 'Cover', 'Bag', 'Roll', 'Bundle', 'Spool', 'Dozen'],
+            'Cosmetics & Imitation' => ['Piece', 'Milliliter', 'Gram', 'Shade', 'Color', 'Skin Type', 'Pack', 'Combo Pack', 'Kit', 'Box', 'Pair', 'Set', 'Bottle', 'Tube', 'Jar', 'Palette', 'Sachet', 'Pump', 'Spray', 'Ounce'],
+            'Jewellery' => ['Gram', 'Milligram', 'Piece', 'Pair', 'Purity', 'Carat', 'Point', 'Box', 'Set', 'Color', 'Clarity', 'Cut', 'Origin', 'Ounce', 'Troy Ounce', 'Karat', 'String', 'Strand'],
         ];
         foreach ($attributesFashionLifestyle as $subCategoryName => $names) {
 
@@ -137,11 +137,11 @@ class AttributeMasterSeeder extends Seeder
         }
 
         $attributesAutomobile = [
-                'Cars' => ['Piece', 'Brand', 'Model', 'Variant', 'Transmission', 'Year', 'Set', 'Pair', 'Liter', 'Milliliter', 'Box', 'Kit', 'Ton', 'Kilogram', 'Pound', 'Gallon', 'Quart', 'Ounce', 'Inch', 'Foot', 'Meter'],
-                'Bike' => ['Piece', 'Set', 'Pair', 'Liter', 'Milliliter', 'Box', 'Kit', 'Gallon', 'Quart', 'Ton', 'Kilogram', 'Pound', 'Ounce', 'Inch', 'Foot', 'Meter'],
-                'Battery' => ['Piece', 'Volt', 'Ampere', 'Ampere-hour (Ah)', 'Watt', 'Kilowatt', 'Box', 'Pallet'],
-                'Tyres' => ['Piece', 'Set', 'Pair', 'Inch', 'Millimeter', 'Pound', 'Kilogram', 'Pallet'],
-                'Car Decor Items' => ['Piece', 'Set', 'Pair', 'Box', 'Kit', 'Pack', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Yard', 'Ounce', 'Gram'],
+            'Cars' => ['Piece', 'Brand', 'Model', 'Variant', 'Transmission', 'Year', 'Set', 'Pair', 'Liter', 'Milliliter', 'Box', 'Kit', 'Ton', 'Kilogram', 'Pound', 'Gallon', 'Quart', 'Ounce', 'Inch', 'Foot', 'Meter'],
+            'Bike' => ['Piece', 'Set', 'Pair', 'Liter', 'Milliliter', 'Box', 'Kit', 'Gallon', 'Quart', 'Ton', 'Kilogram', 'Pound', 'Ounce', 'Inch', 'Foot', 'Meter'],
+            'Battery' => ['Piece', 'Volt', 'Ampere', 'Ampere-hour (Ah)', 'Watt', 'Kilowatt', 'Box', 'Pallet'],
+            'Tyres' => ['Piece', 'Set', 'Pair', 'Inch', 'Millimeter', 'Pound', 'Kilogram', 'Pallet'],
+            'Car Decor Items' => ['Piece', 'Set', 'Pair', 'Box', 'Kit', 'Pack', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Yard', 'Ounce', 'Gram'],
         ];
         foreach ($attributesAutomobile as $subCategoryName => $names) {
 
@@ -164,8 +164,8 @@ class AttributeMasterSeeder extends Seeder
 
 
         $attributesEducationStationery = [
-                'Book / Pen / Pencil' => ['Piece', 'Pack', 'Box', 'Dozen', 'Gross', 'Set', 'Pair', 'Bundle', 'Ream', 'Carton', 'Case', 'Pallet', 'Roll', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Sheet'],
-                'Stationery Goods' => ['Piece', 'Pack', 'Box', 'Dozen', 'Ream', 'Quire', 'Bundle', 'Roll', 'Carton', 'Set', 'Gross', 'Pallet', 'Ounce', 'Gram', 'Case', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Block', 'Sheet', 'Envelope', 'Folder', 'File', 'Bale', 'Tub', 'Tin'],
+            'Book / Pen / Pencil' => ['Piece', 'Pack', 'Box', 'Dozen', 'Gross', 'Set', 'Pair', 'Bundle', 'Ream', 'Carton', 'Case', 'Pallet', 'Roll', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Sheet'],
+            'Stationery Goods' => ['Piece', 'Pack', 'Box', 'Dozen', 'Ream', 'Quire', 'Bundle', 'Roll', 'Carton', 'Set', 'Gross', 'Pallet', 'Ounce', 'Gram', 'Case', 'Crate', 'Bag', 'Sack', 'Unit', 'Tube', 'Display', 'Blister Pack', 'Sleeve', 'Pad', 'Block', 'Sheet', 'Envelope', 'Folder', 'File', 'Bale', 'Tub', 'Tin'],
         ];
 
         foreach ($attributesEducationStationery as $subCategoryName => $names) {
@@ -283,8 +283,8 @@ class AttributeMasterSeeder extends Seeder
         }
 
         $attributesElectronics = [
-                    'Electronics & Accessories' => ['Piece', 'Pair', 'Set', 'Kit', 'Box', 'Pack', 'Packet', 'Carton', 'Case', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Millimeter', 'Inch', 'Foot', 'Gram', 'Kilogram', 'Ounce', 'Pound', 'Milliliter', 'Liter', 'Volt', 'Watt', 'Ampere', 'Ampere-hour (Ah)', 'mAh', 'kWh', 'TB', 'GB'],
-                    ];
+            'Electronics & Accessories' => ['Piece', 'Pair', 'Set', 'Kit', 'Box', 'Pack', 'Packet', 'Carton', 'Case', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Millimeter', 'Inch', 'Foot', 'Gram', 'Kilogram', 'Ounce', 'Pound', 'Milliliter', 'Liter', 'Volt', 'Watt', 'Ampere', 'Ampere-hour (Ah)', 'mAh', 'kWh', 'TB', 'GB'],
+        ];
         foreach ($attributesElectronics as $subCategoryName => $names) {
             $subCategory = BusinessSubCategory::where('business_category_id', 11)
                 ->where('name', $subCategoryName)
@@ -302,6 +302,5 @@ class AttributeMasterSeeder extends Seeder
                 ]);
             }
         }
-
     }
 }
