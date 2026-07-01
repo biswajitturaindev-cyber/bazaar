@@ -16,7 +16,7 @@ class BusinessCategoryController extends Controller
     public function index()
     {
         try {
-            $categories = BusinessCategory::latest()->paginate(10);
+            $categories = BusinessCategory::latest()->paginate(100);
 
             return BusinessCategoryResource::collection($categories);
         } catch (\Exception $e) {
