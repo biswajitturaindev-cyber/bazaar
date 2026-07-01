@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             HsnSeeder::class,
             BusinessCategorySeeder::class,
-            //CategorySeeder::class,
+            CategorySeeder::class,
             //SubCategorySeeder::class,
             //AttributeMasterSeeder::class,
             //AttributeSeeder::class,

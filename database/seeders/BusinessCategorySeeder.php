@@ -127,6 +127,14 @@ class BusinessCategorySeeder extends Seeder
                     ['name' => 'Sports', 'image' => 'Sport/Sports.webp'],
                 ],
             ],
+
+            'Electronics' => [
+                'image' => 'Electronics.webp',
+                'subs' => [
+                    ['name' => 'Electronics & accessories', 'image' => 'electronics/Electronics.webp'],
+                ],
+            ],
+
         ];
 
         foreach ($data as $category => $details) {

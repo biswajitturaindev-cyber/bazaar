@@ -518,6 +518,546 @@ class CategorySeeder extends Seeder
             }
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Mobiles & Tablets
+        |--------------------------------------------------------------------------
+        */
+
+        $mobilesTablets = Category::create([
+            'name' => "Mobiles & Tablets",
+            'description' => 'Mobiles & Tablets category',
+            'status' => 1,
+        ]);
+
+        $mobilesTabletsSubCategories = [
+
+            'Smartphones' => [
+                'Android Smartphones',
+                'iPhones',
+                '5G Smartphones',
+                'Gaming Smartphones',
+                'Budget Smartphones',
+                'Flagship Smartphones',
+            ],
+
+            'Tablets' => [
+                'Android Tablets',
+                'iPads',
+                'Kids Tablets',
+                'Graphic Tablets',
+            ],
+
+            'Mobile Accessories' => [
+                'Chargers',
+                'Power Banks',
+                'Phone Cases',
+                'Screen Protectors',
+                'Mobile Holders',
+            ],
+
+        ];
+
+        foreach ($mobilesTabletsSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $mobilesTablets->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $mobilesTablets->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Computers & Laptops
+        |--------------------------------------------------------------------------
+        */
+
+        $computersLaptops = Category::create([
+            'name' => "Computers & Laptops",
+            'description' => 'Computers & Laptops category',
+            'status' => 1,
+        ]);
+
+        $computersLaptopsSubCategories = [
+
+            'Laptops' => [
+                'Gaming Laptops',
+                'Business Laptops',
+                'Ultrabooks',
+                '2-in-1 Laptops',
+                'Student Laptops',
+            ],
+
+            'Desktop Computers' => [
+                'Gaming PCs',
+                'All-in-One PCs',
+                'Mini PCs',
+                'Workstations',
+            ],
+
+            'Computer Accessories' => [
+                'Keyboards',
+                'Mouse',
+                'Webcams',
+                'Laptop Bags',
+                'Cooling Pads',
+            ],
+
+        ];
+
+        foreach ($computersLaptopsSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $computersLaptops->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $computersLaptops->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TV & Entertainment
+        |--------------------------------------------------------------------------
+        */
+
+        $tvEntertainment = Category::create([
+            'name' => "TV & Entertainment",
+            'description' => 'TV & Entertainment category',
+            'status' => 1,
+        ]);
+
+        $tvEntertainmentSubCategories = [
+
+            'Televisions' => [
+                'Smart TVs',
+                'LED TVs',
+                'QLED TVs',
+                'OLED TVs',
+                'Android TVs',
+            ],
+
+            'Home Entertainment' => [
+                'Soundbars',
+                'Home Theater Systems',
+                'Projectors',
+                'Streaming Devices',
+            ],
+
+        ];
+
+        foreach ($tvEntertainmentSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $tvEntertainment->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $tvEntertainment->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audio Devices
+        |--------------------------------------------------------------------------
+        */
+
+        $audioDevices = Category::create([
+            'name' => "Audio Devices",
+            'description' => 'Audio Devices category',
+            'status' => 1,
+        ]);
+
+        $audioDevicesSubCategories = [
+
+            'Headphones & Earphones' => [
+                'Wireless Earbuds',
+                'Bluetooth Headphones',
+                'Gaming Headsets',
+                'Neckbands',
+                'Wired Earphones',
+            ],
+
+            'Speakers' => [
+                'Bluetooth Speakers',
+                'Portable Speakers',
+                'Smart Speakers',
+                'Party Speakers',
+            ],
+
+        ];
+
+        foreach ($audioDevicesSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $audioDevices->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $audioDevices->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cameras & Photography
+        |--------------------------------------------------------------------------
+        */
+
+        $camerasPhotography = Category::create([
+            'name' => "Cameras & Photography",
+            'description' => 'Cameras & Photography category',
+            'status' => 1,
+        ]);
+
+        $camerasPhotographySubCategories = [
+
+            'Cameras' => [
+                'DSLR Cameras',
+                'Mirrorless Cameras',
+                'Action Cameras',
+                'Instant Cameras',
+            ],
+
+            'Camera Accessories' => [
+                'Lenses',
+                'Tripods',
+                'Camera Bags',
+                'Gimbals',
+                'Memory Cards',
+            ],
+
+        ];
+
+        foreach ($camerasPhotographySubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $camerasPhotography->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $camerasPhotography->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Gaming
+        |--------------------------------------------------------------------------
+        */
+
+        $gaming = Category::create([
+            'name' => "Gaming",
+            'description' => 'Gaming category',
+            'status' => 1,
+        ]);
+
+        $gamingSubCategories = [
+
+            'Gaming Consoles' => [
+                'PlayStation',
+                'Xbox',
+                'Nintendo Switch',
+                'Handheld Consoles',
+            ],
+
+            'Gaming Accessories' => [
+                'Controllers',
+                'Gaming Keyboards',
+                'Gaming Mouse',
+                'VR Headsets',
+            ],
+
+        ];
+
+        foreach ($gamingSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $gaming->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $gaming->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Home Appliances
+        |--------------------------------------------------------------------------
+        */
+
+        $homeAppliances = Category::create([
+            'name' => "Home Appliances",
+            'description' => 'Home Appliances category',
+            'status' => 1,
+        ]);
+
+        $homeAppliancesSubCategories = [
+
+            'Kitchen Appliances' => [
+                'Microwave Ovens',
+                'Air Fryers',
+                'Mixer Grinders',
+                'Electric Kettles',
+                'Induction Cooktops',
+            ],
+
+            'Cleaning Appliances' => [
+                'Vacuum Cleaners',
+                'Robot Vacuum Cleaners',
+                'Steam Cleaners',
+            ],
+
+            'Cooling Appliances' => [
+                'Air Conditioners',
+                'Air Coolers',
+                'Fans',
+            ],
+
+        ];
+
+        foreach ($homeAppliancesSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $homeAppliances->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $homeAppliances->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Wearables
+        |--------------------------------------------------------------------------
+        */
+
+        $wearables = Category::create([
+            'name' => "Wearables",
+            'description' => 'Wearables category',
+            'status' => 1,
+        ]);
+
+        $wearablesSubCategories = [
+
+            'Smartwatches' => [
+                'Fitness Smartwatches',
+                'Premium Smartwatches',
+                'Kids Smartwatches',
+                'Sports Smartwatches',
+            ],
+
+            'Fitness Devices' => [
+                'Fitness Bands',
+                'Smart Rings',
+                'Heart Rate Monitors',
+            ],
+
+        ];
+
+        foreach ($wearablesSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $wearables->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $wearables->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Networking & Smart Home
+        |--------------------------------------------------------------------------
+        */
+
+        $networkingSmartHome = Category::create([
+            'name' => "Networking & Smart Home",
+            'description' => 'Networking & Smart Home category',
+            'status' => 1,
+        ]);
+
+        $networkingSmartHomeSubCategories = [
+
+            'Networking Devices' => [
+                'WiFi Routers',
+                'Mesh WiFi Systems',
+                'Range Extenders',
+                'Network Switches',
+            ],
+
+            'Smart Home Devices' => [
+                'Smart Bulbs',
+                'Smart Plugs',
+                'Smart Door Locks',
+                'Video Doorbells',
+                'Smart Security Cameras',
+            ],
+
+        ];
+
+        foreach ($networkingSmartHomeSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $networkingSmartHome->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $networkingSmartHome->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Office Electronics
+        |--------------------------------------------------------------------------
+        */
+
+        $officeElectronics = Category::create([
+            'name' => "Office Electronics",
+            'description' => 'Office Electronics category',
+            'status' => 1,
+        ]);
+
+        $officeElectronicsSubCategories = [
+
+            'Printers' => [
+                'Inkjet Printers',
+                'Laser Printers',
+                'All-in-One Printers',
+            ],
+
+            'Scanners' => [
+                'Document Scanners',
+                'Photo Scanners',
+            ],
+
+            'Projectors' => [
+                'Business Projectors',
+                'Home Projectors',
+                'Portable Projectors',
+            ],
+
+        ];
+
+        foreach ($officeElectronicsSubCategories as $subCategoryName => $items) {
+
+            $subCategory = SubCategory::create([
+                'category_id' => $officeElectronics->id,
+                'name' => $subCategoryName,
+                'description' => $subCategoryName,
+                'status' => 1,
+            ]);
+
+            foreach ($items as $item) {
+
+                SubCategoryItem::create([
+                    'category_id' => $officeElectronics->id,
+                    'sub_category_id' => $subCategory->id,
+                    'name' => $item,
+                    'description' => $item,
+                    'status' => 1,
+                ]);
+            }
+        }
 
     }
 }

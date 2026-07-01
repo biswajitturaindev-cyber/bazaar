@@ -46,7 +46,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
-
         /*
         |--------------------------------------------------------------------------
         | Business Category Management
@@ -61,7 +60,6 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        //product category
         Route::get('/product-category-list', [ProductController::class, 'productCategoryList'])->name('admin.product.category.list');
         Route::get('/product-category', [ProductController::class, 'productCategory'])->name('admin.product.category');
         Route::post('/product-category-store', [ProductController::class, 'productCategoryStore'])->name('admin.product.category.store');
@@ -131,19 +129,10 @@ Route::prefix('admin')->group(function () {
         */
         Route::resource('attribute-master', AttributemasterController::class);
         Route::resource('attributes', AttributeController::class);
-        Route::post(
-            'attributes/get-attribute-masters',
-            [AttributeController::class, 'getAttributeMasters']
-        )->name('attributes.getAttributeMasters');
+        Route::post('attributes/get-attribute-masters',[AttributeController::class, 'getAttributeMasters'])->name('attributes.getAttributeMasters');
         Route::resource('attribute-values', AttributeValueController::class);
-        Route::post(
-            'attribute-values/get-sub-categories',
-            [AttributeValueController::class, 'getSubCategories']
-        )->name('attributevalues.getSubCategories');
-        Route::post(
-            'attribute-values/get-attribute-master',
-            [AttributeValueController::class, 'getAttributeMaster']
-        )->name('attributevalues.getAttributeMaster');
+        Route::post('attribute-values/get-sub-categories',[AttributeValueController::class, 'getSubCategories'])->name('attributevalues.getSubCategories');
+        Route::post('attribute-values/get-attribute-master',[AttributeValueController::class, 'getAttributeMaster'])->name('attributevalues.getAttributeMaster');
 
         /*
         |--------------------------------------------------------------------------
@@ -182,14 +171,11 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('product-reviews', ProductReviewController::class);
-        Route::put(
-            '/admin/product-review/update-status/{type}/{id}',
-            [ProductReviewController::class, 'updateStatus']
-        )->name('admin.product-review.update-status');
+        Route::put('/admin/product-review/update-status/{type}/{id}',[ProductReviewController::class, 'updateStatus'])->name('admin.product-review.update-status');
 
         /*
         |--------------------------------------------------------------------------
-        | Vendot Products Master
+        | Vendor Products Master
         |--------------------------------------------------------------------------
         */
         Route::resource('vendors.products', VendorProductController::class);
@@ -200,10 +186,7 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('vendor-commissions', VendorCommissionController::class);
-        Route::get(
-            '/vendor-commissions/invoices/{businessId}',
-            [VendorCommissionController::class, 'invoiceList']
-        )->name('vendor-commissions.invoice-list');
+        Route::get('/vendor-commissions/invoices/{businessId}',[VendorCommissionController::class, 'invoiceList'])->name('vendor-commissions.invoice-list');
 
         /*
         |--------------------------------------------------------------------------
