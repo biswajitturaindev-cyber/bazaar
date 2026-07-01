@@ -11,6 +11,7 @@ return [
         8 => 'product_retails',
         9 => 'product_healths',
         10 => 'product_sports',
+        11 => 'product_electronics',
     ],
 
     'model_map' => [
@@ -24,6 +25,7 @@ return [
         8 => \App\Models\ProductRetail::class,
         9 => \App\Models\ProductHealth::class,
         10 => \App\Models\ProductSports::class,
+        11 => \App\Models\ProductElectronic::class,
     ],
 
     'status' => [
