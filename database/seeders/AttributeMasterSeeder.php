@@ -282,8 +282,26 @@ class AttributeMasterSeeder extends Seeder
             }
         }
 
+        $attributesElectronics = [
+                    'Electronics & Accessories' => ['Piece', 'Pair', 'Set', 'Kit', 'Box', 'Pack', 'Packet', 'Carton', 'Case', 'Bundle', 'Roll', 'Meter', 'Centimeter', 'Millimeter', 'Inch', 'Foot', 'Gram', 'Kilogram', 'Ounce', 'Pound', 'Milliliter', 'Liter', 'Volt', 'Watt', 'Ampere', 'Ampere-hour (Ah)', 'mAh', 'kWh', 'TB', 'GB'],
+                    ];
+        foreach ($attributesElectronics as $subCategoryName => $names) {
+            $subCategory = BusinessSubCategory::where('business_category_id', 11)
+                ->where('name', $subCategoryName)
+                ->first();
 
-        
+            if (!$subCategory) {
+                continue;
+            }
+
+            foreach ($names as $name) {
+                AttributeMaster::create([
+                    'business_category_id'     => $subCategory->business_category_id,
+                    'business_sub_category_id' => $subCategory->id,
+                    'name'                     => $name,
+                ]);
+            }
+        }
 
     }
 }
