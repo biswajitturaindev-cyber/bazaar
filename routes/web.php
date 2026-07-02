@@ -20,11 +20,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorCommissionController;
 use App\Http\Controllers\Admin\VendorProductController;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return view('welcome');
+});
 
-Route::redirect('/', '/admin/login');
+//Route::redirect('/', '/admin/login');
 
 Auth::routes();
 
