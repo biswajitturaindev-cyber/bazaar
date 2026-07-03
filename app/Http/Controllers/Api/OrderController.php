@@ -217,6 +217,7 @@ class OrderController extends Controller
                 | Member Loyalty Wallet
                 |--------------------------------------------------------------------------
                 */
+                // Entry for main DB
 
                 if ($order->user_id) {
 

@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\SubCategoryItemController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VendorBannerController;
+use App\Http\Controllers\Api\VendorLoyaltyController;
 use App\Http\Controllers\Api\VendorProductController;
 use Illuminate\Support\Str;
 
@@ -222,6 +223,13 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::resource('sales-reports', SalesReportController::class);
     Route::get('sales-reports/{member_id}/orders',[SalesReportController::class, 'orderDetails']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vendor loyalty points report
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('vendor-loyalty-points', VendorLoyaltyController::class);
 
 
 

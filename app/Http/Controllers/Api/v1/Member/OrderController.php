@@ -245,7 +245,8 @@ class OrderController extends Controller
                 'tax_amount' => $taxAmount,
                 'grand_total' => $grandTotal,
                 'loyalty_used' => $loyaltyPoints,
-                'loyalty_earned' => 0,
+                'loyalty_earned_member' => $grandTotal * 1, // Currently 1 point per 100 percent, can be adjusted as needed
+                'loyalty_earned_vendor' => $grandTotal * 1, // Currently 1 point per 100 percent, can be adjusted as needed
                 'wallet_used' => $paymentMethod == Order::METHOD_WALLET
                     ? $grandTotal
                     : 0,
