@@ -71,7 +71,8 @@ class Order extends Model
         'grand_total',
 
         'loyalty_used',
-        'loyalty_earned',
+        'loyalty_earned_member',
+        'loyalty_earned_vendor',
         'wallet_used',
         'online_paid',
 

@@ -20,6 +20,8 @@ class VendorLoyaltyWalletResource extends JsonResource
             'business_id' => Hashids::encode($this->business_id),
             'order_id' => $this->order_id,
 
+            'order_type' => $this->order_type,
+
             'transaction_no' => $this->transaction_no,
             'transaction_type' => $this->transaction_type,
             'source' => $this->source,
