@@ -51,4 +51,9 @@ class VendorLoyaltyWallet extends Model
     {
         return $this->closing_points;
     }
+
+    public function memberOrder()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }

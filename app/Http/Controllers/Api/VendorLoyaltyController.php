@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\VendorLoyaltyWalletResource;
 use App\Models\VendorLoyaltyWallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VendorLoyaltyController extends Controller
 {
@@ -20,8 +21,22 @@ class VendorLoyaltyController extends Controller
                 'Invalid business ID'
             );
 
-            $wallets = VendorLoyaltyWallet::where('business_id', $businessId)
-                ->latest()
+            // $wallets = VendorLoyaltyWallet::where('business_id', $businessId)
+            //     ->latest()
+            //     ->get();
+
+            $wallets = DB::table('vendor_loyalty_wallets as vlw')
+                ->leftJoin('orders as o', function ($join) {
+                    $join->on('vlw.order_id', '=', 'o.id')
+                        ->where('vlw.order_type', '=', 'member_order');
+                })
+                ->where('vlw.business_id', $businessId)
+                ->orderByDesc('vlw.id')
+                ->select(
+                    'vlw.*',
+                    'o.order_no',
+                    'o.invoice_no'
+                )
                 ->get();
 
             return response()->json([
