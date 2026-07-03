@@ -39,10 +39,14 @@ class VendorLoyaltyController extends Controller
                 )
                 ->get();
 
+            $walletBalance = VendorLoyaltyWallet::where('business_id', $businessId)
+                ->latest('id')
+                ->value('closing_points');
+
             return response()->json([
                 'status' => true,
                 'message' => 'Vendor loyalty wallet fetched successfully.',
-                'wallet_balance' => (float) optional($wallets->first())->closing_points,
+                'wallet_balance' => (float) ($walletBalance ?? 0),
                 'data' => VendorLoyaltyWalletResource::collection($wallets),
             ], 200);
 
