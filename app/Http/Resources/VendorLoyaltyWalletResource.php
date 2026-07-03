@@ -10,8 +10,6 @@ class VendorLoyaltyWalletResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
@@ -19,8 +17,11 @@ class VendorLoyaltyWalletResource extends JsonResource
             'id' => Hashids::encode($this->id),
             'business_id' => Hashids::encode($this->business_id),
             'order_id' => $this->order_id,
-
             'order_type' => $this->order_type,
+
+            // Order Details
+            'order_no' => $this->order_no,
+            'invoice_no' => $this->invoice_no,
 
             'transaction_no' => $this->transaction_no,
             'transaction_type' => $this->transaction_type,
@@ -33,7 +34,7 @@ class VendorLoyaltyWalletResource extends JsonResource
             'remarks' => $this->remarks,
             'status' => $this->status,
 
-            'created_by' => $this->created_byl,
+            'created_by' => $this->created_by,
             'created_at' => optional($this->created_at)->format('d M Y h:i A'),
         ];
     }
