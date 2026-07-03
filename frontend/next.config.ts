@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+    images: {
+        remotePatterns: [
+            {
+                protocol: "http",
+                hostname: "bazaar.resheragroup.in",
+            },
+        ],
+    },
 };
 
 export default nextConfig;
