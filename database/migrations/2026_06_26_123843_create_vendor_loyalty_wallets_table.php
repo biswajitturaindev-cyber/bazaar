@@ -18,11 +18,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('order_id')
-                ->nullable()
-                ->constrained('orders')
-                ->nullOnDelete()
-                ->cascadeOnUpdate();
+            $table->unsignedBigInteger('order_id')->nullable();
+            // Add order type
+            $table->enum('order_type', [
+                'vendor_order',
+                'member_order',
+            ])->nullable();
 
             $table->string('transaction_no')->unique();
             $table->enum('transaction_type', [
