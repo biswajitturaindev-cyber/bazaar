@@ -12,6 +12,7 @@ class VendorLoyaltyWallet extends Model
     protected $fillable = [
         'business_id',
         'order_id',
+        'order_type',
         'transaction_no',
         'transaction_type',
         'source',

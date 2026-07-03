@@ -273,6 +273,7 @@ class OrderController extends Controller
                         VendorLoyaltyWallet::create([
                             'business_id'      => $order->business_id,
                             'order_id'         => $order->id,
+                            'order_type'       => 'member_order',
                             'transaction_no'   => 'VLW-' . now()->format('YmdHis') . '-' . $order->id,
                             'transaction_type' => 'credit',
                             'source'           => 'order',
