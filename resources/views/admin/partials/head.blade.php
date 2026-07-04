@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://unpkg.com/cropperjs/dist/cropper.min.css" />
-    
+
     <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{asset('admin_assets/css/style.css')}}">
@@ -17,7 +17,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
+
+
     <style>
     .live-badge{
         background:red;
@@ -27,11 +28,12 @@
         border-radius:4px;
         animation:blink 1s infinite;
     }
-    
+
     @keyframes blink{
         0%{opacity:1;}
         50%{opacity:0.3;}
         100%{opacity:1;}
     }
     </style>
+    @stack('styles')
 </head>
