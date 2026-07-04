@@ -298,6 +298,8 @@ class AuthController extends Controller
                 'business.category',
                 'business.subCategory',
                 'business.address',
+                'business.address.cityDetail',
+                'business.address.stateDetail',
                 'business.contact',
                 'business.agreement',
                 'business.kycDetail',

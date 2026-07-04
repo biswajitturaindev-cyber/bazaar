@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\BusinessCategoryController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\CommissionReportController;
 use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
@@ -82,6 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/category/dropdown', [UserController::class, 'CategoryDropdown']);
     Route::apiResource('bank-details', BankDetailController::class);
     Route::get('/states', [StateController::class, 'index']);
+    Route::get('/cities', [CityController::class, 'index']);
+    Route::get('/cities/{state_id}', [CityController::class, 'getCitiesByState']);
     Route::apiResource('kyc-details', KycDetailController::class);
     Route::post('kyc-details/update/shop-image', [KycDetailController::class, 'updateShopImage']);
     Route::post('/kyc-details-commission-destribution/{kyc_id}', [KycDetailController::class, 'updateCommissionDistribution']);
