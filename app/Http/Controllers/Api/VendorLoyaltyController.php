@@ -21,10 +21,6 @@ class VendorLoyaltyController extends Controller
                 'Invalid business ID'
             );
 
-            // $wallets = VendorLoyaltyWallet::where('business_id', $businessId)
-            //     ->latest()
-            //     ->get();
-
             $wallets = DB::table('vendor_loyalty_wallets as vlw')
                 ->leftJoin('orders as o', function ($join) {
                     $join->on('vlw.order_id', '=', 'o.id')
