@@ -19,6 +19,7 @@ class StateResource extends JsonResource
             'id' => Hashids::encode($this->id),
             'name' => $this->name,
             'state_code' => $this->state_code,
+            'gst_code' => $this->gst_code,
         ];
     }
 }
