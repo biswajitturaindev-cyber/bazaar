@@ -101,8 +101,8 @@ class KycDetailController extends Controller
                 'fssai_license_status'   => 'nullable|in:0,1,2',
                 'address_proof_status'   => 'nullable|in:0,1,2',
 
-                'shop_status' => 'required|in:open,closed',
-                'working_days' => 'required|array|min:1',
+                'shop_status' => 'nullable|in:open,closed',
+                'working_days' => 'nullable|array|min:1',
                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
@@ -316,7 +316,7 @@ class KycDetailController extends Controller
                 }
             }
 
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'KYC updated',
