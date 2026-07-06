@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             RedemptionCancelReasonSeeder::class,
             UserSeeder::class,
             BusinessSeeder::class,
+            BusinessAddressSeeder::class,
             BusinessAgreementSeeder::class,
             BusinessContactSeeder::class,
             ]);
