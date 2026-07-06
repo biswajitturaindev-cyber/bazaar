@@ -35,7 +35,8 @@ class BusinessResource extends JsonResource
             'years_in_business' => $this->years_in_business,
 
             // Nested relations
-            'address' => $this->whenLoaded('address'),
+            //'address' => $this->whenLoaded('address'),
+            'address' => new AddressResource($this->whenLoaded('address')),
             'contact' => $this->whenLoaded('contact'),
             'agreement' => $this->whenLoaded('agreement'),
             'bankdetail' => $this->whenLoaded('bankDetail'),
