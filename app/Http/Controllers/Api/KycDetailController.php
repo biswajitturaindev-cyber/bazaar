@@ -100,6 +100,10 @@ class KycDetailController extends Controller
                 'trade_license_status'   => 'nullable|in:0,1,2',
                 'fssai_license_status'   => 'nullable|in:0,1,2',
                 'address_proof_status'   => 'nullable|in:0,1,2',
+
+                'shop_status' => 'required|in:open,closed',
+                'working_days' => 'required|array|min:1',
+                'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Upload files
@@ -129,8 +133,18 @@ class KycDetailController extends Controller
 
             $business = Business::find($decoded[0]);
 
-            if ($business && $business->user) {
-                $business->user->update(['kyc_status' => 2]);
+            if ($business) {
+
+                $business->update([
+                    'shop_status' => $request->shop_status,
+                    'working_days' => $request->working_days
+                ]);
+
+                if ($business->user) {
+                    $business->user->update([
+                        'kyc_status' => 2
+                    ]);
+                }
             }
 
             return response()->json([
