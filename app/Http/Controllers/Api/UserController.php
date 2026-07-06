@@ -116,17 +116,33 @@ class UserController extends Controller
             // Address
             $address = BusinessAddress::where('business_id', $business->id)->firstOrFail();
 
-            $address->update($request->only([
-                'address_line_1',
-                'address_line_2',
-                'city',
-                'state',
-                'pincode',
-                'landmark',
-                'google_map_location',
-                'latitude',
-                'longitude'
-            ]));
+            // $address->update($request->only([
+            //     'address_line_1',
+            //     'address_line_2',
+            //     'city',
+            //     'state',
+            //     'pincode',
+            //     'landmark',
+            //     'google_map_location',
+            //     'latitude',
+            //     'longitude'
+            // ]));
+
+            $stateId = decodeIdOrFail($request->state, 'Invalid state ID');
+            $cityId = decodeIdOrFail($request->city, 'Invalid city ID');
+
+            $address->update([
+                'address_line_1'      => $request->address_line_1,
+                'address_line_2'      => $request->address_line_2,
+                'city'                => $cityId,
+                'state'               => $stateId,
+                'pincode'             => $request->pincode,
+                'landmark'            => $request->landmark,
+                'google_map_location' => $request->google_map_location,
+                'latitude'            => $request->latitude,
+                'longitude'           => $request->longitude,
+            ]);
+
 
             // Contact
             $contact = BusinessContact::where('business_id', $business->id)->firstOrFail();
