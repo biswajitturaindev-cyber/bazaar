@@ -70,6 +70,10 @@ class UserController extends Controller
             'confirm_info' => 'required',
 
             'profile_status' => 'required',
+
+            'shop_status' => 'required|in:open,closed',
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
         ]);
 
         DB::beginTransaction();
@@ -111,6 +115,8 @@ class UserController extends Controller
                 'pan_number' => $request->pan_number,
                 //'fssai_license' => $request->fssai_license,
                 'registration_number' => $request->registration_number,
+                'shop_status' => $request->shop_status,
+                'working_days' => $request->working_days,
             ]);
 
             // Address
