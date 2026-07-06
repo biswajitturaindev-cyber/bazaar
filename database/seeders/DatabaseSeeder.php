@@ -31,15 +31,13 @@ class DatabaseSeeder extends Seeder
             //PincodeSeeder::class,
             DeliveryPartnerSeeder::class,
             RedemptionCancelReasonSeeder::class,
+            UserSeeder::class,
+            BusinessSeeder::class,
+            BusinessAgreementSeeder::class,
+            BusinessContactSeeder::class,
             ]);
 
-        // Create Test User
-        User::create([
-            'name' => 'Test User',
-            'vendor_id' => 'RV00000',
-            'email' => 'test@example.com',
-            'password' => Hash::make('123456'), // IMPORTANT
 
-        ]);
+
     }
 }
