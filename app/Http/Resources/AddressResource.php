@@ -21,8 +21,10 @@ class AddressResource extends JsonResource
 
             'address_line_1' => $this->address_line_1,
             'address_line_2' => $this->address_line_2,
-            'city' => $this->city,
-            'state' => $this->state,
+            'city' => Hashids::encode($this->city),
+            'state' => Hashids::encode($this->state),
+            'city_name' => optional($this->cityDetail)->name,
+            'state_name' => optional($this->stateDetail)->name,
             'pincode' => $this->pincode,
             'landmark' => $this->landmark,
 
