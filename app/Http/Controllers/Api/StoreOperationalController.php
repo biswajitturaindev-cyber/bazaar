@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StoreOperationalResource;
+use App\Models\Business;
 use App\Models\StoreOperationalDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -136,6 +137,10 @@ class StoreOperationalController extends Controller
                 'timings' => 'required|array|min:1',
                 'timings.*.opening_time' => 'required|date_format:H:i',
                 'timings.*.closing_time' => 'required|date_format:H:i',
+
+                'shop_status' => 'required|in:open,closed',
+                'working_days' => 'required|array',
+                'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Validate each timing
@@ -184,6 +189,26 @@ class StoreOperationalController extends Controller
                     'closing_time' => $timing['closing_time'],
                 ]);
             }
+
+
+            $business = Business::find($validated['business_id']);
+            if ($business) {
+
+                $updateData = [];
+
+                if ($request->filled('shop_status')) {
+                    $updateData['shop_status'] = $request->shop_status;
+                }
+
+                if ($request->has('working_days')) {
+                    $updateData['working_days'] = $request->working_days; // if cast to array
+                }
+
+                if (!empty($updateData)) {
+                    $business->update($updateData);
+                }
+            }
+
 
             DB::commit();
 
