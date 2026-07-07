@@ -35,6 +35,9 @@ class StoreOperationalResource extends JsonResource
 
             'is_open_now' => $this->isOpenNow(),
 
+            'shop_status' => $this->business?->shop_status,
+            'working_days' => $this->business?->working_days,
+
             'created_at' => $this->created_at?->toDateTimeString(),
         ];
     }
