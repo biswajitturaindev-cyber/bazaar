@@ -101,9 +101,9 @@ class KycDetailController extends Controller
                 'fssai_license_status'   => 'nullable|in:0,1,2',
                 'address_proof_status'   => 'nullable|in:0,1,2',
 
-                 'shop_status' => 'required|in:open,closed',
-                 'working_days' => 'required|array|min:1',
-                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+                //  'shop_status' => 'required|in:open,closed',
+                //  'working_days' => 'required|array|min:1',
+                //  'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Upload files
@@ -131,14 +131,14 @@ class KycDetailController extends Controller
             // Save
             $kyc = KycDetail::create($data);
 
-            $business = Business::find(1);
+            $business = Business::find($decoded[0]);
 
             if ($business) {
 
-                $business->update([
-                    'shop_status' => $request->shop_status,
-                    'working_days' => $request->working_days
-                ]);
+                // $business->update([
+                //     'shop_status' => $request->shop_status,
+                //     'working_days' => $request->working_days
+                // ]);
 
                 if ($business->user) {
                     $business->user->update([
@@ -242,9 +242,9 @@ class KycDetailController extends Controller
                 'fssai_license_status' => 'nullable|in:0,1,2',
                 'address_proof_status' => 'nullable|in:0,1,2',
 
-                 'shop_status' => 'required|in:open,closed',
-                 'working_days' => 'required|array',
-                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+                //  'shop_status' => 'required|in:open,closed',
+                //  'working_days' => 'required|array',
+                //  'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             $statusMap = [
@@ -297,14 +297,13 @@ class KycDetailController extends Controller
 
                 $updateData = [];
 
-                if ($request->filled('shop_status')) {
-                    $updateData['shop_status'] = $request->shop_status;
-                }
+                // if ($request->filled('shop_status')) {
+                //     $updateData['shop_status'] = $request->shop_status;
+                // }
 
-                if ($request->has('working_days')) {
-                    $updateData['working_days'] = $request->working_days; // if cast to array
-                    // Or json_encode($request->working_days) if not cast
-                }
+                // if ($request->has('working_days')) {
+                //     $updateData['working_days'] = $request->working_days; // if cast to array
+                // }
 
                 if (!empty($updateData)) {
                     $business->update($updateData);
