@@ -39,9 +39,16 @@ class StoreOperationalController extends Controller
                 ], 404);
             }
 
+            $business = Business::find($store->business_id);
+
+            $data = (new StoreOperationalResource($store))->toArray($request);
+
+            $data['shop_status'] = $business?->shop_status;
+            $data['working_days'] = $business?->working_days;
+
             return response()->json([
                 'status' => true,
-                'data' => new StoreOperationalResource($store)
+                'data' => $data
             ]);
 
         } catch (\Exception $e) {
