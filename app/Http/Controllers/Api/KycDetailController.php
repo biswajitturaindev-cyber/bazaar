@@ -131,7 +131,7 @@ class KycDetailController extends Controller
             // Save
             $kyc = KycDetail::create($data);
 
-            $business = Business::find($decoded[0]);
+            $business = Business::find(1);
 
             if ($business) {
 
