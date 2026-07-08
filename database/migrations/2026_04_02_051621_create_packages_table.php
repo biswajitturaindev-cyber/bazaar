@@ -17,7 +17,15 @@ return new class extends Migration
             $table->integer('stars')->index();
             $table->decimal('price', 10, 2)->default(0)->index();
 
+            // Subscription validity
+            $table->integer('duration')->default(30);
+            $table->enum('duration_type', ['day', 'month', 'year'])->default('day');
+
             $table->integer('product_limit')->nullable();
+
+            // Description
+            $table->text('description')->nullable();
+
             $table->boolean('status')->default(1)->index();
             $table->timestamps();
         });
