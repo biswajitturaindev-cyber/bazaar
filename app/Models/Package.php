@@ -11,8 +11,16 @@ class Package extends Model
         'name',
         'stars',
         'price',
+        'duration',
+        'duration_type',
+        'description',
         'product_limit',
-        'status'
+        'status',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'status' => 'boolean',
     ];
 
     protected $appends = ['id'];
@@ -47,5 +55,9 @@ class Package extends Model
 
     }
 
+    public function userSubscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
 
 }
