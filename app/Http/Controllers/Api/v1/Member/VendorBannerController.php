@@ -14,6 +14,7 @@ class VendorBannerController extends Controller
      */
     public function index(Request $request)
     {
+        
         try {
 
             // Decode business id
