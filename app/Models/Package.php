@@ -23,12 +23,12 @@ class Package extends Model
         'status' => 'boolean',
     ];
 
-    protected $appends = ['id'];
+    // protected $appends = ['id'];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     /**
      * One package → many vendor packages

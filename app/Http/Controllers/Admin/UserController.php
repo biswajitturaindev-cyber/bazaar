@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use App\Models\Package;
+use App\Models\UserSubscription;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -52,9 +56,10 @@ class UserController extends Controller
     public function edit(string $id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::with('latestSubscription')->findOrFail($id);
+            $packages = Package::where('status', 1)->get();
 
-            return view('admin.users.edit', compact('user'));
+            return view('admin.users.edit', compact('user', 'packages'));
 
         } catch (\Exception $e) {
             return redirect()->route('users.index')
@@ -67,34 +72,97 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Find user
-        $user = User::findOrFail($id);
+        DB::beginTransaction();
 
-        // Validate request
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'mobile' => 'nullable',
-            'dob' => 'nullable',
-            'kyc_status' => 'required|in:0,1,2,3',
-            'status' => 'required|in:0,1',
-            'gender' => 'required|in:1,2,3',
-        ]);
+        try {
 
-        // Update data
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'mobile' => $validated['mobile'],
-            'dob'    => $validated['dob'],
-            'kyc_status' => $validated['kyc_status'],
-            'status' => $validated['status'],
-            'gender' => $validated['gender'],
-        ]);
+            $user = User::findOrFail($id);
 
-        // Redirect
-        return redirect()->route('users.index')
-            ->with('success', 'User updated successfully');
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'mobile' => 'nullable',
+                'dob' => 'nullable|date',
+                'kyc_status' => 'required|in:0,1,2,3',
+                'status' => 'required|in:0,1',
+                'gender' => 'required|in:1,2,3',
+                'package_id' => 'nullable|exists:packages,id',
+            ]);
+
+            // Update user
+            $user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'mobile' => $validated['mobile'],
+                'dob' => $validated['dob'],
+                'kyc_status' => $validated['kyc_status'],
+                'status' => $validated['status'],
+                'gender' => $validated['gender'],
+            ]);
+
+            // Package update
+            if (!empty($validated['package_id'])) {
+
+                $package = Package::findOrFail($validated['package_id']);
+
+                $startDate = Carbon::today();
+
+                $endDate = match ($package->duration_type) {
+                    'day'   => $startDate->copy()->addDays($package->duration),
+                    'month' => $startDate->copy()->addMonths($package->duration),
+                    'year'  => $startDate->copy()->addYears($package->duration),
+                };
+
+                // Active subscription
+                $subscription = UserSubscription::where('user_id', $user->id)
+                    ->where('status', 1)
+                    ->whereDate('end_date', '>=', Carbon::today())
+                    ->latest()
+                    ->first();
+
+                if ($subscription) {
+
+                    // Update existing subscription
+                    $subscription->update([
+                        'package_id' => $package->id,
+                        'amount' => $package->price,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'payment_status' => 'paid',
+                        'payment_method' => '',
+                        'transaction_id' => null,
+                    ]);
+
+                } else {
+
+                    // Create new subscription
+                    UserSubscription::create([
+                        'user_id' => $user->id,
+                        'package_id' => $package->id,
+                        'amount' => $package->price,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'payment_status' => 'paid',
+                        'payment_method' => '',
+                        'transaction_id' => null,
+                        'status' => 1,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('users.index')
+                ->with('success', 'User updated successfully.');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
 
     /**
