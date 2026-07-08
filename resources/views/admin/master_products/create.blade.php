@@ -110,7 +110,7 @@
                 <!-- Description -->
                 <div class="md:col-span-2">
                     <label class="block mb-2 font-medium">Description</label>
-                    <textarea name="description" rows="4"
+                    <textarea name="description" rows="4" id="description"
                         class="w-full border rounded-lg px-3 py-2"
                         placeholder="Enter Description">{{ old('description') }}</textarea>
 
@@ -251,6 +251,7 @@
 @push('scripts')
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.19.0/full/ckeditor.js"></script>
 <script>
 $(document).ready(function () {
 
@@ -391,5 +392,12 @@ function imagePreview() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    CKEDITOR.replace('description', {
+        filebrowserUploadUrl: "{{ route('ckeditor.upload', ['_token' => csrf_token()]) }}",
+        filebrowserUploadMethod: 'form',
+    });
+});
 </script>
 @endpush
