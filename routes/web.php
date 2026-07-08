@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BusinessCategoryController;
 use App\Http\Controllers\Admin\BusinessCategoryMappingController;
 use App\Http\Controllers\Admin\BusinessSubCategoryController;
+use App\Http\Controllers\Admin\CkeditorController;
 use App\Http\Controllers\Admin\HsnController;
 use App\Http\Controllers\Admin\KycDetailController;
 use App\Http\Controllers\Admin\MasterProductController;
@@ -196,5 +197,13 @@ Route::prefix('admin')->group(function () {
         Route::resource('orders', OrderController::class);
         Route::get('orders/{id}',          [OrderController::class, 'show'])->name('admin.orders.show');
         Route::get('orders/{id}/invoice',  [OrderController::class, 'invoice'])->name('admin.orders.invoice');
+
+        /*
+        |--------------------------------------------------------------------------
+        | CKEditor Image Upload
+        |--------------------------------------------------------------------------
+        */
+        Route::post('ckeditor/upload', [CkeditorController::class, 'uploadImage'])->name('ckeditor.upload');
+
     });
 });
