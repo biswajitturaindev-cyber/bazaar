@@ -23,9 +23,9 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             $kycNotifications = KycDetail::with('business.user')
-                                ->whereColumn('updated_at', '!=', 'created_at')
-                                ->latest('updated_at')
-                                ->get();
+                ->whereNull('updated_at')
+                ->latest()
+                ->get();
 
             $view->with([
                 'kycNotifications' => $kycNotifications,
