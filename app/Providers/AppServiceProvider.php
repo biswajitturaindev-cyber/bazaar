@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\KycDetail;
 use Illuminate\Support\Facades\View;
-
+use Illuminate\Support\Facades\Log;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -22,15 +22,24 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view) {
-            $kycNotifications = KycDetail::with('business.user')
-                ->whereNull('updated_at')
-                ->latest()
-                ->get();
+            try {
+                $kycNotifications = KycDetail::with('business.user')
+                    ->whereNull('updated_at')
+                    ->latest()
+                    ->get();
 
-            $view->with([
-                'kycNotifications' => $kycNotifications,
-                'kycNotificationCount' => $kycNotifications->count(),
-            ]);
+                $view->with([
+                    'kycNotifications' => $kycNotifications,
+                    'kycNotificationCount' => $kycNotifications->count(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Failed to load KYC notifications: '.$e->getMessage());
+
+                $view->with([
+                    'kycNotifications' => collect(),
+                    'kycNotificationCount' => 0,
+                ]);
+            }
         });
     }
 }
