@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\KycDetail;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('*', function ($view) {
+            $kycNotifications = KycDetail::with('business.user')
+                                ->whereColumn('updated_at', '!=', 'created_at')
+                                ->latest('updated_at')
+                                ->get();
+
+            $view->with([
+                'kycNotifications' => $kycNotifications,
+                'kycNotificationCount' => $kycNotifications->count(),
+            ]);
+        });
     }
 }
