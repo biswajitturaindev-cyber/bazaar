@@ -77,6 +77,10 @@
 
                     @if($kyc->pan_card)
                     <img src="{{ $kyc->pan_card ? asset('storage/' . $kyc->pan_card) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+
+                    <p class="text-sm text-gray-600 mb-2">
+                        <strong>PAN No:</strong> {{ $kyc->pan_no }}
+                    </p>
                     @endif
 
                     <select name="pan_card_status"
@@ -98,6 +102,10 @@
 
                     @if($kyc->gst_certificate)
                     <img src="{{ $kyc->gst_certificate ? asset('storage/' . $kyc->gst_certificate) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+
+                    <p class="text-sm text-gray-600 mb-2">
+                        <strong>GST No:</strong> {{ $kyc->gst_no }}
+                    </p>
                     @endif
 
                     <select name="gst_certificate_status"
@@ -115,6 +123,10 @@
 
                     @if($kyc->trade_license)
                         <img src="{{ $kyc->trade_license ? asset('storage/' . $kyc->trade_license) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+
+                        <p class="text-sm text-gray-600 mb-2">
+                            <strong>Trade License No:</strong> {{ $kyc->trade_license_no }}
+                        </p>
                     @endif
 
                     <select name="trade_license_status"
@@ -132,6 +144,9 @@
 
                     @if($kyc->fssai_license)
                         <img src="{{ $kyc->fssai_license ? asset('storage/' . $kyc->fssai_license) : asset('images/no-image.png') }}" class="w-24 h-24 rounded border mb-2">
+                        <p class="text-sm text-gray-600 mb-2">
+                            <strong>FSSAI License No:</strong> {{ $kyc->fssai_license_no }}
+                        </p>
                     @endif
 
                     <select name="fssai_license_status"

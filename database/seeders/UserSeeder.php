@@ -5,7 +5,10 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Package;
+use App\Models\UserSubscription;
 
+use Carbon\Carbon;
 class UserSeeder extends Seeder
 {
     /**
@@ -13,7 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'ishitagiri@gmail.com'],
             [
                 'vendor_id' => 'RV00015838',
@@ -31,5 +34,35 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        // Get Basic Package
+        $package = Package::where('name', 'Basic')->first();
+
+        if ($package) {
+            $startDate = Carbon::today();
+
+            $endDate = match ($package->duration_type) {
+                'day'   => $startDate->copy()->addDays($package->duration),
+                'month' => $startDate->copy()->addMonths($package->duration),
+                'year'  => $startDate->copy()->addYears($package->duration),
+            };
+
+            UserSubscription::updateOrCreate(
+                [
+                    'user_id'    => $user->id,
+                    'package_id' => $package->id,
+                ],
+                [
+                    'amount'           => $package->price,
+                    'start_date'       => $startDate,
+                    'end_date'         => $endDate,
+                    'payment_status'   => 'paid',
+                    'payment_method'   => '',
+                    'transaction_id'   => null,
+                    'status'           => 1,
+                ]
+            );
+        }
+
+
     }
 }
