@@ -4,6 +4,10 @@
     Add Business Category Mapping
 @endsection
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+
 @section('breadcrumb')
     Business Category Mapping
 @endsection
@@ -76,7 +80,7 @@
                     <div>
                         <label class="block mb-2 font-medium">Product Category</label>
 
-                        <select name="category_id"
+                        <select name="category_id" id="product_category"
                             class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
 
                             <option value="">-- Select Product Category --</option>
@@ -120,36 +124,61 @@
 
         </div>
     </div>
+@endsection
+@push('scripts')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     {{-- AJAX --}}
     <script>
-        document.getElementById('business_category').addEventListener('change', function() {
-            let categoryId = this.value;
+       $(document).ready(function () {
 
-            let url = `{{ route('get.subcategories', ':id') }}`.replace(':id', categoryId);
+    // Initialize Select2
+    $('#business_category, #sub_category, #product_category').select2({
+        width: '100%',
+        placeholder: 'Select',
+        allowClear: true
+    });
 
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    let subCat = document.getElementById('sub_category');
-                    subCat.innerHTML = '<option value="">-- Select Sub Category --</option>';
+    $('#business_category').on('change', function () {
 
-                    data.forEach(item => {
-                        let selected = (item.id == "{{ old('business_sub_category_id') }}") ?
-                            'selected' : '';
-                        subCat.innerHTML +=
-                            `<option value="${item.id}" ${selected}>${item.name}</option>`;
-                    });
+        let categoryId = $(this).val();
+
+        // Reset subcategory
+        $('#sub_category')
+            .html('<option value="">-- Select Sub Category --</option>')
+            .trigger('change');
+
+        if (!categoryId) {
+            return;
+        }
+
+        let url = `{{ route('get.subcategories', ':id') }}`.replace(':id', categoryId);
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+
+                let options = '<option value="">-- Select Sub Category --</option>';
+
+                data.forEach(function (item) {
+                    options += `<option value="${item.id}">
+                                    ${item.name}
+                                </option>`;
                 });
-        });
 
-        // Auto trigger if old value exists
-        window.addEventListener('load', function() {
-            let oldCategory = "{{ old('business_category_id') }}";
+                $('#sub_category')
+                    .html(options)
+                    .val("{{ old('business_sub_category_id', $business->business_sub_category_id ?? '') }}")
+                    .trigger('change'); // Refresh Select2
+            });
+    });
 
-            if (oldCategory) {
-                document.getElementById('business_category').dispatchEvent(new Event('change'));
-            }
-        });
+    // Auto load subcategories on edit page
+    @if(old('business_category_id', $business->business_category_id ?? false))
+        $('#business_category').trigger('change');
+    @endif
+
+});
     </script>
-@endsection
+@endpush
