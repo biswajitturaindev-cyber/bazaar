@@ -19,6 +19,9 @@ use App\Models\BusinessCategory;
 use App\Models\BusinessSubCategory;
 use App\Models\BusinessContact;
 use App\Models\User;
+use App\Models\Package;
+use App\Models\UserSubscription;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -177,6 +180,36 @@ class AuthController extends Controller
                 'agree_terms' => 1,
                 'confirm_info' => 1,
             ]);
+
+            // Assign Basic Package
+            $package = Package::where('name', 'Basic')
+                ->where('status', 1)
+                ->first();
+
+            if ($package) {
+
+                $startDate = now();
+
+                $endDate = match ($package->duration_type) {
+                    'day'   => $startDate->copy()->addDays($package->duration),
+                    'month' => $startDate->copy()->addMonths($package->duration),
+                    'year'  => $startDate->copy()->addYears($package->duration),
+                    default => $startDate->copy()->addDays(30),
+                };
+
+                UserSubscription::create([
+                    'user_id'          => $user->id,
+                    'package_id'       => $package->id,
+                    'amount'           => $package->price,
+                    'start_date'       => $startDate,
+                    'end_date'         => $endDate,
+                    'payment_status'   => 'paid',
+                    'payment_method'   => '',
+                    'transaction_id'   => null,
+                    'status'           => 1,
+                ]);
+            }
+
 
             DB::commit();
 
