@@ -32,17 +32,23 @@ class PackageController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'stars' => 'required|integer|min:0|max:5',
-            'price' => 'required|numeric|min:0',
-            'product_limit' => 'nullable|integer|min:1',
-            'status' => 'required|boolean',
+            'name'            => 'required|string|max:255',
+            'stars'           => 'required|integer|min:0|max:5',
+            'price'           => 'required|numeric|min:0',
+
+            'duration'        => 'required|integer|min:1',
+            'duration_type'   => 'required|in:day,month,year',
+            'description'     => 'nullable|string',
+
+            'product_limit'   => 'nullable|integer|min:1',
+            'status'          => 'required|boolean',
         ]);
 
         Package::create($data);
 
-        return redirect()->route('packages.index')
-            ->with('success', 'Package created successfully');
+        return redirect()
+            ->route('packages.index')
+            ->with('success', 'Package created successfully.');
     }
 
     /**
@@ -67,17 +73,23 @@ class PackageController extends Controller
     public function update(Request $request, Package $package)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'stars' => 'required|integer|min:0|max:5',
-            'price' => 'required|numeric|min:0',
-            'product_limit' => 'nullable|integer|min:1',
-            'status' => 'required|boolean',
+            'name'            => 'required|string|max:255',
+            'stars'           => 'required|integer|min:0|max:5',
+            'price'           => 'required|numeric|min:0',
+
+            'duration'        => 'required|integer|min:1',
+            'duration_type'   => 'required|in:day,month,year',
+            'description'     => 'nullable|string',
+
+            'product_limit'   => 'nullable|integer|min:1',
+            'status'          => 'required|boolean',
         ]);
 
         $package->update($data);
 
-        return redirect()->route('packages.index')
-            ->with('success', 'Package updated successfully');
+        return redirect()
+            ->route('packages.index')
+            ->with('success', 'Package updated successfully.');
     }
 
     /**

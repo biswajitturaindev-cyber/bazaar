@@ -15,13 +15,12 @@ class CommissionReportResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         $items = $this->items;
 
         $totalItems = $items->count();
 
         $orderAmount = $items->sum('subtotal');
-
-        $commissionPercent = $items->sum('product_commission');
 
         $commissionAmount = $items->sum(function ($item) {
             return ($item->subtotal * $item->product_commission) / 100;
@@ -31,12 +30,11 @@ class CommissionReportResource extends JsonResource
             'order_id' => Hashids::encode($this->id),
             'invoice_no' => $this->invoice_no,
             'invoice_date' => optional($this->created_at)->format('d-m-Y'),
-
             'total_items' => $totalItems,
-
             'order_amount' => round($orderAmount, 2),
 
-            'commission_percent' => round($commissionPercent, 2),
+            // Average commission percentage
+            'commission_percent' => round($items->avg('product_commission') ?? 0, 2),
 
             'commission_amount' => round($commissionAmount, 2),
         ];

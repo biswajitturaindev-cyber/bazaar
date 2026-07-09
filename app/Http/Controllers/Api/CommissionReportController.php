@@ -199,7 +199,7 @@ class CommissionReportController extends Controller
                 'items' => function ($query) {
                     $query->where('status', 'confirmed');
                 },
-                
+
                 'items.attributes',
                 'items.cancelReason',
                 'items.variant.images',
