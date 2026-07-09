@@ -25,7 +25,44 @@
             </select>
         </div>
         <div class="flex items-center lg:gap-6 gap-3">
-            <i class="iconoir-bell text-xl cursor-pointer hover:text-orange-600"></i>
+            {{-- <i class="iconoir-bell text-xl cursor-pointer hover:text-orange-600"></i> --}}
+            <div class="relative group">
+                <button class="relative">
+                    <i class="iconoir-bell text-xl cursor-pointer hover:text-orange-600"></i>
+
+                    @if($kycNotificationCount > 0)
+                        <span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ $kycNotificationCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <div class="absolute right-0 mt-3 w-80 bg-white rounded-lg shadow-lg border hidden group-hover:block z-50">
+
+                    <div class="px-4 py-3 border-b font-semibold">
+                        KYC Notifications
+                    </div>
+
+                    @forelse($kycNotifications as $kyc)
+                        <a href="{{ route('kyc-details.edit', $kyc->id) }}"
+                        class="block px-4 py-3 hover:bg-gray-100 border-b">
+
+                            <p class="font-medium">
+                                {{ optional(optional($kyc->business)->user)->name ?? 'Unknown User' }}
+                            </p>
+
+                            <p class="text-xs text-gray-500">
+                                New KYC submitted
+                            </p>
+                        </a>
+                    @empty
+                        <div class="px-4 py-3 text-gray-500">
+                            No notifications
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
             <div class="flex items-center gap-2 cursor-pointer hover:text-orange-600">
                 <img src="{{ asset('admin_assets/images/15.jpg') }}" class="h-8 w-8 object-cover rounded-lg" alt="">
                 <span class="capitalize w-[60px] inline-block truncate" title="Administration">
