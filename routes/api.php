@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\CommissionReportController;
+use App\Http\Controllers\Api\DepositController;
 use App\Http\Controllers\Api\HsnController;
 use App\Http\Controllers\Api\KycDetailController;
 use App\Http\Controllers\Api\MasterProductController;
@@ -234,7 +235,12 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::resource('vendor-loyalty-points', VendorLoyaltyController::class);
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Deposits
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('deposits', DepositController::class);
 
 });
 

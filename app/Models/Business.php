@@ -90,4 +90,10 @@ class Business extends Model
     {
         return $this->hasOne(StoreOperationalDetail::class, 'business_id');
     }
+
+    public function deposits()
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
 }

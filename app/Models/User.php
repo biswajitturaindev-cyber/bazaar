@@ -90,4 +90,5 @@ class User extends Authenticatable
         return $this->hasOne(UserSubscription::class)->latestOfMany();
     }
 
+
 }
