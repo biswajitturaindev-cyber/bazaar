@@ -102,10 +102,7 @@ Route::prefix('member')->middleware('member.api')->group(function () {
         | Get redemption cancel reasons
         |--------------------------------------------------------------------------
         */
-        Route::resource(
-            'cancel-reasons',
-            RedemptionCancelReasonController::class
-        )->only(['index']);
+        Route::resource('cancel-reasons',RedemptionCancelReasonController::class)->only(['index']);
 
     //});
 });

@@ -1,4 +1,7 @@
 @extends('admin.layouts.master')
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
 
 @section('title')
     Add Master Product
@@ -29,7 +32,7 @@
                 <!-- Category -->
                 <div>
                     <label class="block mb-2 font-medium">Category</label>
-                    <select name="category_id" id="category_id" class="w-full border rounded-lg px-3 py-2">
+                    <select name="category_id" id="category_id" class="w-full border rounded-lg px-3 py-2 select2">
                         <option value="">Select Category</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -46,7 +49,7 @@
                 <!-- Sub Category -->
                 <div>
                     <label class="block mb-2 font-medium">Sub Category</label>
-                    <select name="sub_category_id" id="sub_category_id" class="w-full border rounded-lg px-3 py-2">
+                    <select name="sub_category_id" id="sub_category_id" class="w-full border rounded-lg px-3 py-2 select2">
                         <option value="">Select Sub Category</option>
                     </select>
 
@@ -58,7 +61,7 @@
                 <!-- Sub Sub Category -->
                 <div>
                     <label class="block mb-2 font-medium">Sub Sub Category</label>
-                    <select name="sub_sub_category_id" id="sub_sub_category_id" class="w-full border rounded-lg px-3 py-2">
+                    <select name="sub_sub_category_id" id="sub_sub_category_id" class="w-full border rounded-lg px-3 py-2 select2">
                         <option value="">Select Sub Sub Category</option>
                     </select>
 
@@ -107,7 +110,7 @@
                 <!-- Description -->
                 <div class="md:col-span-2">
                     <label class="block mb-2 font-medium">Description</label>
-                    <textarea name="description" rows="4"
+                    <textarea name="description" rows="4" id="description"
                         class="w-full border rounded-lg px-3 py-2"
                         placeholder="Enter Description">{{ old('description') }}</textarea>
 
@@ -247,28 +250,45 @@
 @endsection
 @push('scripts')
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.19.0/full/ckeditor.js"></script>
 <script>
 $(document).ready(function () {
+
+    // Initialize Select2
+    $('#category_id, #sub_category_id, #sub_sub_category_id').select2({
+        width: '100%',
+        placeholder: 'Select',
+        allowClear: true
+    });
 
     // Category → SubCategory
     $('#category_id').on('change', function () {
         let categoryId = $(this).val();
 
-        $('#sub_category_id').html('<option>Loading...</option>');
-        $('#sub_sub_category_id').html('<option>Select Sub Sub Category</option>');
+        $('#sub_category_id')
+            .html('<option value="">Loading...</option>')
+            .trigger('change');
+
+        $('#sub_sub_category_id')
+            .html('<option value="">Select Sub Sub Category</option>')
+            .trigger('change');
 
         if (categoryId) {
             $.ajax({
                 url: '/admin/product-get-subcategories/' + categoryId,
                 type: 'GET',
                 success: function (data) {
+
                     let options = '<option value="">Select Sub Category</option>';
 
                     $.each(data, function (key, value) {
                         options += `<option value="${value.id}">${value.name}</option>`;
                     });
 
-                    $('#sub_category_id').html(options);
+                    $('#sub_category_id')
+                        .html(options)
+                        .trigger('change.select2');
                 }
             });
         }
@@ -278,20 +298,25 @@ $(document).ready(function () {
     $('#sub_category_id').on('change', function () {
         let subCategoryId = $(this).val();
 
-        $('#sub_sub_category_id').html('<option>Loading...</option>');
+        $('#sub_sub_category_id')
+            .html('<option value="">Loading...</option>')
+            .trigger('change');
 
         if (subCategoryId) {
             $.ajax({
                 url: '/admin/product-get-sub-subcategories/' + subCategoryId,
                 type: 'GET',
                 success: function (data) {
+
                     let options = '<option value="">Select Sub Sub Category</option>';
 
                     $.each(data, function (key, value) {
                         options += `<option value="${value.id}">${value.name}</option>`;
                     });
 
-                    $('#sub_sub_category_id').html(options);
+                    $('#sub_sub_category_id')
+                        .html(options)
+                        .trigger('change.select2');
                 }
             });
         }
@@ -367,5 +392,12 @@ function imagePreview() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    CKEDITOR.replace('description', {
+        filebrowserUploadUrl: "{{ route('ckeditor.upload', ['_token' => csrf_token()]) }}",
+        filebrowserUploadMethod: 'form',
+    });
+});
 </script>
 @endpush

@@ -25,7 +25,34 @@
             </select>
         </div>
         <div class="flex items-center lg:gap-6 gap-3">
-            <i class="iconoir-bell text-xl cursor-pointer hover:text-orange-600"></i>
+            {{-- <i class="iconoir-bell text-xl cursor-pointer hover:text-orange-600"></i> --}}
+            <div class="relative">
+                <button id="notificationBtn" type="button" class="relative">
+                    <i class="iconoir-bell text-xl hover:text-orange-600"></i>
+
+                    @if($kycNotificationCount)
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ $kycNotificationCount }}
+                        </span>
+                    @endif
+                </button>
+
+                <div id="notificationMenu"
+                    class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border z-[9999]">
+
+                    @forelse($kycNotifications as $kyc)
+                        <a href="{{ route('kyc-details.edit', $kyc->id) }}"
+                        class="block px-4 py-3 hover:bg-gray-100 border-b">
+                            {{ $kyc->business?->user?->name }}
+                        </a>
+                    @empty
+                        <div class="p-4 text-gray-500">
+                            No notifications
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
             <div class="flex items-center gap-2 cursor-pointer hover:text-orange-600">
                 <img src="{{ asset('admin_assets/images/15.jpg') }}" class="h-8 w-8 object-cover rounded-lg" alt="">
                 <span class="capitalize w-[60px] inline-block truncate" title="Administration">

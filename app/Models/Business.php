@@ -18,8 +18,13 @@ class Business extends Model
         'pan_number',
         'fssai_license',
         'registration_number',
+        'shop_status',
+        'working_days'
     ];
 
+    protected $casts = [
+        'working_days' => 'array',
+    ];
 
     // protected $appends = ['id'];
 
@@ -85,4 +90,10 @@ class Business extends Model
     {
         return $this->hasOne(StoreOperationalDetail::class, 'business_id');
     }
+
+    public function deposits()
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
 }

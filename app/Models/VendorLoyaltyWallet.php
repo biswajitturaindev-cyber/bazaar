@@ -12,6 +12,7 @@ class VendorLoyaltyWallet extends Model
     protected $fillable = [
         'business_id',
         'order_id',
+        'order_type',
         'transaction_no',
         'transaction_type',
         'source',
@@ -49,5 +50,10 @@ class VendorLoyaltyWallet extends Model
     public function getAvailablePointsAttribute()
     {
         return $this->closing_points;
+    }
+
+    public function memberOrder()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }

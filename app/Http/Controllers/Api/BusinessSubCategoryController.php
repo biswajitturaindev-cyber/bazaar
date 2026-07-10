@@ -31,7 +31,7 @@ class BusinessSubCategoryController extends Controller
             $query->where('business_category_id', Hashids::decode($request->business_category_id)[0]);
         }
 
-        $subcategories = $query->latest()->paginate(10);
+        $subcategories = $query->latest()->orderBy('name')->paginate(100);
 
         return BusinessSubCategoryResource::collection($subcategories);
     }

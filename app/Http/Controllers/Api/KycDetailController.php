@@ -100,6 +100,10 @@ class KycDetailController extends Controller
                 'trade_license_status'   => 'nullable|in:0,1,2',
                 'fssai_license_status'   => 'nullable|in:0,1,2',
                 'address_proof_status'   => 'nullable|in:0,1,2',
+
+                //  'shop_status' => 'required|in:open,closed',
+                //  'working_days' => 'required|array|min:1',
+                //  'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Upload files
@@ -129,8 +133,18 @@ class KycDetailController extends Controller
 
             $business = Business::find($decoded[0]);
 
-            if ($business && $business->user) {
-                $business->user->update(['kyc_status' => 2]);
+            if ($business) {
+
+                // $business->update([
+                //     'shop_status' => $request->shop_status,
+                //     'working_days' => $request->working_days
+                // ]);
+
+                if ($business->user) {
+                    $business->user->update([
+                        'kyc_status' => 2
+                    ]);
+                }
             }
 
             return response()->json([
@@ -227,6 +241,10 @@ class KycDetailController extends Controller
                 'trade_license_status' => 'nullable|in:0,1,2',
                 'fssai_license_status' => 'nullable|in:0,1,2',
                 'address_proof_status' => 'nullable|in:0,1,2',
+
+                //  'shop_status' => 'required|in:open,closed',
+                //  'working_days' => 'required|array',
+                //  'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             $statusMap = [
@@ -273,11 +291,30 @@ class KycDetailController extends Controller
                 $kycStatus = 2; // Pending
             }
 
-            // Update user KYC
-            $userId = Business::where('id', $kyc->business_id)->value('user_id');
+           $business = Business::find($kyc->business_id);
 
-            User::where('id', $userId)
-                ->update(['kyc_status' => $kycStatus]);
+            if ($business) {
+
+                $updateData = [];
+
+                // if ($request->filled('shop_status')) {
+                //     $updateData['shop_status'] = $request->shop_status;
+                // }
+
+                // if ($request->has('working_days')) {
+                //     $updateData['working_days'] = $request->working_days; // if cast to array
+                // }
+
+                if (!empty($updateData)) {
+                    $business->update($updateData);
+                }
+
+                if ($business->user_id) {
+                    User::where('id', $business->user_id)
+                        ->update(['kyc_status' => $kycStatus]);
+                }
+            }
+
 
             return response()->json([
                 'status' => true,

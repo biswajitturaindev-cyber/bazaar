@@ -32,4 +32,15 @@ class BusinessAddress extends Model
     {
         return $this->belongsTo(Business::class);
     }
+
+    public function cityDetail()
+    {
+        return $this->belongsTo(City::class, 'city');
+    }
+
+    public function stateDetail()
+    {
+        return $this->belongsTo(State::class, 'state');
+    }
+
 }

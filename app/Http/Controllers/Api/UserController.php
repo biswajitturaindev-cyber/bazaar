@@ -10,6 +10,7 @@ use App\Models\BusinessAddress;
 use App\Models\BusinessAgreement;
 use App\Models\BusinessCategory;
 use App\Models\BusinessContact;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,17 +116,33 @@ class UserController extends Controller
             // Address
             $address = BusinessAddress::where('business_id', $business->id)->firstOrFail();
 
-            $address->update($request->only([
-                'address_line_1',
-                'address_line_2',
-                'city',
-                'state',
-                'pincode',
-                'landmark',
-                'google_map_location',
-                'latitude',
-                'longitude'
-            ]));
+            // $address->update($request->only([
+            //     'address_line_1',
+            //     'address_line_2',
+            //     'city',
+            //     'state',
+            //     'pincode',
+            //     'landmark',
+            //     'google_map_location',
+            //     'latitude',
+            //     'longitude'
+            // ]));
+
+            $stateId = decodeIdOrFail($request->state, 'Invalid state ID');
+            $cityId = decodeIdOrFail($request->city, 'Invalid city ID');
+
+            $address->update([
+                'address_line_1'      => $request->address_line_1,
+                'address_line_2'      => $request->address_line_2,
+                'city'                => $cityId,
+                'state'               => $stateId,
+                'pincode'             => $request->pincode,
+                'landmark'            => $request->landmark,
+                'google_map_location' => $request->google_map_location,
+                'latitude'            => $request->latitude,
+                'longitude'           => $request->longitude,
+            ]);
+
 
             // Contact
             $contact = BusinessContact::where('business_id', $business->id)->firstOrFail();
@@ -243,39 +260,104 @@ class UserController extends Controller
     /**
      * Get Category Dropdown as per Businss Category
      */
+    // public function CategoryDropdown(Request $request)
+    // {
+    //     try {
+    //         // Decode ID
+    //         $decoded = Hashids::decode($request->business_category_id);
+
+    //         if (empty($decoded)) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Invalid business category ID'
+    //             ], 400);
+    //         }
+
+    //         $businessCategoryId = $decoded[0];
+
+    //         // Validation
+    //         $request->merge(['business_category_id' => $businessCategoryId]);
+
+    //         $request->validate([
+    //             'business_category_id' => 'required|exists:business_categories,id'
+    //         ]);
+
+    //         // Fetch categories
+    //         $categories = BusinessCategory::findOrFail($businessCategoryId)
+    //             ->categories()
+    //             ->select('categories.id', 'categories.name')
+    //             ->distinct()
+    //             ->get();
+
+    //         // RETURN WITH RESOURCE
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => CategoryResource::collection($categories)
+    //         ]);
+
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Validation error',
+    //             'errors' => $e->errors()
+    //         ], 422);
+
+    //     } catch (\Exception $e) {
+
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Something went wrong',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function CategoryDropdown(Request $request)
     {
         try {
-            // Decode ID
-            $decoded = Hashids::decode($request->business_category_id);
-
-            if (empty($decoded)) {
+            // Decode Business Category ID
+            $decodedCategory = Hashids::decode($request->business_category_id);
+            if (empty($decodedCategory)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid business category ID'
                 ], 400);
             }
 
-            $businessCategoryId = $decoded[0];
+            // Decode Business Sub Category ID
+            $decodedSubCategory = Hashids::decode($request->business_sub_category_id);
+            if (empty($decodedSubCategory)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business sub category ID'
+                ], 400);
+            }
 
-            // Validation
-            $request->merge(['business_category_id' => $businessCategoryId]);
+            $businessCategoryId = $decodedCategory[0];
+            $businessSubCategoryId = $decodedSubCategory[0];
 
-            $request->validate([
-                'business_category_id' => 'required|exists:business_categories,id'
+            $request->merge([
+                'business_category_id' => $businessCategoryId,
+                'business_sub_category_id' => $businessSubCategoryId,
             ]);
 
-            // Fetch categories
-            $categories = BusinessCategory::findOrFail($businessCategoryId)
-                ->categories()
-                ->select('categories.id', 'categories.name')
-                ->distinct()
-                ->get();
+            $request->validate([
+                'business_category_id' => 'required|exists:business_categories,id',
+                'business_sub_category_id' => 'required|exists:business_sub_categories,id',
+            ]);
 
-            // RETURN WITH RESOURCE
+            $categories = Category::whereIn('id', function ($query) use ($businessCategoryId, $businessSubCategoryId) {
+                $query->select('category_id')
+                    ->from('business_category_mappings')
+                    ->where('business_category_id', $businessCategoryId)
+                    ->where('business_sub_category_id', $businessSubCategoryId);
+            })->get();
+
             return response()->json([
                 'status' => true,
-                'data' => CategoryResource::collection($categories)
+                'data' => CategoryResource::collection($categories),
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {

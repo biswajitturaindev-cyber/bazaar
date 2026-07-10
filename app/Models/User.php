@@ -79,4 +79,16 @@ class User extends Authenticatable
         return $this->hasOne(VendorPackage::class)
                     ->latestOfMany();
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    public function latestSubscription()
+    {
+        return $this->hasOne(UserSubscription::class)->latestOfMany();
+    }
+
+
 }

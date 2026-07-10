@@ -4,6 +4,10 @@
 Add Product Sub Category
 @endsection
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+
 @section('breadcrumb')
 Category / Add Sub Category
 @endsection
@@ -114,39 +118,20 @@ Category / Add Sub Category
         </div>
     </div>
 </div>
+@endsection
 
+@push('scripts')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function(){
 
-    // $('#subCategoryName').on('keyup', function(){
-
-    //     let name = $(this).val();
-
-    //     if(name.length > 0){
-
-    //         $.ajax({
-    //             url: "{{ route('admin.product.sub.category.check.name') }}",
-    //             type: "POST",
-    //             data: {
-    //                 _token: "{{ csrf_token() }}",
-    //                 name: name
-    //             },
-    //             success: function(response){
-
-    //                 if(response.exists){
-    //                     $('#nameError').text('Sub category already exists');
-    //                 }else{
-    //                     $('#nameError').text('');
-    //                 }
-
-    //             }
-    //         });
-
-    //     }else{
-    //         $('#nameError').text('');
-    //     }
-
-    // });
+    // Initialize Select2
+    $('#category_id').select2({
+        width: '100%',
+        placeholder: 'Select',
+        allowClear: true
+    });
 
     $('#subCategoryName, #category_id').on('keyup change', function () {
 
@@ -182,4 +167,5 @@ $(document).ready(function(){
 
 });
 </script>
-@endsection
+
+@endpush

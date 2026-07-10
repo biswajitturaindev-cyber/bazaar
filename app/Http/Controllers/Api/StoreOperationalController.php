@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StoreOperationalResource;
+use App\Models\Business;
 use App\Models\StoreOperationalDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,9 +39,16 @@ class StoreOperationalController extends Controller
                 ], 404);
             }
 
+            $business = Business::find($store->business_id);
+
+            $data = (new StoreOperationalResource($store))->toArray($request);
+
+            $data['shop_status'] = $business?->shop_status;
+            $data['working_days'] = $business?->working_days;
+
             return response()->json([
                 'status' => true,
-                'data' => new StoreOperationalResource($store)
+                'data' => $data
             ]);
 
         } catch (\Exception $e) {
@@ -136,6 +144,10 @@ class StoreOperationalController extends Controller
                 'timings' => 'required|array|min:1',
                 'timings.*.opening_time' => 'required|date_format:H:i',
                 'timings.*.closing_time' => 'required|date_format:H:i',
+
+                'shop_status' => 'required|in:open,closed',
+                'working_days' => 'required|array',
+                'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Validate each timing
@@ -184,6 +196,26 @@ class StoreOperationalController extends Controller
                     'closing_time' => $timing['closing_time'],
                 ]);
             }
+
+
+            $business = Business::find($validated['business_id']);
+            if ($business) {
+
+                $updateData = [];
+
+                if ($request->filled('shop_status')) {
+                    $updateData['shop_status'] = $request->shop_status;
+                }
+
+                if ($request->has('working_days')) {
+                    $updateData['working_days'] = $request->working_days; // if cast to array
+                }
+
+                if (!empty($updateData)) {
+                    $business->update($updateData);
+                }
+            }
+
 
             DB::commit();
 
@@ -275,6 +307,23 @@ class StoreOperationalController extends Controller
 
             $id = $decoded[0];
 
+
+            // Decode business_id
+            $decodedbusinessid = Hashids::decode($request->business_id);
+
+            if (empty($decodedbusinessid)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid business ID'
+                ], 400);
+            }
+
+            $request->merge([
+                'business_id' => $decodedbusinessid[0]
+            ]);
+
+
+
             $store = StoreOperationalDetail::with('timings')->find($id);
 
             if (!$store) {
@@ -314,6 +363,8 @@ class StoreOperationalController extends Controller
             }
 
             $validated = $request->validate([
+                'business_id' => 'required|exists:businesses,id',
+
                 'delivery_type' => 'required|in:self,platform,both',
                 'delivery_radius' => 'nullable|numeric|min:0',
 
@@ -325,6 +376,11 @@ class StoreOperationalController extends Controller
                 'timings' => 'required|array|min:1',
                 'timings.*.opening_time' => 'required|date_format:H:i',
                 'timings.*.closing_time' => 'required|date_format:H:i',
+
+
+                'shop_status' => 'required|in:open,closed',
+                'working_days' => 'required|array',
+                'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             ]);
 
             // Validate timings
@@ -367,6 +423,25 @@ class StoreOperationalController extends Controller
                     'closing_time' => $timing['closing_time'],
                 ]);
             }
+
+            $business = Business::find($validated['business_id']);
+            if ($business) {
+
+                $updateData = [];
+
+                if ($request->filled('shop_status')) {
+                    $updateData['shop_status'] = $request->shop_status;
+                }
+
+                if ($request->has('working_days')) {
+                    $updateData['working_days'] = $request->working_days; // if cast to array
+                }
+
+                if (!empty($updateData)) {
+                    $business->update($updateData);
+                }
+            }
+
 
             DB::commit();
 

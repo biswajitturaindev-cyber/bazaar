@@ -71,7 +71,8 @@ class OrderResource extends JsonResource
             */
 
             'loyalty_used' => (float) $this->loyalty_used,
-            'loyalty_earned' => (float) $this->loyalty_earned,
+            'loyalty_earned_member' => (float) $this->loyalty_earned_member,
+            'loyalty_earned_vendor' => (float) $this->loyalty_earned_vendor,
             'wallet_used' => (float) $this->wallet_used,
             'online_paid' => (float) $this->online_paid,
 

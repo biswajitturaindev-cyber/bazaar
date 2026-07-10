@@ -4,6 +4,10 @@
 Add Product Sub Category
 @endsection
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+
 @section('breadcrumb')
 Category / Add Sub Category
 @endsection
@@ -105,7 +109,11 @@ Category / Add Sub Category
         </div>
     </div>
 </div>
+@endsection
+@push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 toastr.options = {
         closeButton: true,
@@ -115,8 +123,12 @@ toastr.options = {
     };
 $(document).ready(function(){
 
-    // NAME VALIDATION + CHECK EXISTING
-
+    // Initialize Select2
+    $('#category_id').select2({
+        width: '100%',
+        placeholder: 'Select',
+        allowClear: true
+    });
 
 
     // FORM SUBMIT AJAX
@@ -179,4 +191,6 @@ $(document).ready(function(){
 
 });
 </script>
-@endsection
+
+@endpush
+

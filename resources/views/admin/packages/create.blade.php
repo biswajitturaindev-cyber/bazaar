@@ -89,6 +89,53 @@
                     @enderror
                 </div>
 
+                <div>
+                    <label class="block mb-2 font-medium">Duration</label>
+
+                    <input type="number"
+                        name="duration"
+                        min="1"
+                        value="{{ old('duration') }}"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                        placeholder="e.g. 30">
+
+                    @error('duration')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-medium">Duration Type</label>
+
+                    <select name="duration_type"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+
+                        <option value="day" {{ old('duration_type') == 'day' ? 'selected' : '' }}>Day(s)</option>
+                        <option value="month" {{ old('duration_type') == 'month' ? 'selected' : '' }}>Month(s)</option>
+                        <option value="year" {{ old('duration_type') == 'year' ? 'selected' : '' }}>Year(s)</option>
+
+                    </select>
+
+                    @error('duration_type')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+
+                <div class="md:col-span-2">
+                    <label class="block mb-2 font-medium">Description</label>
+
+                    <textarea name="description"
+                            rows="4"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                            placeholder="Enter package description">{{ old('description') }}</textarea>
+
+                    @error('description')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+
                 {{-- Status --}}
                 <div>
                     <label class="block mb-2 font-medium">Status</label>

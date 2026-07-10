@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('state_code', 2)->unique();
+            $table->string('gst_code', 2)->unique();
             $table->timestamps();
         });
     }

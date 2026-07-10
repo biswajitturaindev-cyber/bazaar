@@ -24,4 +24,15 @@ function updateDateTime() {
 
 updateDateTime();
 setInterval(updateDateTime, 60000); // update every minute
+
+
+
+document.getElementById('notificationBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.getElementById('notificationMenu').classList.toggle('hidden');
+});
+
+document.addEventListener('click', function () {
+    document.getElementById('notificationMenu').classList.add('hidden');
+});
 </script>

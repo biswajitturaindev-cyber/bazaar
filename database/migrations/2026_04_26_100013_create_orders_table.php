@@ -39,7 +39,8 @@ return new class extends Migration
 
 
             $table->decimal('loyalty_used', 12, 2)->default(0);
-            $table->decimal('loyalty_earned', 12, 2)->default(0);
+            $table->decimal('loyalty_earned_member', 12, 2)->default(0);
+            $table->decimal('loyalty_earned_vendor', 12, 2)->default(0);
             $table->decimal('wallet_used', 12, 2)->default(0);
             $table->decimal('online_paid', 12, 2)->default(0);
 

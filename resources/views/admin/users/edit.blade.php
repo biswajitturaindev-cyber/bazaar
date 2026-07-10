@@ -155,6 +155,29 @@
                     @enderror
                 </div>
 
+                <div>
+                    <label class="block mb-2 font-medium">Package</label>
+
+
+                    <select name="package_id" class="w-full border rounded-lg px-3 py-2">
+                        <option value="">Select Package</option>
+
+                        @foreach($packages as $package)
+                            <option value="{{ $package->id }}"
+                                {{ old('package_id', optional($user->latestSubscription)->package_id) == $package->id ? 'selected' : '' }}>
+                                {{ $package->name }}
+                                ({{ $package->duration }} {{ ucfirst($package->duration_type) }})
+                                - ₹{{ $package->price }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('package_id')
+                        <p class="text-red-500 text-sm">{{ $message }}</p>
+                    @enderror
+                </div>
+
+
+
             </div>
 
             {{-- Submit --}}

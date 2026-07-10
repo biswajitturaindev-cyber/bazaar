@@ -45,6 +45,15 @@ return new class extends Migration
             $table->string('fssai_license')->nullable();
             $table->string('registration_number')->nullable();
 
+            // Shop Status
+            $table->enum('shop_status', ['open', 'closed'])
+                ->default('open')
+                ->index();
+
+            // Working Days
+            $table->json('working_days')->nullable();
+
+
             $table->timestamps();
         });
     }

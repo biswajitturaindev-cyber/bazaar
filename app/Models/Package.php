@@ -11,16 +11,24 @@ class Package extends Model
         'name',
         'stars',
         'price',
+        'duration',
+        'duration_type',
+        'description',
         'product_limit',
-        'status'
+        'status',
     ];
 
-    protected $appends = ['id'];
+    protected $casts = [
+        'price' => 'decimal:2',
+        'status' => 'boolean',
+    ];
 
-    public function getIdAttribute()
-    {
-        return Hashids::encode($this->attributes['id']);
-    }
+    // protected $appends = ['id'];
+
+    // public function getIdAttribute()
+    // {
+    //     return Hashids::encode($this->attributes['id']);
+    // }
 
     /**
      * One package → many vendor packages
@@ -47,5 +55,9 @@ class Package extends Model
 
     }
 
+    public function userSubscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
 
 }
