@@ -16,10 +16,11 @@ import BillDetailsCard from "@/components/cart/BillDetailsCard";
 import DeliveryAddressCard from "@/components/cart/DeliveryAddressCard";
 import PaymentAndPlaceOrder from "@/components/cart/PaymentAndPlaceOrder";
 import { useAuthContext } from "@/providers/AuthProvider";
+import { formatAddress } from "@/utils/address";
 
-const HANDLING_CHARGE = 5;
-const DELIVERY_CHARGE = 30;
-const FREE_DELIVERY_THRESHOLD = 150;
+const HANDLING_CHARGE = typeof process !== "undefined" && process.env.NEXT_PUBLIC_HANDLING_CHARGE ? Number(process.env.NEXT_PUBLIC_HANDLING_CHARGE) : 5;
+const DELIVERY_CHARGE = typeof process !== "undefined" && process.env.NEXT_PUBLIC_DELIVERY_CHARGE ? Number(process.env.NEXT_PUBLIC_DELIVERY_CHARGE) : 30;
+const FREE_DELIVERY_THRESHOLD = typeof process !== "undefined" && process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD ? Number(process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD) : 150;
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -30,7 +31,7 @@ export default function CheckoutPage() {
     const [successOrder, setSuccessOrder] = useState<any | null>(null);
 
     const addressStr = selectedAddress 
-        ? `${selectedAddress.address_line_1}${selectedAddress.address_line_2 ? `, ${selectedAddress.address_line_2}` : ""}, ${selectedAddress.city}`
+        ? formatAddress(selectedAddress)
         : "No delivery location selected";
 
     // Queries & Mutations

@@ -14,7 +14,7 @@ export default function BillDetailsCard({
     itemsTotal,
     handlingCharge,
     deliveryCharge,
-    freeDeliveryThreshold = 150,
+    freeDeliveryThreshold = typeof process !== "undefined" && process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD ? Number(process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD) : 150,
     itemCount,
 }: BillDetailsCardProps) {
     
