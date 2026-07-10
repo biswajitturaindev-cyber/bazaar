@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { RiArrowDownSLine, RiNotificationLine, RiUserLine, RiLogoutBoxRLine } from "react-icons/ri";
 import { useAuthContext } from "@/providers/AuthProvider";
+import { formatAddress } from "@/utils/address";
 
 interface HeaderProps {
     onOpenLocation: () => void;
@@ -43,7 +44,7 @@ export default function Header({ onOpenLocation }: HeaderProps) {
                     >
                         <span className="truncate">
                             {selectedAddress 
-                                ? `${selectedAddress.address_line_1}, ${selectedAddress.city}` 
+                                ? formatAddress(selectedAddress) 
                                 : "Select delivery location"}
                         </span>
                         <RiArrowDownSLine size={18} className="shrink-0" />
