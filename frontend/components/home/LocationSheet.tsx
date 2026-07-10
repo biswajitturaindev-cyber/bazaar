@@ -10,7 +10,6 @@ import {
 } from "react-icons/ri";
 import { useUserAddresses } from "@/hooks/address/useUserAddresses";
 import { UserAddress } from "@/types/address";
-import { formatAddress } from "@/utils/address";
 
 interface LocationSheetProps {
     open: boolean;
@@ -134,7 +133,7 @@ export default function LocationSheet({
                         {!isLoading && !isError && addresses.map((addr) => {
                             const isSelected = selectedAddressId === addr.id;
                             const displayName = addr.name || addr.full_name || "Recipient";
-                            const displayAddressText = formatAddress(addr);
+                            const displayAddressText = addr.address || `${addr.address_line_1 || ""}${addr.address_line_2 ? `, ${addr.address_line_2}` : ""}${addr.city ? `, ${addr.city}` : ""}`;
 
                             return (
                                 <div
