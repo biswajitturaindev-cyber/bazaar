@@ -348,6 +348,8 @@ class AuthController extends Controller
                 'message' => 'Login successful',
                 'token' => $token,
                 'user_id' => $user->id,
+                'state' => $user->business->address->state ?? null,
+                'city' => $user->business->address->city ?? null,
                 'user' => new UserResource($user)
             ]);
 
