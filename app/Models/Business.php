@@ -18,6 +18,7 @@ class Business extends Model
         'pan_number',
         'fssai_license',
         'registration_number',
+        'admin_shop_status',
         'shop_status',
         'working_days'
     ];

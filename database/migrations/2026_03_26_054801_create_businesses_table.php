@@ -45,6 +45,10 @@ return new class extends Migration
             $table->string('fssai_license')->nullable();
             $table->string('registration_number')->nullable();
 
+            $table->enum('admin_shop_status', ['open', 'closed'])
+                ->default('open')
+                ->index();
+
             // Shop Status
             $table->enum('shop_status', ['open', 'closed'])
                 ->default('open')

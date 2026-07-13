@@ -87,6 +87,13 @@ class UserController extends Controller
                 'status' => 'required|in:0,1',
                 'gender' => 'required|in:1,2,3',
                 'package_id' => 'nullable|exists:packages,id',
+
+                // Business
+                'admin_shop_status' => 'nullable|in:open,closed',
+                'shop_status' => 'nullable|in:open,closed',
+                'working_days' => 'nullable|array',
+                'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+
             ]);
 
             // Update user
@@ -99,6 +106,15 @@ class UserController extends Controller
                 'status' => $validated['status'],
                 'gender' => $validated['gender'],
             ]);
+
+            // Update business details
+            if ($user->business) {
+                $user->business->update([
+                    'admin_shop_status' => $validated['admin_shop_status'] ?? $user->business->admin_shop_status,
+                    'shop_status' => $validated['shop_status'] ?? $user->business->shop_status,
+                    'working_days' => $validated['working_days'] ?? $user->business->working_days,
+                ]);
+            }
 
             // Package update
             if (!empty($validated['package_id'])) {
@@ -149,6 +165,9 @@ class UserController extends Controller
                     ]);
                 }
             }
+
+
+
 
             DB::commit();
 
