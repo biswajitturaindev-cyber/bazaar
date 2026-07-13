@@ -19,7 +19,7 @@ class BusinessSeeder extends Seeder
                 'user_id' => 1,
                 'sponsor_id' => 3,
                 'business_type' => 'service',
-                'business_name' => 'Ishita Ghugni Muri',
+                'business_name' => 'Ishita Fashion',
                 'business_category_id' => 1,
                 'business_sub_category_id' => 2,
                 'years_in_business' => 2,
