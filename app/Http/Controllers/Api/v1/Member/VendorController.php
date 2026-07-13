@@ -26,11 +26,12 @@ class VendorController extends Controller
             //'operationalDetail'
         ]);
 
-        // Current day (monday, tuesday, wednesday...)
+        // Current day (monday, tuesday, ...)
         $today = strtolower(now()->format('l'));
 
-        // Only open businesses that work today
-        $query->where('shop_status', 'open')
+        // Show only businesses that are open by both admin and vendor
+        $query->where('admin_shop_status', 'open')
+            ->where('shop_status', 'open')
             ->whereJsonContains('working_days', $today);
 
         // Filter by category

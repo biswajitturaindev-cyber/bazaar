@@ -29,8 +29,9 @@ class BusinessSeeder extends Seeder
                 'fssai_license' => null,
                 'registration_number' => null,
 
+                'admin_shop_status' => 'open',
                 'shop_status' => 'open',
-                'working_days' => null,
+                'working_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
             ]
         );
     }

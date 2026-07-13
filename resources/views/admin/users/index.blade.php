@@ -50,6 +50,7 @@
                             <th class="px-3 py-2">Gender</th>
                             <th class="px-3 py-2">Status</th>
                             <th class="px-3 py-2">KYC</th>
+                            <th class="px-3 py-2">Admin Shop</th>
                             <th class="px-3 py-2">Action</th>
                         </tr>
                     </thead>
@@ -123,6 +124,22 @@
                                         {{ $label }}
                                     </span>
                                 </td>
+
+                                <td class="px-3 py-2">
+                                    @if($user->business)
+                                        <span class="px-2 py-1 text-xs font-semibold rounded
+                                            {{ $user->business->admin_shop_status == 'open'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-red-100 text-red-700' }}">
+                                            {{ ucfirst($user->business->admin_shop_status) }}
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700">
+                                            N/A
+                                        </span>
+                                    @endif
+                                </td>
+
 
                                 {{-- Actions --}}
                                 <td class="px-3 py-2 flex gap-2">
