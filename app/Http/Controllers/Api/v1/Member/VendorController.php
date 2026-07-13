@@ -26,10 +26,20 @@ class VendorController extends Controller
             //'operationalDetail'
         ]);
 
+        // Current day (monday, tuesday, wednesday...)
+        $today = strtolower(now()->format('l'));
+
+        // Only open businesses that work today
+        $query->where('shop_status', 'open')
+            ->whereJsonContains('working_days', $today);
+
         // Filter by category
         if ($request->filled('business_category_id')) {
 
-            $decoded = decodeIdOrFail($request->business_category_id, 'Invalid category ID');
+            $decoded = decodeIdOrFail(
+                $request->business_category_id,
+                'Invalid category ID'
+            );
 
             $query->where('business_category_id', $decoded);
         }
@@ -37,7 +47,10 @@ class VendorController extends Controller
         // Filter by subcategory
         if ($request->filled('business_sub_category_id')) {
 
-            $decoded = decodeIdOrFail($request->business_sub_category_id, 'Invalid subcategory ID');
+            $decoded = decodeIdOrFail(
+                $request->business_sub_category_id,
+                'Invalid subcategory ID'
+            );
 
             $query->where('business_sub_category_id', $decoded);
         }
