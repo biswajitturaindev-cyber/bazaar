@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             //PincodeSeeder::class,
             DeliveryPartnerSeeder::class,
             RedemptionCancelReasonSeeder::class,
-            UserSeeder::class,
+            //UserSeeder::class,
             BusinessSeeder::class,
             BusinessAddressSeeder::class,
             BusinessAgreementSeeder::class,

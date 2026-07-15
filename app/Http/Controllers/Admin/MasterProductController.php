@@ -19,22 +19,130 @@ class MasterProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = MasterProduct::with([
-            'category',
-            'subCategory',
-            'subSubCategory',
-            'hsn',
-            'primaryImage'
-        ])
-        ->latest()
-        ->get();
+        if ($request->ajax()) {
 
-        return view(
-            'admin.master_products.index',
-            compact('products')
-        );
+            $columns = [
+                0 => 'id',
+                1 => 'category_id',
+                2 => 'name',
+                3 => 'product_price',
+                4 => 'selling_price',
+                5 => 'commission',
+                6 => 'status',
+            ];
+
+            $totalData = MasterProduct::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = MasterProduct::with([
+                'category',
+                'subCategory',
+                'subSubCategory',
+                'primaryImage'
+            ]);
+
+            // Search
+            if ($search = $request->input('search.value')) {
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('product_price', 'like', "%{$search}%")
+                        ->orWhere('selling_price', 'like', "%{$search}%")
+                        ->orWhere('commission', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($cat) use ($search) {
+                            $cat->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('subCategory', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('subSubCategory', function ($subSub) use ($search) {
+                            $subSub->where('name', 'like', "%{$search}%");
+                        });
+
+                });
+
+            }
+
+            $totalFiltered = $query->count();
+
+            $products = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($products as $product) {
+
+                $hierarchy = $product->category->name ?? '-';
+
+                if ($product->subCategory) {
+                    $hierarchy .= ' → ' . $product->subCategory->name;
+                }
+
+                if ($product->subSubCategory) {
+                    $hierarchy .= ' → ' . $product->subSubCategory->name;
+                }
+
+                $image = $product->primaryImage
+                    ? '<img src="' . $product->primaryImage->image_url . '" width="50" height="50" class="rounded border" style="object-fit:cover;">'
+                    : '<span class="text-gray-400">No Image</span>';
+
+                $status = $product->status == 1
+                    ? '<span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>'
+                    : '<span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Inactive</span>';
+
+                $action = '
+                    <div class="flex gap-2">
+                        <a href="' . route('master-products.edit', $product->id) . '"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+                            Edit
+                        </a>
+
+                        <form action="' . route('master-products.destroy', $product->id) . '"
+                            method="POST"
+                            onsubmit="return confirm(\'Delete this product?\')"
+                            style="display:inline-block;">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
+                            <button type="submit"
+                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+                                Delete
+                            </button>
+                        </form>
+                    </div>';
+
+                $data[] = [
+                    '',
+                    $hierarchy,
+                    $product->name,
+                    $product->product_price,
+                    $product->selling_price,
+                    $product->commission,
+                    $image,
+                    $status,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
+        }
+
+        return view('admin.master_products.index');
     }
 
     /**

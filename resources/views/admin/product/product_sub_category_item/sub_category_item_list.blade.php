@@ -38,72 +38,6 @@
                     </thead>
 
                     <tbody class="divide-y">
-
-                        @foreach ($subcategoriitems as $key => $sub)
-                            <tr class="border-l border-r">
-
-                                <td class="px-3 py-2">
-                                    {{ $key + 1 }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    @if ($sub->image)
-                                        <img src="{{ asset('storage/subcategoryitem/' . $sub->image) }}" alt="Image"
-                                            style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $sub->category->name ?? '-' }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $sub->subCategory->name }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $sub->name }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $sub->description }}
-                                </td>
-
-                                <td class="px-3 py-2">
-
-                                    @if ($sub->status == 1)
-                                        <span class="text-green-600 font-semibold">Active</span>
-                                    @else
-                                        <span class="text-red-600 font-semibold">Inactive</span>
-                                    @endif
-
-                                </td>
-
-                                <td class="px-3 py-2 gap-2">
-
-                                    <a href="{{ route('admin.product.sub.category.item.edit', $sub->id) }}"
-                                        class="bg-blue-500 text-white px-3 py-1 rounded">
-                                        Edit
-                                    </a>
-
-                                    {{-- <form action="{{ route('admin.product.sub.category.delete',$sub->id) }}" method="POST"
-                                        onsubmit="return confirm('Delete this category?')">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="submit"
-                                                class="bg-red-500 text-white px-2 py-1 rounded">
-                                            Delete
-                                        </button>
-
-                                    </form> --}}
-                                </td>
-                            </tr>
-                        @endforeach
-
                     </tbody>
                 </table>
             </div>
@@ -117,13 +51,70 @@
         <script src="{{ asset('admin_assets/js/script.js') }}"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#example').DataTable({
-                    paging: true,
-                    searching: true,
-                    info: true,
-                    pagingType: "simple_numbers"
+            $(function() {
+
+                let table = $('#example').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    pageLength: 10,
+
+                    ajax: "{{ route('admin.product.sub.category.item.list') }}",
+
+                    columns: [{
+                            data: null,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 1,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 2
+                        },
+                        {
+                            data: 3
+                        },
+                        {
+                            data: 4
+                        },
+                        {
+                            data: 5
+                        },
+                        {
+                            data: 6,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 7,
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+
+                    columnDefs: [{
+                        targets: [1, 6, 7],
+                        render: function(data) {
+                            return data;
+                        }
+                    }],
+
+                    drawCallback: function() {
+
+                        let api = this.api();
+
+                        api.column(0, {
+                            page: 'current'
+                        }).nodes().each(function(cell, i) {
+                            cell.innerHTML = api.page.info().start + i + 1;
+                        });
+
+                    }
+
                 });
+
             });
         </script>
     @endpush
