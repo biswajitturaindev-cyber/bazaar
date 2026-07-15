@@ -9,163 +9,111 @@
 @endsection
 
 @section('content')
-<div class="grid grid-cols-1 lg:gap-16 md:gap-10">
-    <div class="bg-white shadow-[0px_6px_16px_rgba(0,0,0,0.05)] rounded-xl">
+    <div class="grid grid-cols-1 lg:gap-16 md:gap-10">
+        <div class="bg-white shadow-[0px_6px_16px_rgba(0,0,0,0.05)] rounded-xl">
 
-        <div class="flex justify-between items-center px-5 py-3 border-b">
-            <h2 class="text-lg font-semibold">Master Product List</h2>
+            <div class="flex justify-between items-center px-5 py-3 border-b">
+                <h2 class="text-lg font-semibold">Master Product List</h2>
 
-            <a href="{{ route('master-products.create') }}"
-                class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
-                + Add Product
-            </a>
-        </div>
+                <a href="{{ route('master-products.create') }}"
+                    class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
+                    + Add Product
+                </a>
+            </div>
 
-        <div class="overflow-x-auto p-5">
-            <table class="w-full text-sm text-left" id="example">
-                <thead class="bg-gray-100">
-                    <tr class="border">
-                        <th class="px-3 py-2">Sl.No</th>
-                        <th class="px-3 py-2">Category Hierarchy</th>
-                        <th class="px-3 py-2">Product Name</th>
-
-                        <th>Product Price</th>
-                        <th>Selling Price</th>
-                        <th>Commission</th>
-                        <th class="px-3 py-2">Image</th>
-                        <th class="px-3 py-2">Status</th>
-                        <th class="px-3 py-2">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody class="divide-y">
-                    @foreach ($products as $product)
-                        <tr class="border-l border-r">
-
-                            {{-- Serial --}}
-                            <td class="px-3 py-2">
-                                {{ $loop->iteration }}
-                            </td>
-
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                {{ $product->category->name ?? '-' }}
-
-                                @if($product->subCategory)
-                                    → {{ $product->subCategory->name }}
-                                @endif
-
-                                @if($product->subSubCategory)
-                                    → {{ $product->subSubCategory->name }}
-                                @endif
-                            </td>
-
-                            {{-- Product Name --}}
-                            <td class="px-3 py-2">
-                                {{ $product->name }}
-                            </td>
-
-                            {{-- Product Price --}}
-                            <td class="px-3 py-2">
-                                {{ $product->product_price }}
-                            </td>
-
-                            {{-- Selling Price --}}
-                            <td class="px-3 py-2">
-                                {{ $product->selling_price }}
-                            </td>
-
-
-                            {{-- Commission --}}
-                            <td class="px-3 py-2">
-                                {{ $product->commission }}
-                            </td>
-
-                            {{-- Primary Image --}}
-                            <td class="px-3 py-2">
-
-                                @if ($product->primaryImage)
-
-                                    <img
-                                        src="{{ $product->primaryImage->image_url }}"
-                                        width="50"
-                                        height="50"
-                                        class="rounded border"
-                                        style="object-fit: cover;"
-                                    >
-
-                                @else
-
-                                    <span class="text-gray-400">
-                                        No Image
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            {{-- Status --}}
-                            <td class="px-3 py-2">
-                                <span class="px-2 py-1 text-xs font-semibold rounded
-                                    {{ $product->status == 1
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-red-100 text-red-700' }}">
-
-                                    {{ $product->status == 1 ? 'Active' : 'Inactive' }}
-
-                                </span>
-                            </td>
-
-                            {{-- Actions --}}
-                            <td class="px-3 py-2 flex gap-2">
-
-                                {{-- Edit --}}
-                                <a href="{{ route('master-products.edit', $product->id) }}"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
-
-                                    Edit
-
-                                </a>
-
-                                {{-- Delete --}}
-                                <form
-                                    action="{{ route('master-products.destroy', $product->id) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Delete this product?')"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button
-                                        type="submit"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                                    >
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
+            <div class="overflow-x-auto p-5">
+                <table class="w-full text-sm text-left" id="example">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th>Sl.No</th>
+                            <th>Category Hierarchy</th>
+                            <th>Product Name</th>
+                            <th>Product Price</th>
+                            <th>Selling Price</th>
+                            <th>Commission</th>
+                            <th>Image</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                </table>
+            </div>
+
         </div>
-
     </div>
-</div>
 
-@push('scripts')
-<link href="{{ asset('admin_assets/datatables/dataTables.dataTables.css') }}" rel="stylesheet">
-<script src="{{ asset('admin_assets/datatables/dataTables.js') }}"></script>
+    @push('scripts')
+        <link href="{{ asset('admin_assets/datatables/dataTables.dataTables.css') }}" rel="stylesheet">
+        <script src="{{ asset('admin_assets/datatables/dataTables.js') }}"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        $('#example').DataTable({
-            paging: true,
-            searching: true,
-            info: true,
-            pagingType: "simple_numbers"
-        });
-    });
-</script>
-@endpush
+        <script>
+            $(function() {
 
+                let table = $('#example').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    pageLength: 10,
+
+                    ajax: "{{ route('master-products.index') }}",
+
+                    columns: [{
+                            data: null,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 1
+                        },
+                        {
+                            data: 2
+                        },
+                        {
+                            data: 3
+                        },
+                        {
+                            data: 4
+                        },
+                        {
+                            data: 5
+                        },
+                        {
+                            data: 6,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 7,
+                            orderable: false
+                        },
+                        {
+                            data: 8,
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+
+                    columnDefs: [{
+                        targets: [6, 7, 8],
+                        render: function(data) {
+                            return data;
+                        }
+                    }],
+
+                    drawCallback: function() {
+
+                        let api = this.api();
+
+                        api.column(0, {
+                            page: 'current'
+                        }).nodes().each(function(cell, i) {
+                            cell.innerHTML = api.page.info().start + i + 1;
+                        });
+
+                    }
+
+                });
+
+            });
+        </script>
+    @endpush
 @endsection

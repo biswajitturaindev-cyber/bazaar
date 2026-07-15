@@ -486,11 +486,95 @@ class ProductController extends Controller
 
     /* Sub Category Item Section Start */
 
-    public function productSubCategoryItemList()
+    public function productSubCategoryItemList(Request $request)
     {
-        $subcategoriitems = SubCategoryItem::with(['category', 'subCategory'])->get();
+        if ($request->ajax()) {
 
-        return view('admin.product.product_sub_category_item.sub_category_item_list', compact('subcategoriitems'));
+            $columns = [
+                0 => 'id',
+                1 => 'image',
+                2 => 'category_id',
+                3 => 'sub_category_id',
+                4 => 'name',
+                5 => 'description',
+                6 => 'status',
+            ];
+
+            $totalData = SubCategoryItem::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = SubCategoryItem::with(['category', 'subCategory']);
+
+            // Search
+            if ($search = $request->input('search.value')) {
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($cat) use ($search) {
+                            $cat->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('subCategory', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        });
+
+                });
+
+            }
+
+            $totalFiltered = $query->count();
+
+            $subCategoryItems = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($subCategoryItems as $item) {
+
+                $image = $item->image
+                    ? '<img src="' . asset('storage/subcategoryitem/' . $item->image) . '" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">'
+                    : '-';
+
+                $status = $item->status == 1
+                    ? '<span class="text-green-600 font-semibold">Active</span>'
+                    : '<span class="text-red-600 font-semibold">Inactive</span>';
+
+                $action = '
+                    <a href="' . route('admin.product.sub.category.item.edit', $item->id) . '"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                        Edit
+                    </a>';
+
+                $data[] = [
+                    '',
+                    $image,
+                    $item->category->name ?? '-',
+                    $item->subCategory->name ?? '-',
+                    $item->name,
+                    $item->description ?? '-',
+                    $status,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
+        }
+
+        return view('admin.product.product_sub_category_item.sub_category_item_list');
     }
 
     public function productSubCategoryItem(Request $request)
