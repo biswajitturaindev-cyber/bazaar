@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $user = User::updateOrCreate(
             ['email' => 'ishitagiri@gmail.com'],
             [
-                'vendor_id' => 'RV15838',
+                'vendor_id' => 'RV00015838',
                 'name' => 'Ishita Giri',
                 'password' => Hash::make('123456'),
                 'mobile' => '9876543210',
