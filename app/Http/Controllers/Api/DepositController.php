@@ -11,16 +11,40 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class DepositController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try {
+
+            $request->validate([
+                'business_id' => 'required',
+            ]);
+
+            // If using Hashids, uncomment below and remove the line after it.
+            $businessId = decodeIdOrFail($request->business_id, 'business_id');
+
+            $deposits = Deposit::where('business_id', $businessId)
+                ->latest()
+                ->paginate(100);
+
+            return DepositResource::collection($deposits);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+
+        }
     }
 
     /**
