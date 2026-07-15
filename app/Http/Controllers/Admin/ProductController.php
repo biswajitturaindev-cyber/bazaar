@@ -17,10 +17,84 @@ use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
+
     public function productCategoryList(Request $request)
     {
-        $data = Category::all();
-        return view('admin.product.product_category.product_category_list',compact('data'));
+        if ($request->ajax()) {
+
+            $columns = [
+                0 => 'id',
+                1 => 'name',
+                2 => 'image',
+                3 => 'description',
+                4 => 'status',
+            ];
+
+            $totalData = Category::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = Category::query();
+
+            // Search
+            if ($search = $request->input('search.value')) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $totalFiltered = $query->count();
+
+            $categories = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($categories as $category) {
+
+                if ($category->image) {
+                    $image = '<img src="' . asset('storage/category/' . $category->image) . '" width="50" height="50" style="object-fit:cover;">';
+                } else {
+                    $image = '-';
+                }
+
+                $status = $category->status == 1
+                    ? '<span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>'
+                    : '<span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Inactive</span>';
+
+                $action = '
+                    <a href="' . route('admin.product.category.edit', $category->id) . '"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+                        Edit
+                    </a>';
+
+                $data[] = [
+                    '',
+                    $category->name ?? '-',
+                    $image,
+                    $category->description ?? '-',
+                    $status,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                "draw" => intval($request->draw),
+                "recordsTotal" => $totalData,
+                "recordsFiltered" => $totalFiltered,
+                "data" => $data,
+            ]);
+        }
+
+        return view('admin.product.product_category.product_category_list');
     }
 
     public function productCategory(Request $request)
@@ -169,11 +243,84 @@ class ProductController extends Controller
             ->with('success', 'Category deleted successfully');
     }
 
-    public function productSubCategoryList()
+    public function productSubCategoryList(Request $request)
     {
-        $subcategories = SubCategory::with('category')->get();
+        if ($request->ajax()) {
 
-        return view('admin.product.product_sub_category.sub_category_list', compact('subcategories'));
+            $columns = [
+                0 => 'id',
+                1 => 'category_id',
+                2 => 'name',
+                3 => 'description',
+                4 => 'status',
+            ];
+
+            $totalData = SubCategory::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = SubCategory::with('category');
+
+            // Search
+            if ($search = $request->input('search.value')) {
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($cat) use ($search) {
+                            $cat->where('name', 'like', "%{$search}%");
+                        });
+
+                });
+
+            }
+
+            $totalFiltered = $query->count();
+
+            $subcategories = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($subcategories as $sub) {
+
+                $status = $sub->status == 1
+                    ? '<span class="text-green-600 font-semibold">Active</span>'
+                    : '<span class="text-red-600 font-semibold">Inactive</span>';
+
+                $action = '
+                    <a href="'.route('admin.product.sub.category.edit', $sub->id).'"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                        Edit
+                    </a>';
+
+                $data[] = [
+                    '',
+                    $sub->category->name ?? '-',
+                    $sub->name,
+                    $sub->description ?? '-',
+                    $status,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
+        }
+
+        return view('admin.product.product_sub_category.sub_category_list');
     }
 
     public function productSubCategory(Request $request)
