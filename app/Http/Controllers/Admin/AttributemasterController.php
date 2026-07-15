@@ -13,13 +13,93 @@ class AttributemasterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $masters = AttributeMaster::with(['category', 'subCategory'])
-            ->latest()
-            ->paginate(10);
+        if ($request->ajax()) {
 
-        return view('admin.attribute-master.index', compact('masters'));
+            $columns = [
+                0 => 'id',
+                1 => 'category_id',
+                2 => 'sub_category_id',
+                3 => 'name',
+            ];
+
+            $totalData = AttributeMaster::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = AttributeMaster::with(['category', 'subCategory']);
+
+            // Search
+            if ($search = $request->input('search.value')) {
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($cat) use ($search) {
+                            $cat->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('subCategory', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        });
+
+                });
+
+            }
+
+            $totalFiltered = $query->count();
+
+            $masters = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($masters as $master) {
+
+                $action = '
+                    <div class="flex gap-2">
+                        <a href="' . route('attribute-master.edit', $master->id) . '"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+                            Edit
+                        </a>
+
+                        <form action="' . route('attribute-master.destroy', $master->id) . '"
+                            method="POST"
+                            onsubmit="return confirm(\'Are you sure?\')"
+                            style="display:inline-block;">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+                                Delete
+                            </button>
+                        </form>
+                    </div>';
+
+                $data[] = [
+                    '',
+                    $master->category?->name ?? '-',
+                    $master->subCategory?->name ?? '-',
+                    $master->name,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
+        }
+
+        return view('admin.attribute-master.index');
     }
 
     /**

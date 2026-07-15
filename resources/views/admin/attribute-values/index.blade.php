@@ -27,78 +27,17 @@
                 <table class="w-full text-sm text-left" id="example">
                     <thead class="bg-gray-100">
                         <tr class="border">
-                            <th class="px-3 py-2">Sl.No</th>
-                            <th class="px-3 py-2">Category</th>
-                            <th class="px-3 py-2">Sub Category</th>
-                            <th class="px-3 py-2">Attribute Master</th>
-                            <th class="px-3 py-2">Value</th>
-                            <th class="px-3 py-2">Status</th>
-                            <th class="px-3 py-2">Action</th>
+                            <th>Sl.No</th>
+                            <th>Category</th>
+                            <th>Sub Category</th>
+                            <th>Attribute Master</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-
-                    <tbody class="divide-y">
-                        @foreach ($values as $value)
-                            <tr class="border-l border-r">
-
-                                <td class="px-3 py-2">
-                                    {{ ($values->currentPage() - 1) * $values->perPage() + $loop->iteration }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $value->category?->name ?? '-' }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $value->subCategory?->name ?? '-' }}
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $value->attributeMaster?->name ?? '-' }}
-                                </td>
-
-                                <td class="px-3 py-2 font-medium">
-                                    <div class="flex items-center gap-2">
-                                        @if ($value->color_code)
-                                            <span class="w-5 h-5 rounded border"
-                                                style="background-color: {{ $value->color_code }}">
-                                            </span>
-                                        @endif
-
-                                        <span>{{ $value->value ?? '-' }}</span>
-
-                                        @if ($value->color_code)
-                                            <span class="text-xs text-gray-500">
-                                                ({{ $value->color_code }})
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    <span
-                                        class="px-2 py-1 text-xs font-semibold rounded
-                                        {{ $value->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                        {{ $value->status == 1 ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    <a href="{{ route('attribute-values.edit', $value->id) }}"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
-                                        Edit
-                                    </a>
-                                </td>
-
-                            </tr>
-                        @endforeach
-                    </tbody>
                 </table>
 
-                {{-- Pagination --}}
-                <div class="mt-4">
-                    {{ $values->links() }}
-                </div>
 
             </div>
 
@@ -111,13 +50,65 @@
         <script src="{{ asset('admin_assets/datatables/dataTables.js') }}"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                $('#example').DataTable({
-                    paging: true,
-                    searching: true,
-                    info: true,
-                    pagingType: "simple_numbers"
+            $(function() {
+
+                let table = $('#example').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    pageLength: 10,
+
+                    ajax: "{{ route('attribute-values.index') }}",
+
+                    columns: [{
+                            data: null,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 1
+                        },
+                        {
+                            data: 2
+                        },
+                        {
+                            data: 3
+                        },
+                        {
+                            data: 4
+                        },
+                        {
+                            data: 5,
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 6,
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+
+                    columnDefs: [{
+                        targets: [4, 5, 6],
+                        render: function(data) {
+                            return data;
+                        }
+                    }],
+
+                    drawCallback: function() {
+
+                        let api = this.api();
+
+                        api.column(0, {
+                            page: 'current'
+                        }).nodes().each(function(cell, i) {
+                            cell.innerHTML = api.page.info().start + i + 1;
+                        });
+
+                    }
+
                 });
+
             });
         </script>
     @endpush

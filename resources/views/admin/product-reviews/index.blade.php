@@ -155,12 +155,10 @@
 
                                 {{-- VENDOR COMMISSION APPROVAL STATUS --}}
                                 <td class="px-3 py-2">
-                                    @if($product->vendor_commission_approval_status == 0)
+                                    @if ($product->vendor_commission_approval_status == 0)
                                         <span class="status-badge pending">Waiting for Approval</span>
-
                                     @elseif($product->vendor_commission_approval_status == 1)
                                         <span class="status-badge approved">Approved</span>
-
                                     @elseif($product->vendor_commission_approval_status == 2)
                                         <span class="status-badge rejected">Rejected</span>
                                     @endif
@@ -247,7 +245,7 @@
         <script src="{{ asset('admin_assets/datatables/dataTables.js') }}"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
 
                 let table = $('#example').DataTable({
                     paging: true,
@@ -266,11 +264,13 @@
                     }]
                 });
 
-                table.on('draw.dt', function () {
+                table.on('draw.dt', function() {
 
                     let PageInfo = table.page.info();
 
-                    table.column(0, { page: 'current' }).nodes().each(function (cell, i) {
+                    table.column(0, {
+                        page: 'current'
+                    }).nodes().each(function(cell, i) {
                         cell.innerHTML = i + 1 + PageInfo.start;
                     });
 
