@@ -16,23 +16,102 @@ class BusinessSubCategoryController extends Controller
     // List
     public function index(Request $request)
     {
-        $query = BusinessSubCategory::with('category');
+        if ($request->ajax()) {
 
-        // Search
-        if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $columns = [
+                0 => 'id',
+                1 => 'business_category_id',
+                2 => 'name',
+                3 => 'image',
+                4 => 'commission',
+                5 => 'status',
+            ];
+
+            $totalData = BusinessSubCategory::count();
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+
+            $query = BusinessSubCategory::with('category');
+
+            // Search
+            if (!empty($request->input('search.value'))) {
+                $search = $request->input('search.value');
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                        ->orWhere('commission', 'LIKE', "%{$search}%")
+                        ->orWhereHas('category', function ($c) use ($search) {
+                            $c->where('name', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            // Category Filter
+            if ($request->filled('business_category_id')) {
+                $query->where('business_category_id', $request->business_category_id);
+            }
+
+            $totalFiltered = $query->count();
+
+            $subcategories = $query
+                ->orderBy($order, $dir)
+                ->offset($start)
+                ->limit($limit)
+                ->get();
+
+            $data = [];
+
+            foreach ($subcategories as $subCategory) {
+
+                $image = '<span class="text-gray-400">No Image</span>';
+
+                if ($subCategory->image) {
+                    $url = asset('storage/business_sub_category/' . $subCategory->image);
+
+                    $image = '
+                        <a href="'.$url.'" data-fancybox="gallery">
+                            <img src="'.$url.'" width="50" height="50"
+                                class="rounded cursor-pointer"
+                                style="object-fit:cover;">
+                        </a>';
+                }
+
+                $status = $subCategory->status == 1
+                    ? '<span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>'
+                    : '<span class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700">Inactive</span>';
+
+                $action = '
+                    <a href="'.route('business-sub-categories.edit',$subCategory->id).'"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
+                        Edit
+                    </a>';
+
+                $data[] = [
+                    '',
+                    $subCategory->category->name ?? '-',
+                    $subCategory->name,
+                    $image,
+                    $subCategory->commission ?? '-',
+                    $status,
+                    $action,
+                ];
+            }
+
+            return response()->json([
+                "draw" => intval($request->input('draw')),
+                "recordsTotal" => $totalData,
+                "recordsFiltered" => $totalFiltered,
+                "data" => $data,
+            ]);
         }
 
-        // Filter by category
-        if ($request->business_category_id) {
-            $query->where('business_category_id', $request->business_category_id);
-        }
-
-        // ❌ Remove paginate
-        $subcategories = $query->latest()->get();
-
-        return view('admin.business-sub-category.index', compact('subcategories'));
+        return view('admin.business-sub-category.index');
     }
+
 
     // Create Form
     public function create()

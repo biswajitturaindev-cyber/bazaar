@@ -35,61 +35,7 @@
                             <th class="px-3 py-2">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
-                        @foreach ($subcategories as $subCategory)
-                            <tr class="border-l border-r">
-
-                                {{-- Serial --}}
-                                <td class="px-3 py-2"></td>
-
-                                {{-- Category Name --}}
-                                <td class="px-3 py-2">
-                                    {{ $subCategory->category?->name ?? '-' }}
-                                </td>
-
-                                {{-- Name --}}
-                                <td class="px-3 py-2">
-                                    {{ $subCategory->name ?? '-' }}
-                                </td>
-
-                                {{-- Image --}}
-                                <td class="px-3 py-2">
-                                    @if ($subCategory->image)
-                                        <a href="{{ asset('storage/business_sub_category/' . $subCategory->image) }}" data-fancybox="gallery">
-                                            <img src="{{ asset('storage/business_sub_category/' . $subCategory->image) }}"
-                                                width="50" height="50"
-                                                class="rounded cursor-pointer"
-                                                style="object-fit:cover;">
-                                        </a>
-                                    @else
-                                        <span class="text-gray-400">No Image</span>
-                                    @endif
-                                </td>
-
-                                <td class="px-3 py-2">
-                                    {{ $subCategory->commission ?: '-' }}
-                                </td>
-
-                                {{-- Status --}}
-                                <td class="px-3 py-2">
-                                    <span
-                                        class="px-2 py-1 text-xs font-semibold rounded
-                                        {{ $subCategory->status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                        {{ $subCategory->status == 1 ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </td>
-
-                                {{-- Actions --}}
-                                <td class="px-3 py-2 gap-2">
-                                    <a href="{{ route('business-sub-categories.edit', $subCategory->id) }}"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">
-                                        Edit
-                                    </a>
-                                </td>
-
-                            </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
 
@@ -107,31 +53,82 @@
         <script src="{{ asset('admin_assets/js/script.js') }}"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                let table = $('#example').DataTable({
-                    paging: true,
-                    searching: true,
-                    info: true,
-                    pageLength: 10
-                });
+        $(function () {
+            let table = $('#example').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                pageLength: 10,
 
-                // Dynamic serial number
-                table.on('draw.dt', function () {
-                    let PageInfo = table.page.info();
-
-                    table.column(0, { page: 'current' }).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1 + PageInfo.start;
-                    });
-                });
-            });
-
-            document.addEventListener("DOMContentLoaded", function () {
-                Fancybox.bind("[data-fancybox='gallery']", {
-                    Toolbar: {
-                        display: ["close"]
+                ajax: {
+                    url: "{{ route('business-sub-categories.index') }}",
+                    data: function (d) {
+                        d.business_category_id = $('#business_category_id').val(); // optional filter
                     }
-                });
+                },
+
+                columns: [
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 1
+                    },
+                    {
+                        data: 2
+                    },
+                    {
+                        data: 3,
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 4
+                    },
+                    {
+                        data: 5
+                    },
+                    {
+                        data: 6,
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+
+                columnDefs: [
+                    {
+                        targets: [3,5,6],
+                        render: function (data) {
+                            return data;
+                        }
+                    }
+                ],
+
+                drawCallback: function () {
+
+                    let api = this.api();
+
+                    api.column(0, {
+                        page: 'current'
+                    }).nodes().each(function (cell, i) {
+                        cell.innerHTML = api.page.info().start + i + 1;
+                    });
+
+                    Fancybox.bind("[data-fancybox='gallery']", {
+                        Toolbar: {
+                            display: ["close"]
+                        }
+                    });
+                }
             });
+
+            $('#business_category_id').change(function () {
+                table.ajax.reload();
+            });
+
+        });
         </script>
     @endpush
 @endsection
