@@ -9,15 +9,30 @@ class CommissionSettlementTransaction extends Model
     protected $fillable = [
         'business_id',
         'transaction_no',
+
+        // Commission
         'payable_commission',
         'settlement_amount',
+
+        // Payment
         'payment_mode',
+        'payment_transaction_no',
+        'payment_reference_no',
+        'payment_slip',
+
+        // Vendor remarks
         'remarks',
+
+        // Status
         'status',
+
+        // Admin
         'approved_by',
         'approved_at',
         'admin_remarks',
-        'payment_reference',
+
+        // Final settlement
+        'settlement_reference_no',
         'paid_at',
     ];
 
@@ -28,13 +43,19 @@ class CommissionSettlementTransaction extends Model
         'paid_at'            => 'datetime',
     ];
 
+    /**
+     * Business
+     */
     public function business()
     {
         return $this->belongsTo(Business::class);
     }
 
+    /**
+     * Admin who approved the request
+     */
     public function approver()
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(Admin::class, 'approved_by');
     }
 }

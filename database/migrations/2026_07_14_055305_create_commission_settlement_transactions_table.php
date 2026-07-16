@@ -12,50 +12,56 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('commission_settlement_transactions', function (Blueprint $table) {
-            $table->id();
+                $table->id();
 
-            $table->foreignId('business_id')
-                ->constrained('businesses')
-                ->cascadeOnDelete();
+                $table->foreignId('business_id')
+                    ->constrained('businesses')
+                    ->cascadeOnDelete();
 
-            $table->string('transaction_no')->unique();
+                // Unique settlement request number
+                $table->string('transaction_no')->unique();
 
-            // Commission details
-            $table->decimal('payable_commission', 12, 2)->default(0);
-            $table->decimal('settlement_amount', 12, 2);
+                // Commission
+                $table->decimal('payable_commission', 12, 2)->default(0);
+                $table->decimal('settlement_amount', 12, 2);
 
-            // Payment details
-            $table->enum('payment_mode', [
-                'wallet',
-                'bank_transfer',
-                'upi',
-                'cash'
-            ]);
+                // Payment
+                $table->enum('payment_mode', [
+                    'wallet',
+                    'bank_transfer',
+                    'upi',
+                    'cash',
+                ]);
 
-            $table->text('remarks')->nullable();
+                // User payment details
+                $table->string('payment_transaction_no')->nullable();
+                $table->string('payment_reference_no')->nullable();
+                $table->string('payment_slip')->nullable(); // store file path
 
-            // Request status
-            $table->enum('status', [
-                'pending',
-                'approved',
-                'rejected',
-                'paid'
-            ])->default('pending');
+                $table->text('remarks')->nullable();
 
-            // Admin action
-            $table->foreignId('approved_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
+                // Settlement Status
+                $table->enum('status', [
+                    'pending',
+                    'approved',
+                    'rejected',
+                    'paid',
+                ])->default('pending');
 
-            $table->timestamp('approved_at')->nullable();
-            $table->text('admin_remarks')->nullable();
+                // Admin Action
+                $table->foreignId('approved_by')
+                    ->nullable()
+                    ->constrained('admins')
+                    ->nullOnDelete();
 
-            // Payment reference
-            $table->string('payment_reference')->nullable();
-            $table->timestamp('paid_at')->nullable();
+                $table->timestamp('approved_at')->nullable();
+                $table->text('admin_remarks')->nullable();
 
-            $table->timestamps();
+                // Final payment details (when admin pays vendor)
+                $table->string('settlement_reference_no')->nullable();
+                $table->timestamp('paid_at')->nullable();
+
+                $table->timestamps();
         });
     }
 

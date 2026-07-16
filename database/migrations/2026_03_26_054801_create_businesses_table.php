@@ -58,6 +58,17 @@ return new class extends Migration
             $table->json('working_days')->nullable();
 
 
+            $table->enum('commission_settlement_type', [
+                'daily',
+                'weekly',
+                'biweekly',
+                'monthly',
+            ])->default('monthly');
+
+            $table->unsignedTinyInteger('commission_settlement_day')->nullable();
+            // For weekly: 1=Monday ... 7=Sunday
+            // For monthly: 1-31
+
             $table->timestamps();
         });
     }
