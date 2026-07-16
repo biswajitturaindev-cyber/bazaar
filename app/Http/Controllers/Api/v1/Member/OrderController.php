@@ -99,7 +99,6 @@ class OrderController extends Controller
             $request->validate([
 
                 'user_id' => 'required|integer',
-
                 'phone'   => 'nullable|string',
 
                 // Billing Address
