@@ -20,7 +20,9 @@ class Business extends Model
         'registration_number',
         'admin_shop_status',
         'shop_status',
-        'working_days'
+        'working_days',
+        'commission_settlement_type',
+        'commission_settlement_day'
     ];
 
     protected $casts = [

@@ -221,6 +221,40 @@
                     </div>
 
 
+                    <div class="mt-4">
+                        <label class="block mb-2 font-medium">Commission Settlement Type</label>
+
+                        <select id="commission_settlement_type" name="commission_settlement_type"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+
+                            <option value="">Select Type</option>
+                            <option value="daily"
+                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'daily' ? 'selected' : '' }}>
+                                Daily
+                            </option>
+                            <option value="weekly"
+                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'weekly' ? 'selected' : '' }}>
+                                Weekly
+                            </option>
+                            <option value="monthly"
+                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'monthly' ? 'selected' : '' }}>
+                                Monthly
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block mb-2 font-medium">Commission Settlement Day</label>
+
+                        <select id="commission_settlement_day" name="commission_settlement_day"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+                        </select>
+
+                        @error('commission_settlement_day')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
 
 
                 </div>
@@ -236,4 +270,105 @@
 
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const typeSelect = document.getElementById('commission_settlement_type');
+            const daySelect = document.getElementById('commission_settlement_day');
+
+            const selectedDay =
+                "{{ old('commission_settlement_day', optional($user->business)->commission_settlement_day) }}";
+
+            const weekDays = [{
+                    value: 1,
+                    text: 'Monday'
+                },
+                {
+                    value: 2,
+                    text: 'Tuesday'
+                },
+                {
+                    value: 3,
+                    text: 'Wednesday'
+                },
+                {
+                    value: 4,
+                    text: 'Thursday'
+                },
+                {
+                    value: 5,
+                    text: 'Friday'
+                },
+                {
+                    value: 6,
+                    text: 'Saturday'
+                },
+                {
+                    value: 7,
+                    text: 'Sunday'
+                },
+            ];
+
+            function populateDays(type) {
+
+                daySelect.innerHTML = '<option value="">Select Day</option>';
+                daySelect.disabled = false;
+
+                if (type === 'weekly') {
+
+                    weekDays.forEach(day => {
+                        const option = document.createElement('option');
+                        option.value = day.value;
+                        option.textContent = day.text;
+
+                        if (parseInt(selectedDay) === day.value) {
+                            option.selected = true;
+                        }
+
+                        daySelect.appendChild(option);
+                    });
+
+                } else if (type === 'biweekly') {
+
+                    for (let i = 1; i <= 14; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `Day ${i}`;
+
+                        if (parseInt(selectedDay) === i) {
+                            option.selected = true;
+                        }
+
+                        daySelect.appendChild(option);
+                    }
+
+                } else if (type === 'monthly') {
+
+                    for (let i = 1; i <= 31; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i;
+
+                        if (parseInt(selectedDay) === i) {
+                            option.selected = true;
+                        }
+
+                        daySelect.appendChild(option);
+                    }
+
+                } else if (type === 'daily') {
+
+                    daySelect.innerHTML = '<option value="">Every Day</option>';
+                    daySelect.disabled = true;
+                }
+            }
+
+            populateDays(typeSelect.value);
+
+            typeSelect.addEventListener('change', function() {
+                populateDays(this.value);
+            });
+
+        });
+    </script>
 @endsection
