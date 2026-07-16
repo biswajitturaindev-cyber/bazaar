@@ -10,6 +10,15 @@
         </a>
     </div>
 
+    <div>
+        <a href="{{ route('banners.index') }}"
+            class="flex gap-3 items-center w-full text-slate-200 hover:text-orange-400 group">
+            <div class="w-10 h-10 shrink-0 bg-slate-600 rounded-md flex justify-center items-center">
+                <i class="iconoir-media-image"></i>
+            </div>
+            <span class="capitalize menu-text">Banner</span>
+        </a>
+    </div>
 
     <div>
         <a href="#"
