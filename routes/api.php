@@ -2,7 +2,6 @@
 use App\Http\Controllers\Api\AttributeController;
 use App\Http\Controllers\Api\AttributeMasterController;
 use App\Http\Controllers\Api\AttributeValueController;
-use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\BusinessCategoryMappingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,13 +60,6 @@ Route::get('/captcha', function () {
         ])
     ]);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Banners
-|--------------------------------------------------------------------------
-*/
-Route::get('banners', [BannerController::class, 'index']);
 
 
 /*
