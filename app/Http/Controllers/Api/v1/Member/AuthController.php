@@ -224,7 +224,7 @@ class AuthController extends Controller
      * Login User
      */
     public function login(Request $request)
-    { 
+    {
         try {
             $key = Str::lower($request->vendor_id) . '|' . $request->ip();
 

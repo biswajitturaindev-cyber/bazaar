@@ -154,6 +154,10 @@ class AuthController extends Controller
                 'pan_number' => $data['pan_number'] ?? null,
                 'fssai_license' => $data['fssai_license'] ?? null,
                 'registration_number' => $data['registration_number'] ?? null,
+
+                // Add other business fields as necessary
+                'shop_status' => 'open',
+                'working_days' => ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]
             ]);
 
             BusinessAddress::create([
