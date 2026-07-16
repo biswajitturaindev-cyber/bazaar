@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\v1\BannerController;
 use App\Http\Controllers\Api\v1\Member\AuthController;
 use App\Http\Controllers\Api\v1\Member\BusinessCategoryController;
 use App\Http\Controllers\Api\v1\Member\BusinessSubCategoryController;
@@ -37,6 +37,14 @@ Route::prefix('member')->middleware('member.api')->group(function () {
             ])
         ]);
     });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Banners
+    |--------------------------------------------------------------------------
+    */
+    Route::get('banners', [BannerController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------
