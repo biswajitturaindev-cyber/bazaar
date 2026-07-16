@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AttributemasterController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BusinessCategoryController;
 use App\Http\Controllers\Admin\BusinessCategoryMappingController;
@@ -212,6 +213,13 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('deposits', DepositController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Banners
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('banners', BannerController::class);
 
     });
 });
