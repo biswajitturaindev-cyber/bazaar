@@ -26,7 +26,6 @@ class OrderController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
-                'user_id'      => 'required|exists:users,id',
                 'search'       => 'nullable|string|max:100',
                 'order_status' => 'nullable|integer',
                 'per_page'     => 'nullable|integer|min:1|max:100',
