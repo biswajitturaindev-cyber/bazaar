@@ -14,7 +14,7 @@ use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Validator;
 class OrderController extends Controller
 {
 
@@ -25,10 +25,23 @@ class OrderController extends Controller
     {
         try {
 
-            $userId = $request->user_id;
-            $perPage = $request->get('per_page', 10);
+            $validator = Validator::make($request->all(), [
+                'user_id'      => 'required|exists:users,id',
+                'search'       => 'nullable|string|max:100',
+                'order_status' => 'nullable|integer',
+                'per_page'     => 'nullable|integer|min:1|max:100',
+            ]);
 
-            $orders = Order::with([
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+
+            $perPage = $request->input('per_page', 10);
+
+            $query = Order::with([
                     'business',
                     'businessCategory',
 
@@ -43,7 +56,24 @@ class OrderController extends Controller
 
                     'statusHistories',
                 ])
-                ->where('user_id', $userId)
+                ->where('user_id', $request->user_id);
+
+            // Search
+            if ($request->filled('search')) {
+                $search = trim($request->search);
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('order_no', 'like', "%{$search}%")
+                    ->orWhere('invoice_no', 'like', "%{$search}%");
+                });
+            }
+
+            // Order Status Filter
+            if ($request->filled('order_status')) {
+                $query->where('order_status', $request->order_status);
+            }
+
+            $orders = $query
                 ->latest()
                 ->paginate($perPage);
 
@@ -54,7 +84,7 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch orders.',
-                'error'   => $e->getMessage(),
+                'error'   => config('app.debug') ? $e->getMessage() : 'Internal Server Error',
             ], 500);
         }
     }
