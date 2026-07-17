@@ -298,7 +298,7 @@ class OrderController extends Controller
                     $platformCharge = CommissionSettlementOrder::PLATFORM_CHARGE;
 
                     $commissionAmount = $order->items->sum(function ($item) {
-                        return (($item->selling_price * $item->quantity) * $item->product_commission) / 100;
+                        return ($item->subtotal * $item->product_commission) / 100;
                     });
 
                     $settlementOrderAmount = $commissionAmount + $platformCharge;
