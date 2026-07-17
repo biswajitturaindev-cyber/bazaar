@@ -31,6 +31,9 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+            $data = $request->all();
+
+    dd($data); // Display all request data and stop execution
         $rules = [
 
             'name' => 'required|string|max:255',
