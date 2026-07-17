@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\BusinessSubCategoryController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CityController;
+use App\Http\Controllers\Api\CommissionController;
 use App\Http\Controllers\Api\CommissionReportController;
 use App\Http\Controllers\Api\DepositController;
 use App\Http\Controllers\Api\HsnController;
@@ -242,6 +243,12 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::resource('deposits', DepositController::class);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Commission
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('commissions', CommissionController::class);
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {
