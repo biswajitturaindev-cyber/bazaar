@@ -18,7 +18,7 @@ return new class extends Migration
                   ->constrained('users')
                   ->cascadeOnDelete();
 
-            $table->unsignedBigInteger('sponsor_id')->nullable()->index();
+            $table->string('sponsor_id')->nullable()->index();
 
             $table->enum('business_type', [
                 'sales',
