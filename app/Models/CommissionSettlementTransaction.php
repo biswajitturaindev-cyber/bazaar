@@ -58,4 +58,12 @@ class CommissionSettlementTransaction extends Model
     {
         return $this->belongsTo(Admin::class, 'approved_by');
     }
+
+    public function settlementOrders()
+    {
+        return $this->hasMany(
+            CommissionSettlementOrder::class,
+            'settlement_transaction_id'
+        );
+    }
 }

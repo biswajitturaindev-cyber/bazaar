@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\CommissionSettlementOrder;
 use App\Models\MemberLoyaltyWallet;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -285,6 +286,34 @@ class OrderController extends Controller
                 //         ]);
                 //     }
                 // }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Commission Settlement Order
+                |--------------------------------------------------------------------------
+                */
+
+                if (!CommissionSettlementOrder::where('order_id', $order->id)->exists()) {
+
+                    $platformCharge = CommissionSettlementOrder::PLATFORM_CHARGE;
+
+                    $commissionAmount = $order->items->sum(function ($item) {
+                        return (($item->selling_price * $item->quantity) * $item->product_commission) / 100;
+                    });
+
+                    $settlementOrderAmount = $commissionAmount + $platformCharge;
+
+                    CommissionSettlementOrder::create([
+                        'order_id'                    => $order->id,
+                        'business_id'                 => $order->business_id,
+                        'order_amount'                => $order->grand_total,
+                        'platform_charge'             => $platformCharge,
+                        'commission_amount'           => round($commissionAmount, 2),
+                        'settlement_order_amount'     => round($settlementOrderAmount, 2),
+                        'status'                      => 'processing',
+                    ]);
+                }
+
             }
 
             OrderStatusHistory::create([
