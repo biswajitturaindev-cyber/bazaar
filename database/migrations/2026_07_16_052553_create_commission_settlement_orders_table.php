@@ -35,13 +35,13 @@ return new class extends Migration
                 ->default(0.00)
                 ->comment('Platform charge deducted from each order');
 
-            // Order amount after platform charge deduction
-            $table->decimal('settlement_order_amount', 12, 2)
-                ->default(0)
-                ->comment('Order amount after platform charge deduction');
-
             // Commission for this order
             $table->decimal('commission_amount', 12, 2)->default(0);
+
+            // Commission amount plus platform charge
+            $table->decimal('settlement_order_amount', 12, 2)
+                ->default(0)
+                ->comment('Commission amount plus platform charge');
 
             $table->enum('status', [
                 'pending',

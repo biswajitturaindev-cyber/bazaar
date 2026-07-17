@@ -310,7 +310,7 @@ class OrderController extends Controller
                         'platform_charge'             => $platformCharge,
                         'commission_amount'           => round($commissionAmount, 2),
                         'settlement_order_amount'     => round($settlementOrderAmount, 2),
-                        'status'                      => 'processing',
+                        'status'                      => 'pending',
                     ]);
                 }
 
