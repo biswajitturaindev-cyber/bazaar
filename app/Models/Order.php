@@ -174,6 +174,11 @@ class Order extends Model
         );
     }
 
+    public function commissionSettlementOrder()
+    {
+        return $this->hasOne(CommissionSettlementOrder::class);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Accessors

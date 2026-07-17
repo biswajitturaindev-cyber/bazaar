@@ -99,4 +99,9 @@ class Business extends Model
         return $this->hasMany(Deposit::class);
     }
 
+    public function commissionSettlementOrders()
+    {
+        return $this->hasMany(CommissionSettlementOrder::class);
+    }
+
 }
