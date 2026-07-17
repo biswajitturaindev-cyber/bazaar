@@ -48,10 +48,10 @@ class AuthController extends Controller
             'agree_terms' => 'required|accepted',
             'confirm_info' => 'required|accepted',
 
-            'sponsor_id' => 'nullable|numeric',
+            'sponsor_id' => 'nullable|string',
             'dob' => 'nullable|date',
             'gender' => 'nullable|numeric',
-            'years_in_business' => 'nullable|numeric',
+            'years_in_business' => 'nullable|string',
             'gst_number' => 'nullable|string|max:50',
             'pan_number' => 'nullable|string|max:20',
             'fssai_license' => 'nullable|string|max:50',
