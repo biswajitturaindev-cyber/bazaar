@@ -292,25 +292,25 @@ class OrderController extends Controller
                 | Create Commission Settlement Order
                 |--------------------------------------------------------------------------
                 */
-
                 if (!CommissionSettlementOrder::where('order_id', $order->id)->exists()) {
 
-                    $platformCharge = CommissionSettlementOrder::PLATFORM_CHARGE;
-
                     $commissionAmount = $order->items->sum(function ($item) {
-                        return ($item->subtotal * $item->product_commission) / 100;
+                        $productAmount = $item->subtotal - CommissionSettlementOrder::PLATFORM_CHARGE;
+
+                        return ($productAmount * $item->product_commission) / 100;
                     });
 
-                    $settlementOrderAmount = $commissionAmount + $platformCharge;
-
                     CommissionSettlementOrder::create([
-                        'order_id'                    => $order->id,
-                        'business_id'                 => $order->business_id,
-                        'order_amount'                => $order->grand_total,
-                        'platform_charge'             => $platformCharge,
-                        'commission_amount'           => round($commissionAmount, 2),
-                        'settlement_order_amount'     => round($settlementOrderAmount, 2),
-                        'status'                      => 'pending',
+                        'order_id'                => $order->id,
+                        'business_id'             => $order->business_id,
+                        'order_amount'            => $order->grand_total,
+                        'platform_charge'         => CommissionSettlementOrder::PLATFORM_CHARGE,
+                        'commission_amount'       => round($commissionAmount, 2),
+                        'settlement_order_amount' => round(
+                            $commissionAmount + CommissionSettlementOrder::PLATFORM_CHARGE,
+                            2
+                        ),
+                        'status'                  => CommissionSettlementOrder::STATUS_PENDING,
                     ]);
                 }
 
