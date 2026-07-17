@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class CommissionSettlementOrder extends Model
 {
     const PLATFORM_CHARGE = 2.00;
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'order_id',
