@@ -39,7 +39,7 @@ return new class extends Migration
                   ->constrained('business_sub_categories')
                   ->cascadeOnDelete();
 
-            $table->integer('years_in_business')->nullable();
+            $table->string('years_in_business')->nullable();
             $table->string('gst_number')->nullable()->index();
             $table->string('pan_number')->nullable()->index();
             $table->string('fssai_license')->nullable();
