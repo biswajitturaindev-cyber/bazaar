@@ -104,4 +104,8 @@ class Business extends Model
         return $this->hasMany(CommissionSettlementOrder::class);
     }
 
+    public function commissionSettlementTransactions()
+    {
+        return $this->hasMany(CommissionSettlementTransaction::class, 'business_id');
+    }
 }
