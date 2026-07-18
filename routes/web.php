@@ -188,9 +188,10 @@ Route::prefix('admin')->group(function () {
         | Vendor Commission Master
         |--------------------------------------------------------------------------
         */
+        Route::get('/vendor-commissions/payment-pending-list',[VendorCommissionController::class, 'paymentPendingList'])->name('vendor-commissions.payment-pending-list');
+        Route::post('vendor-commissions/update-status',[VendorCommissionController::class, 'updateStatus'])->name('vendor-commissions.update-status');
         Route::resource('vendor-commissions', VendorCommissionController::class);
         Route::get('/vendor-commissions/invoices/{businessId}',[VendorCommissionController::class, 'invoiceList'])->name('vendor-commissions.invoice-list');
-
         /*
         |--------------------------------------------------------------------------
         | Orders

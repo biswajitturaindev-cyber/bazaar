@@ -249,6 +249,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('commissions', CommissionController::class);
+
+
 });
 
 Route::prefix('main')->middleware('main.api')->group(function () {

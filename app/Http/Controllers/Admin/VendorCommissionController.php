@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CommissionSettlementOrder;
+use App\Models\CommissionSettlementTransaction;
+use App\Models\MemberLoyaltyWallet;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\VendorLoyaltyWallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -336,5 +340,167 @@ class VendorCommissionController extends Controller
 
         ]);
     }
+
+    public function paymentPendingList(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $transactions = CommissionSettlementTransaction::with('business')
+                ->where('status', 'pending')
+                ->latest()
+                ->get();
+
+            $data = [];
+
+            foreach ($transactions as $key => $transaction) {
+
+                    $data[] = [
+                        // '',
+                        $transaction->transaction_no,
+                        optional($transaction->business)->business_name,
+                        number_format($transaction->payable_commission, 2),
+                        number_format($transaction->settlement_amount, 2),
+                        ucfirst(str_replace('_', ' ', $transaction->payment_mode)),
+                        '
+                        <select class="form-control form-control-sm change-status"
+                            data-id="'.$transaction->id.'"
+                            data-old-status="'.$transaction->status.'">
+                            <option value="pending" '.($transaction->status == 'pending' ? 'selected' : '').'>Pending</option>
+                            <option value="approved" '.($transaction->status == 'approved' ? 'selected' : '').'>Approved</option>
+                            <option value="rejected" '.($transaction->status == 'rejected' ? 'selected' : '').'>Rejected</option>
+                            <option value="paid" '.($transaction->status == 'paid' ? 'selected' : '').'>Paid</option>
+                        </select>
+                        ',
+                        $transaction->created_at->format('d-m-Y h:i A'),
+                    ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->draw),
+                'recordsTotal' => count($data),
+                'recordsFiltered' => count($data),
+                'data' => $data,
+            ]);
+        }
+
+        return view('admin.vendor-commissions.payment_pending_list');
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:commission_settlement_transactions,id',
+            'status' => 'required|in:pending,approved,rejected,paid',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $transaction = CommissionSettlementTransaction::findOrFail($request->id);
+
+            $transaction->update([
+                'status' => $request->status,
+            ]);
+
+            // Credit loyalty only when approved
+            if ($request->status === CommissionSettlementTransaction::STATUS_APPROVED) {
+
+                $settlementOrders = CommissionSettlementOrder::where(
+                    'settlement_transaction_id',
+                    $transaction->id
+                )->get();
+
+                foreach ($settlementOrders as $settlementOrder) {
+
+                    $order = Order::with('items')->find($settlementOrder->order_id);
+
+                    if (!$order) {
+                        continue;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Member Loyalty Wallet
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($order->user_id && !MemberLoyaltyWallet::where('order_id', $order->id)->exists()) {
+
+                        $lastWallet = MemberLoyaltyWallet::where('member_id', $order->user_id)
+                            ->latest('id')
+                            ->first();
+
+                        $opening = $lastWallet?->closing_points ?? 0;
+
+                        $points = $order->items()
+                            ->where('status', OrderItem::STATUS_CONFIRMED)
+                            ->sum('subtotal');
+
+                        MemberLoyaltyWallet::create([
+                            'member_id'        => $order->user_id,
+                            'order_id'         => $order->id,
+                            'transaction_no'   => 'MLW-' . now()->format('YmdHis') . '-' . $order->id,
+                            'transaction_type' => 'credit',
+                            'source'           => 'order',
+                            'points'           => $points,
+                            'opening_points'   => $opening,
+                            'closing_points'   => $opening + $points,
+                            'remarks'          => 'Loyalty points for Order ' . $order->order_no,
+                            'status'           => 'approved',
+                        ]);
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Vendor Loyalty Wallet
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($order->business_id && !VendorLoyaltyWallet::where('order_id', $order->id)->exists()) {
+
+                        $lastWallet = VendorLoyaltyWallet::where('business_id', $order->business_id)
+                            ->latest('id')
+                            ->first();
+
+                        $opening = $lastWallet?->closing_points ?? 0;
+
+                        $vendorPoints = $order->items()
+                            ->where('status', OrderItem::STATUS_CONFIRMED)
+                            ->sum('subtotal');
+
+                        VendorLoyaltyWallet::create([
+                            'business_id'      => $order->business_id,
+                            'order_id'         => $order->id,
+                            'order_type'       => 'member_order',
+                            'transaction_no'   => 'VLW-' . now()->format('YmdHis') . '-' . $order->id,
+                            'transaction_type' => 'credit',
+                            'source'           => 'order',
+                            'points'           => $vendorPoints,
+                            'opening_points'   => $opening,
+                            'closing_points'   => $opening + $vendorPoints,
+                            'remarks'          => 'Vendor commission for Order ' . $order->order_no,
+                            'status'           => 'approved',
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Status updated successfully.',
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
 }

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class CommissionSettlementTransaction extends Model
 {
+    const STATUS_PENDING  = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_PAID     = 'paid';
+
     protected $fillable = [
         'business_id',
         'transaction_no',
