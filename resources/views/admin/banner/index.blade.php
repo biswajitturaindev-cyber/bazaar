@@ -44,6 +44,7 @@
                         <tr>
                             <th>Sl.No</th>
                             <th>Title</th>
+                            <th>Banner Type</th>
                             <th>Image</th>
                             <th>Sort Order</th>
                             <th>Status</th>
@@ -77,30 +78,32 @@
                             searchable: false
                         },
                         {
-                            data: 1
+                            data: 1 // Title
                         },
                         {
-                            data: 2,
+                            data: 2 // Banner Type
+                        },
+                        {
+                            data: 3, // Image
                             orderable: false,
                             searchable: false
                         },
                         {
-                            data: 3
+                            data: 4 // Sort Order
                         },
                         {
-                            data: 4,
+                            data: 5, // Status
                             orderable: false,
                             searchable: false
                         },
                         {
-                            data: 5,
+                            data: 6, // Action
                             orderable: false,
                             searchable: false
                         }
                     ],
-
                     columnDefs: [{
-                        targets: [2, 4, 5],
+                        targets: [3, 5, 6],
                         render: function(data) {
                             return data;
                         }

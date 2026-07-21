@@ -250,36 +250,6 @@ class UserController extends Controller
                 'shop_status' => 'nullable|in:open,closed',
                 'working_days' => 'nullable|array',
                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
-                'commission_settlement_type' => 'required|in:daily,weekly,biweekly,monthly',
-                'commission_settlement_day' => [
-                    'nullable',
-                    'integer',
-                    function ($attribute, $value, $fail) use ($request) {
-                        switch ($request->commission_settlement_type) {
-                            case 'weekly':
-                                if ($value < 1 || $value > 7) {
-                                    $fail('Weekly settlement day must be between 1 and 7.');
-                                }
-                                break;
-
-                            case 'biweekly':
-                                if ($value < 1 || $value > 14) {
-                                    $fail('Biweekly settlement day must be between 1 and 14.');
-                                }
-                                break;
-
-                            case 'monthly':
-                                if ($value < 1 || $value > 31) {
-                                    $fail('Monthly settlement day must be between 1 and 31.');
-                                }
-                                break;
-
-                            case 'daily':
-                                // No day required
-                                break;
-                        }
-                    },
-                ],
             ]);
 
             // Update user
@@ -299,8 +269,6 @@ class UserController extends Controller
                     'admin_shop_status' => $validated['admin_shop_status'] ?? $user->business->admin_shop_status,
                     'shop_status' => $validated['shop_status'] ?? $user->business->shop_status,
                     'working_days' => $validated['working_days'] ?? $user->business->working_days,
-                    'commission_settlement_type' => $validated['commission_settlement_type'] ?? $user->business->commission_settlement_type,
-                    'commission_settlement_day' => $validated['commission_settlement_day'] ?? $user->business->commission_settlement_day,
                 ]);
             }
 
