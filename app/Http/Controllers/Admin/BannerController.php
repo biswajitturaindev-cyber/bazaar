@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Banner;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class BannerController extends Controller
 {
@@ -20,8 +22,9 @@ class BannerController extends Controller
             $columns = [
                 0 => 'id',
                 1 => 'title',
-                2 => 'sort_order',
-                3 => 'status',
+                2 => 'banner_type',
+                3 => 'sort_order',
+                4 => 'status',
             ];
 
             $totalData = Banner::count();
@@ -36,7 +39,10 @@ class BannerController extends Controller
 
             // Search
             if ($search = $request->input('search.value')) {
-                $query->where('title', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('banner_type', 'like', "%{$search}%");
+                });
             }
 
             $totalFiltered = $query->count();
@@ -54,6 +60,12 @@ class BannerController extends Controller
                 $image = $banner->image
                     ? '<img src="' . asset('storage/' . $banner->image) . '" class="w-16 h-12 rounded border object-cover">'
                     : '<img src="' . asset('images/no-image.png') . '" class="w-16 h-12 rounded border object-cover">';
+
+                $bannerType = match ($banner->banner_type) {
+                    'promotional_banner' => '<span class="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">Promotional Banner</span>',
+                    'advertisement_banner' => '<span class="px-2 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700">Advertisement Banner</span>',
+                    default => '-',
+                };
 
                 $status = $banner->status
                     ? '<span class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>'
@@ -76,6 +88,7 @@ class BannerController extends Controller
                 $data[] = [
                     '',
                     $banner->title,
+                    $bannerType,
                     $image,
                     $banner->sort_order,
                     $status,
@@ -93,7 +106,6 @@ class BannerController extends Controller
 
         return view('admin.banner.index');
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -109,6 +121,7 @@ class BannerController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'banner_type' => 'required|in:promotional_banner,advertisement_banner',
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'sort_order' => 'required|integer|min:0',
             'status' => 'required|boolean',
@@ -116,19 +129,35 @@ class BannerController extends Controller
 
         DB::beginTransaction();
 
+        $imagePath = null;
+
         try {
 
-            $imagePath = null;
-
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('banners', 'public');
+
+                $manager = new ImageManager(new Driver());
+
+                $file = $request->file('image');
+
+                $filename = time() . '_' . uniqid();
+
+                // Resize and convert to WebP
+                $banner = $manager->read($file)->cover(1200, 600);
+
+                $imagePath = "banners/{$filename}.webp";
+
+                Storage::disk('public')->put(
+                    $imagePath,
+                    compressToTargetSize($banner, 80)
+                );
             }
 
             Banner::create([
-                'title' => $request->title,
-                'image' => $imagePath,
-                'sort_order' => $request->sort_order,
-                'status' => $request->status,
+                'title'       => $request->title,
+                'banner_type' => $request->banner_type,
+                'image'       => $imagePath,
+                'sort_order'  => $request->sort_order,
+                'status'      => $request->status,
             ]);
 
             DB::commit();
@@ -186,6 +215,7 @@ class BannerController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'banner_type' => 'required|in:promotional_banner,advertisement_banner',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'sort_order' => 'required|integer|min:0',
             'status' => 'required|boolean',
@@ -199,16 +229,26 @@ class BannerController extends Controller
 
             if ($request->hasFile('image')) {
 
-                // Delete old image
+                $manager = new ImageManager(new Driver());
+                $file = $request->file('image');
+                $filename = time() . '_' . uniqid();
+                // Resize and convert to WebP
+                $image = $manager->read($file)->cover(1200, 600);
+                $imagePath = "banners/{$filename}.webp";
+                Storage::disk('public')->put(
+                    $imagePath,
+                    compressToTargetSize($image, 80)
+                );
+
+                // Delete old image after successful upload
                 if ($banner->image && Storage::disk('public')->exists($banner->image)) {
                     Storage::disk('public')->delete($banner->image);
                 }
-
-                // Upload new image
-                $banner->image = $request->file('image')->store('banners', 'public');
+                $banner->image = $imagePath;
             }
 
             $banner->title = $request->title;
+            $banner->banner_type = $request->banner_type;
             $banner->sort_order = $request->sort_order;
             $banner->status = $request->status;
 
@@ -242,8 +282,8 @@ class BannerController extends Controller
 
             $banner = Banner::findOrFail($id);
 
-            // Delete image
-            if ($banner->image && Storage::disk('public')->exists($banner->image)) {
+            // Delete banner image if it exists
+            if (!empty($banner->image) && Storage::disk('public')->exists($banner->image)) {
                 Storage::disk('public')->delete($banner->image);
             }
 
@@ -255,7 +295,7 @@ class BannerController extends Controller
                 ->route('banners.index')
                 ->with('success', 'Banner deleted successfully.');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             DB::rollBack();
 

@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('banners', function (Blueprint $table) {
             $table->id();
+            $table->enum('banner_type', [
+                'promotional_banner',
+                'advertisement_banner'
+            ])->default('promotional_banner');
             $table->string('title');
             $table->string('image');
             $table->boolean('status')->default(true);

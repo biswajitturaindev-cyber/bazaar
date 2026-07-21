@@ -29,6 +29,32 @@
 
             <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                {{-- Banner Type --}}
+                <div>
+                    <label class="block mb-2 font-medium">Banner Type</label>
+
+                    <select name="banner_type"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+
+                        <option value="">Select Banner Type</option>
+
+                        <option value="promotional_banner"
+                            {{ old('banner_type', $banner->banner_type) == 'promotional_banner' ? 'selected' : '' }}>
+                            Promotional Banner
+                        </option>
+
+                        <option value="advertisement_banner"
+                            {{ old('banner_type', $banner->banner_type) == 'advertisement_banner' ? 'selected' : '' }}>
+                            Advertisement Banner
+                        </option>
+
+                    </select>
+
+                    @error('banner_type')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 {{-- Title --}}
                 <div>
                     <label class="block mb-2 font-medium">Title</label>

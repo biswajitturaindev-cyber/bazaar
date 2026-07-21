@@ -21,8 +21,6 @@ class Business extends Model
         'admin_shop_status',
         'shop_status',
         'working_days',
-        'commission_settlement_type',
-        'commission_settlement_day'
     ];
 
     protected $casts = [
@@ -108,4 +106,10 @@ class Business extends Model
     {
         return $this->hasMany(CommissionSettlementTransaction::class, 'business_id');
     }
+    
+    public function settlementSchedules()
+    {
+        return $this->hasMany(BusinessSettlementSchedule::class);
+    }
+
 }
