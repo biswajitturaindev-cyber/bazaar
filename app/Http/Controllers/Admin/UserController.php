@@ -250,6 +250,13 @@ class UserController extends Controller
                 'shop_status' => 'nullable|in:open,closed',
                 'working_days' => 'nullable|array',
                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+
+                'settlement_type' => 'nullable|array',
+                'settlement_type.*' => 'required_with:settlement_day|in:daily,weekly,monthly',
+
+                'settlement_day' => 'nullable|array',
+                'settlement_day.*' => 'nullable|integer|min:1|max:31',
+
             ]);
 
             // Update user
@@ -270,6 +277,22 @@ class UserController extends Controller
                     'shop_status' => $validated['shop_status'] ?? $user->business->shop_status,
                     'working_days' => $validated['working_days'] ?? $user->business->working_days,
                 ]);
+
+                // Update settlement schedules
+                $user->business->settlementSchedules()->delete();
+                if ($request->filled('settlement_type')) {
+                    foreach ($request->settlement_type as $index => $type) {
+                        if (empty($type)) {
+                            continue;
+                        }
+                        $user->business->settlementSchedules()->create([
+                            'type' => $type,
+                            'day'  => $type === 'daily'
+                                ? null
+                                : ($request->settlement_day[$index] ?? null),
+                        ]);
+                    }
+                }
             }
 
             // Package update
