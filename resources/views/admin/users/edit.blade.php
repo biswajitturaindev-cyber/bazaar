@@ -221,38 +221,73 @@
                     </div>
 
 
-                    <div class="mt-4">
-                        <label class="block mb-2 font-medium">Commission Settlement Type</label>
+                    @php
+                        $schedules = optional($user->business)->settlementSchedules ?? collect();
+                    @endphp
 
-                        <select id="commission_settlement_type" name="commission_settlement_type"
-                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
+                    <div class="md:col-span-2">
+                        <label class="block mb-2 font-medium">Commission Settlement Schedule</label>
 
-                            <option value="">Select Type</option>
-                            <option value="daily"
-                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'daily' ? 'selected' : '' }}>
-                                Daily
-                            </option>
-                            <option value="weekly"
-                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'weekly' ? 'selected' : '' }}>
-                                Weekly
-                            </option>
-                            <option value="monthly"
-                                {{ old('commission_settlement_type', optional($user->business)->commission_settlement_type) == 'monthly' ? 'selected' : '' }}>
-                                Monthly
-                            </option>
-                        </select>
-                    </div>
+                        <div id="schedule-wrapper">
 
-                    <div class="mt-4">
-                        <label class="block mb-2 font-medium">Commission Settlement Day</label>
+                            @forelse($schedules as $schedule)
+                                <div class="schedule-row grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
 
-                        <select id="commission_settlement_day" name="commission_settlement_day"
-                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
-                        </select>
+                                    <select name="settlement_type[]" class="settlement-type border rounded-lg px-3 py-2">
 
-                        @error('commission_settlement_day')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                                        <option value="">Select Type</option>
+
+                                        <option value="daily" {{ $schedule->type == 'daily' ? 'selected' : '' }}>
+                                            Daily
+                                        </option>
+
+                                        <option value="weekly" {{ $schedule->type == 'weekly' ? 'selected' : '' }}>
+                                            Weekly
+                                        </option>
+
+                                        <option value="monthly" {{ $schedule->type == 'monthly' ? 'selected' : '' }}>
+                                            Monthly
+                                        </option>
+
+                                    </select>
+
+                                    <select name="settlement_day[]" class="settlement-day border rounded-lg px-3 py-2"
+                                        data-selected="{{ $schedule->day }}">
+                                    </select>
+
+                                    <button type="button" class="remove-row bg-red-500 text-white rounded px-4">
+                                        Remove
+                                    </button>
+
+                                </div>
+                            @empty
+
+                                <div class="schedule-row grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+
+                                    <select name="settlement_type[]" class="settlement-type border rounded-lg px-3 py-2">
+
+                                        <option value="">Select Type</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+
+                                    </select>
+
+                                    <select name="settlement_day[]"
+                                        class="settlement-day border rounded-lg px-3 py-2"></select>
+
+                                    <button type="button" class="remove-row bg-red-500 text-white rounded px-4">
+                                        Remove
+                                    </button>
+
+                                </div>
+                            @endforelse
+
+                        </div>
+
+                        <button type="button" id="add-schedule" class="bg-blue-600 text-white px-4 py-2 rounded">
+                            + Add Schedule
+                        </button>
                     </div>
 
 
@@ -271,103 +306,94 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        const weekDays = [
+            'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+        ];
 
-            const typeSelect = document.getElementById('commission_settlement_type');
-            const daySelect = document.getElementById('commission_settlement_day');
+        function fillDays(typeSelect, daySelect) {
 
-            const selectedDay =
-                "{{ old('commission_settlement_day', optional($user->business)->commission_settlement_day) }}";
+            let selected = daySelect.dataset.selected ?? '';
 
-            const weekDays = [{
-                    value: 1,
-                    text: 'Monday'
-                },
-                {
-                    value: 2,
-                    text: 'Tuesday'
-                },
-                {
-                    value: 3,
-                    text: 'Wednesday'
-                },
-                {
-                    value: 4,
-                    text: 'Thursday'
-                },
-                {
-                    value: 5,
-                    text: 'Friday'
-                },
-                {
-                    value: 6,
-                    text: 'Saturday'
-                },
-                {
-                    value: 7,
-                    text: 'Sunday'
-                },
-            ];
+            daySelect.innerHTML = '';
 
-            function populateDays(type) {
+            if (typeSelect.value === 'daily') {
 
-                daySelect.innerHTML = '<option value="">Select Day</option>';
+                daySelect.innerHTML = '<option value="">Every Day</option>';
+                daySelect.disabled = true;
+
+            } else if (typeSelect.value === 'weekly') {
+
                 daySelect.disabled = false;
 
-                if (type === 'weekly') {
+                weekDays.forEach((day, index) => {
 
-                    weekDays.forEach(day => {
-                        const option = document.createElement('option');
-                        option.value = day.value;
-                        option.textContent = day.text;
+                    daySelect.innerHTML +=
+                        `<option value="${index+1}" ${selected==index+1?'selected':''}>${day}</option>`;
 
-                        if (parseInt(selectedDay) === day.value) {
-                            option.selected = true;
-                        }
+                });
 
-                        daySelect.appendChild(option);
-                    });
+            } else if (typeSelect.value === 'monthly') {
 
-                } else if (type === 'biweekly') {
+                daySelect.disabled = false;
 
-                    for (let i = 1; i <= 14; i++) {
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.textContent = `Day ${i}`;
+                for (let i = 1; i <= 31; i++) {
 
-                        if (parseInt(selectedDay) === i) {
-                            option.selected = true;
-                        }
+                    daySelect.innerHTML +=
+                        `<option value="${i}" ${selected==i?'selected':''}>${i}</option>`;
 
-                        daySelect.appendChild(option);
-                    }
-
-                } else if (type === 'monthly') {
-
-                    for (let i = 1; i <= 31; i++) {
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.textContent = i;
-
-                        if (parseInt(selectedDay) === i) {
-                            option.selected = true;
-                        }
-
-                        daySelect.appendChild(option);
-                    }
-
-                } else if (type === 'daily') {
-
-                    daySelect.innerHTML = '<option value="">Every Day</option>';
-                    daySelect.disabled = true;
                 }
+
+            } else {
+
+                daySelect.innerHTML = '<option value="">Select Day</option>';
+
+            }
+        }
+
+        document.querySelectorAll('.schedule-row').forEach(row => {
+
+            fillDays(
+                row.querySelector('.settlement-type'),
+                row.querySelector('.settlement-day')
+            );
+
+        });
+
+        document.addEventListener('change', function(e) {
+
+            if (e.target.classList.contains('settlement-type')) {
+
+                fillDays(
+                    e.target,
+                    e.target.closest('.schedule-row').querySelector('.settlement-day')
+                );
+
             }
 
-            populateDays(typeSelect.value);
+        });
 
-            typeSelect.addEventListener('change', function() {
-                populateDays(this.value);
-            });
+        document.getElementById('add-schedule').addEventListener('click', function() {
+
+            let row = document.querySelector('.schedule-row').cloneNode(true);
+
+            row.querySelector('.settlement-type').value = '';
+            row.querySelector('.settlement-day').innerHTML = '';
+
+            document.getElementById('schedule-wrapper').appendChild(row);
+
+        });
+
+        document.addEventListener('click', function(e) {
+
+            if (e.target.classList.contains('remove-row')) {
+
+                if (document.querySelectorAll('.schedule-row').length > 1) {
+
+                    e.target.closest('.schedule-row').remove();
+
+                }
+
+            }
 
         });
     </script>
