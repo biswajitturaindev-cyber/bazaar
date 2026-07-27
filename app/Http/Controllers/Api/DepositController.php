@@ -167,6 +167,7 @@ class DepositController extends Controller
             $businessId = decodeIdOrFail($request->business_id, 'business_id');
 
             $balance = Deposit::where('business_id', $businessId)
+                ->where('status', 1)
                 ->sum('amount');
 
             return response()->json([
