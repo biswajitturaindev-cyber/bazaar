@@ -152,4 +152,42 @@ class DepositController extends Controller
     {
         //
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function balance(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'business_id' => 'required',
+            ]);
+
+            $businessId = decodeIdOrFail($request->business_id, 'business_id');
+
+            $balance = Deposit::where('business_id', $businessId)
+                ->where('status', 1)
+                ->sum('amount');
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Deposit balance fetched successfully.',
+                'data' => [
+                    'balance' => number_format($balance, 2, '.', ''),
+                ],
+            ]);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+
+        }
+    }
+
+
 }

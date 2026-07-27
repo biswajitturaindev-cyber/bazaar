@@ -241,6 +241,8 @@ Route::middleware('auth:sanctum')->group(function () {
     | Deposits
     |--------------------------------------------------------------------------
     */
+    Route::get('/deposit/balance', [DepositController::class, 'balance'])
+        ->name('deposit.balance');
     Route::resource('deposits', DepositController::class);
 
     /*
