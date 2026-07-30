@@ -149,7 +149,7 @@ class BannerController extends Controller
                 if ($request->banner_type === 'promotional_banner') {
                     $banner->scaleDown(width: 1472, height: 512);
                 } elseif ($request->banner_type === 'advertisement_banner') {
-                    $banner->scaleDown(width: 800, height: 278);
+                    $banner->scaleDown(width: 900, height: 313);
                 }
 
 
@@ -249,7 +249,7 @@ class BannerController extends Controller
                 if ($request->banner_type === 'promotional_banner') {
                     $image->scaleDown(width: 1472, height: 512);
                 } elseif ($request->banner_type === 'advertisement_banner') {
-                    $image->scaleDown(width: 800, height: 278);
+                    $image->scaleDown(width: 900, height: 313);
                 }
 
 
