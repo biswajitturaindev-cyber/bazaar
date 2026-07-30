@@ -17,6 +17,12 @@ class BannerResource extends JsonResource
     {
         return [
             'id' => Hashids::encode($this->id),
+            'banner_type' => $this->banner_type,
+            'banner_type_label' => match ($this->banner_type) {
+                'promotional_banner' => 'Promotional Banner',
+                'advertisement_banner' => 'Advertisement Banner',
+                default => '',
+            },
             'title' => $this->title,
             'image' => $this->image
                 ? asset('storage/' . $this->image)
