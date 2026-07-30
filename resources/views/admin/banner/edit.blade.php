@@ -87,7 +87,12 @@
 
                 {{-- Current Image --}}
                 <div>
-                    <label class="block mb-2 font-medium">Current Image</label>
+                    <label class="block mb-2 font-medium">
+                        Current Image
+                        <span class="text-red-600 font-semibold">
+                            (Recommended Size: 1472 × 512 px, Max: 2 MB)
+                        </span>
+                    </label>
 
                     @if ($banner->image)
                         <img src="{{ asset('storage/' . $banner->image) }}"
