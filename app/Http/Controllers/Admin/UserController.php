@@ -257,6 +257,9 @@ class UserController extends Controller
                 'settlement_day' => 'nullable|array',
                 'settlement_day.*' => 'nullable|integer|min:1|max:31',
 
+                'platform_charge' => 'nullable',
+                'commission_settlement_fee' => 'nullable',
+
             ]);
 
             // Update user
@@ -273,6 +276,8 @@ class UserController extends Controller
             // Update business details
             if ($user->business) {
                 $user->business->update([
+                    'platform_charge' => $validated['platform_charge'],
+                    'commission_settlement_fee' => $validated['commission_settlement_fee'],
                     'admin_shop_status' => $validated['admin_shop_status'] ?? $user->business->admin_shop_status,
                     'shop_status' => $validated['shop_status'] ?? $user->business->shop_status,
                     'working_days' => $validated['working_days'] ?? $user->business->working_days,
