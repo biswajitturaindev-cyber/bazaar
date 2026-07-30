@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '(Recommended Size: 1472 × 512 px, Max: 2 MB)';
         } else if (bannerType.value === 'advertisement_banner') {
             bannerSizeText.textContent =
-                '(Recommended Size: 736 × 240 px, Max: 2 MB)';
+                '(Recommended Size: 800 × 278 px, Max: 2 MB)';
         }
     }
 
