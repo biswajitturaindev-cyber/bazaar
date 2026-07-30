@@ -237,7 +237,10 @@ class BannerController extends Controller
                 $file = $request->file('image');
                 $filename = time() . '_' . uniqid();
                 // Resize and convert to WebP
-                $image = $manager->read($file)->cover(1200, 600);
+                //$image = $manager->read($file)->cover(1200, 600);
+                $image = $manager->read($file);
+
+                $image->scaleDown(width: 1472, height: 512);
                 $imagePath = "banners/{$filename}.webp";
                 Storage::disk('public')->put(
                     $imagePath,
