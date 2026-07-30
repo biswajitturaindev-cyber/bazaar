@@ -169,6 +169,37 @@
                         @enderror
                     </div>
 
+                    {{-- Platform Charge --}}
+                    <div>
+                        <label class="block mb-2 font-medium">
+                            Platform Charge (₹)
+                        </label>
+
+                        <input type="number"
+                            name="platform_charge"
+                            step="0.01"
+                            min="0"
+                            value="{{ old('platform_charge', optional($user->business)->platform_charge) }}"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                            placeholder="Enter platform charge">
+                    </div>
+
+                    {{-- Commission Settlement Fee --}}
+                    <div>
+                        <label class="block mb-2 font-medium">
+                            Commission Settlement Fee (₹)
+                        </label>
+
+                        <input type="number"
+                            name="commission_settlement_fee"
+                            step="0.01"
+                            min="0"
+                            value="{{ old('commission_settlement_fee', optional($user->business)->commission_settlement_fee) }}"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                            placeholder="Enter settlement fee">
+                    </div>
+
+
                     {{-- Admin Shop Status --}}
                     <div>
                         <label class="block mb-2 font-medium">Admin Shop Status</label>
