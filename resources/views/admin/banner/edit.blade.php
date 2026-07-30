@@ -33,7 +33,7 @@
                 <div>
                     <label class="block mb-2 font-medium">Banner Type</label>
 
-                    <select name="banner_type"
+                    <select name="banner_type" id="banner_type"
                         class="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200">
 
                         <option value="">Select Banner Type</option>
@@ -89,7 +89,7 @@
                 <div>
                     <label class="block mb-2 font-medium">
                         Current Image
-                        <span class="text-red-600 font-semibold">
+                        <span class="text-red-600 font-semibold" id="banner-size-text">
                             (Recommended Size: 1472 × 512 px, Max: 2 MB)
                         </span>
                     </label>
@@ -150,4 +150,29 @@
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const bannerType = document.getElementById('banner_type');
+    const bannerSizeText = document.getElementById('banner-size-text');
+
+    function updateBannerSize() {
+        if (bannerType.value === 'promotional_banner') {
+            bannerSizeText.textContent =
+                '(Recommended Size: 1472 × 512 px, Max: 2 MB)';
+        } else if (bannerType.value === 'advertisement_banner') {
+            bannerSizeText.textContent =
+                '(Recommended Size: 736 × 240 px, Max: 2 MB)';
+        }
+    }
+
+    // Initial load
+    updateBannerSize();
+
+    // On change
+    bannerType.addEventListener('change', updateBannerSize);
+});
+</script>
+
 @endsection
