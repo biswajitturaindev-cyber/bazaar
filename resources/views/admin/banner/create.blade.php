@@ -83,7 +83,12 @@
 
                 {{-- Image --}}
                 <div>
-                    <label class="block mb-2 font-medium">Banner Image</label>
+                    <label class="block mb-2 font-medium">
+                        Banner Image
+                        <span class="text-red-600 font-semibold">
+                            (Recommended Size: 1472 × 512 px, Max: 2 MB)
+                        </span>
+                    </label>
 
                     <input type="file"
                         name="image"

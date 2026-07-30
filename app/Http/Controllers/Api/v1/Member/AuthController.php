@@ -155,6 +155,8 @@ class AuthController extends Controller
                 'pan_number' => $data['pan_number'] ?? null,
                 'fssai_license' => $data['fssai_license'] ?? null,
                 'registration_number' => $data['registration_number'] ?? null,
+                'platform_charge' => config('business.platform_charge'),
+                'commission_settlement_fee' => config('business.commission_settlement_fee'),
             ]);
 
             BusinessAddress::create([

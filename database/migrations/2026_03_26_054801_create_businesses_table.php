@@ -45,6 +45,18 @@ return new class extends Migration
             $table->string('fssai_license')->nullable();
             $table->string('registration_number')->nullable();
 
+
+            // Platform charge per order
+            $table->decimal('platform_charge', 10, 2)
+                ->default(0.00)
+                ->comment('Platform charge per order');
+
+            // Commission settlement fee per transaction
+            $table->decimal('commission_settlement_fee', 10, 2)
+                ->default(0.00)
+                ->comment('Commission settlement fee per transaction');
+
+
             $table->enum('admin_shop_status', ['open', 'closed'])
                 ->default('open')
                 ->index();
