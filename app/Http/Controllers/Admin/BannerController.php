@@ -145,7 +145,12 @@ class BannerController extends Controller
                 //$banner = $manager->read($file)->cover(1472, 512);
                 $banner = $manager->read($file);
 
-                $banner->scaleDown(width: 1472, height: 512);
+                // Resize based on banner type (no cropping)
+                if ($request->banner_type === 'promotional_banner') {
+                    $banner->scaleDown(width: 1472, height: 512);
+                } elseif ($request->banner_type === 'advertisement_banner') {
+                    $banner->scaleDown(width: 736, height: 240);
+                }
 
 
                 $imagePath = "banners/{$filename}.webp";
@@ -240,7 +245,14 @@ class BannerController extends Controller
                 //$image = $manager->read($file)->cover(1200, 600);
                 $image = $manager->read($file);
 
-                $image->scaleDown(width: 1472, height: 512);
+                // Resize based on banner type (no cropping)
+                if ($request->banner_type === 'promotional_banner') {
+                    $image->scaleDown(width: 1472, height: 512);
+                } elseif ($request->banner_type === 'advertisement_banner') {
+                    $image->scaleDown(width: 736, height: 240);
+                }
+
+
                 $imagePath = "banners/{$filename}.webp";
                 Storage::disk('public')->put(
                     $imagePath,
