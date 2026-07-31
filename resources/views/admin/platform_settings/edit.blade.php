@@ -214,13 +214,13 @@
 
         </div>
     </div>
-@section('scripts')
+
 <script>
     $('#select_all').on('change', function () {
         $('.business_checkbox').prop('checked', $(this).is(':checked'));
     });
 </script>
-@endsection
+
 
 
 @endsection
