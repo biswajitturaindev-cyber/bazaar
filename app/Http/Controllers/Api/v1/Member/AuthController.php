@@ -18,6 +18,7 @@ use App\Models\BusinessAgreement;
 use App\Models\BusinessCategory;
 use App\Models\BusinessSubCategory;
 use App\Models\BusinessContact;
+use App\Models\PlatformSetting;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -143,6 +144,13 @@ class AuthController extends Controller
             $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
             $user->update(['vendor_id' => $vendorId]);
 
+            $platformSetting = PlatformSetting::where('status', 1)->first();
+
+            if (!$platformSetting) {
+                throw new \Exception('Platform settings not configured.');
+            }
+
+
             $business = Business::create([
                 'user_id' => $user->id,
                 'sponsor_id' => $data['sponsor_id'] ?? null,
@@ -155,8 +163,8 @@ class AuthController extends Controller
                 'pan_number' => $data['pan_number'] ?? null,
                 'fssai_license' => $data['fssai_license'] ?? null,
                 'registration_number' => $data['registration_number'] ?? null,
-                'platform_charge' => config('business.platform_charge'),
-                'commission_settlement_fee' => config('business.commission_settlement_fee'),
+                'platform_charge' => $platformSetting->platform_fee,
+                'commission_settlement_fee' => $platformSetting->settlement_fee,
             ]);
 
             BusinessAddress::create([
