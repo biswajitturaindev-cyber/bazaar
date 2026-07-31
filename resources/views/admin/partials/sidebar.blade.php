@@ -306,8 +306,10 @@
         </a>
         <ul
             class="list-none w-5/6 mx-auto space-y-2 overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out dropdown-content block">
-
-            <!--<li><a href="{{ route('change.password') }}" class="text-slate-400 text-sm hover:text-white">- Change Password</a></li>-->
+            <li><a href="{{ route('platform-settings.edit') }}" class="text-slate-400 text-sm hover:text-white">- Platform Setting</a></li>
+            <li><a href="{{ route('change.password') }}" class="text-slate-400 text-sm hover:text-white">- Change Password</a></li>
         </ul>
     </div>
+
+
 </aside>
