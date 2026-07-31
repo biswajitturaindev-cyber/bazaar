@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\KycDetailController;
 use App\Http\Controllers\Admin\MasterProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\PlatformSettingController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductReviewController;
 use App\Http\Controllers\Admin\UserController;
@@ -221,6 +222,21 @@ Route::prefix('admin')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::resource('banners', BannerController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Platform Setting
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/platform-settings', [PlatformSettingController::class, 'edit'])
+            ->name('platform-settings.edit');
+
+        Route::put('/platform-settings', [PlatformSettingController::class, 'update'])
+            ->name('platform-settings.update');
+
+        Route::post('/platform-settings/update-businesses', [PlatformSettingController::class, 'updateBusinesses'])
+    ->name('platform-settings.update-businesses');
+
 
     });
 });
