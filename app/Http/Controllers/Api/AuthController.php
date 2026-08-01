@@ -20,6 +20,7 @@ use App\Models\BusinessSubCategory;
 use App\Models\BusinessContact;
 use App\Models\User;
 use App\Models\Package;
+use App\Models\PlatformSetting;
 use App\Models\UserSubscription;
 use Carbon\Carbon;
 
@@ -142,6 +143,13 @@ class AuthController extends Controller
             $vendorId = 'RV' . str_pad($randomNumber, 8, '0', STR_PAD_LEFT);
             $user->update(['vendor_id' => $vendorId]);
 
+            $platformSetting = PlatformSetting::where('status', 1)->first();
+
+            if (!$platformSetting) {
+                throw new \Exception('Platform settings not configured.');
+            }
+
+
             $business = Business::create([
                 'user_id' => $user->id,
                 'sponsor_id' => $data['sponsor_id'] ?? null,
@@ -156,7 +164,9 @@ class AuthController extends Controller
 
                 // Add other business fields as necessary
                 'shop_status' => 'open',
-                'working_days' => ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]
+                'working_days' => ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+                'platform_charge' => $platformSetting->platform_fee,
+                'commission_settlement_fee' => $platformSetting->settlement_fee,
             ]);
 
             BusinessAddress::create([
