@@ -11,429 +11,718 @@
 @section('content')
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
-    @import url('https://cdn.jsdelivr.net/npm/@fancyapps/ui@5/dist/fancybox/fancybox.css');
+    @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap");
+@import url("https://cdn.jsdelivr.net/npm/@fancyapps/ui@5/dist/fancybox/fancybox.css");
 
-    :root {
-        --accent: #4f46e5;
-        --accent-light: #eef2ff;
-        --accent-mid: #c7d2fe;
-        --success: #059669;
-        --success-light: #ecfdf5;
-        --warning: #d97706;
-        --warning-light: #fffbeb;
-        --danger: #dc2626;
-        --danger-light: #fef2f2;
-        --text-primary: #111827;
-        --text-secondary: #6b7280;
-        --text-muted: #9ca3af;
-        --border: #e5e7eb;
-        --border-strong: #d1d5db;
-        --surface: #ffffff;
-        --surface-raised: #f9fafb;
-        --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-        --radius: 14px;
-        --radius-sm: 8px;
-        --radius-xs: 6px;
-    }
+:root {
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-mid: #c7d2fe;
+    --success: #059669;
+    --success-light: #ecfdf5;
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --surface: #ffffff;
+    --surface-raised: #f9fafb;
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+}
 
-    * { font-family: 'DM Sans', sans-serif; }
+* {
+    font-family: "DM Sans", sans-serif;
+}
 
-    /* ── Card ── */
-    .pd-card {
-        background: var(--surface);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-card);
-        border: 1px solid var(--border);
-        overflow: hidden;
-    }
+/* ── Card ── */
+.pd-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
 
-    /* ── Header ── */
-    .pd-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        padding: 22px 28px;
-        border-bottom: 1px solid var(--border);
-        background: var(--surface-raised);
-        gap: 16px;
-        flex-wrap: wrap;
-    }
+/* ── Header ── */
+.pd-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-raised);
+    gap: 16px;
+    flex-wrap: wrap;
+}
 
-    .pd-title {
-        font-size: 17px;
-        font-weight: 600;
-        color: var(--text-primary);
-        letter-spacing: -0.3px;
-        margin: 0 0 10px;
-    }
+.pd-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    margin: 0 0 10px;
+}
 
-    /* ── Status Pills ── */
-    .pd-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.01em;
-    }
+/* ── Status Pills ── */
+.pd-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
 
-    .pd-status-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
+.pd-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
 
-    .pd-status.approved { background: var(--success-light); color: var(--success); border: 1px solid #a7f3d0; }
-    .pd-status.pending  { background: var(--warning-light); color: var(--warning); border: 1px solid #fde68a; }
-    .pd-status.rejected { background: var(--danger-light);  color: var(--danger);  border: 1px solid #fecaca; }
+.pd-status.approved {
+    background: var(--success-light);
+    color: var(--success);
+    border: 1px solid #a7f3d0;
+}
+.pd-status.pending {
+    background: var(--warning-light);
+    color: var(--warning);
+    border: 1px solid #fde68a;
+}
+.pd-status.rejected {
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 1px solid #fecaca;
+}
 
-    .pd-status.approved .pd-status-dot { background: var(--success); }
-    .pd-status.pending  .pd-status-dot { background: var(--warning); }
-    .pd-status.rejected .pd-status-dot { background: var(--danger);  }
+.pd-status.approved .pd-status-dot {
+    background: var(--success);
+}
+.pd-status.pending .pd-status-dot {
+    background: var(--warning);
+}
+.pd-status.rejected .pd-status-dot {
+    background: var(--danger);
+}
 
-    /* ── Action Buttons ── */
-    .pd-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
+/* ── Action Buttons ── */
+.pd-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 
-    .pd-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 9px 18px;
-        border-radius: var(--radius-sm);
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.15s ease;
-        cursor: pointer;
-        border: none;
-        letter-spacing: 0.01em;
-        white-space: nowrap;
-        line-height: 1;
-    }
+.pd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    line-height: 1;
+}
 
-    .pd-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.pd-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
 
-    .pd-btn-approve { background: var(--success); color: #fff; box-shadow: 0 1px 3px rgba(5,150,105,0.3); }
-    .pd-btn-approve:hover { background: #047857; box-shadow: 0 3px 10px rgba(5,150,105,0.35); transform: translateY(-1px); color: #fff; text-decoration: none; }
+.pd-btn-approve {
+    background: var(--success);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+.pd-btn-approve:hover {
+    background: #047857;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.35);
+    transform: translateY(-1px);
+    color: #fff;
+    text-decoration: none;
+}
 
-    .pd-btn-reject { background: var(--danger); color: #fff; box-shadow: 0 1px 3px rgba(220,38,38,0.3); }
-    .pd-btn-reject:hover { background: #b91c1c; box-shadow: 0 3px 10px rgba(220,38,38,0.35); transform: translateY(-1px); color: #fff; text-decoration: none; }
+.pd-btn-reject {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+}
+.pd-btn-reject:hover {
+    background: #b91c1c;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.35);
+    transform: translateY(-1px);
+    color: #fff;
+    text-decoration: none;
+}
 
-    .pd-btn-back { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border-strong); }
-    .pd-btn-back:hover { background: var(--surface-raised); color: var(--text-primary); text-decoration: none; }
+.pd-btn-back {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-strong);
+}
+.pd-btn-back:hover {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    text-decoration: none;
+}
 
-    /* ── Content ── */
-    .pd-content { padding: 28px; }
+/* ── Content ── */
+.pd-content {
+    padding: 28px;
+}
 
-    /* ── Info Grid ── */
+/* ── Info Grid ── */
+.pd-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+@media (max-width: 480px) {
     .pd-info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        overflow: hidden;
+        grid-template-columns: 1fr;
     }
+}
 
-    @media (max-width: 480px) { .pd-info-grid { grid-template-columns: 1fr; } }
+.pd-info-cell {
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+}
+.pd-info-cell:hover {
+    background: var(--surface-raised);
+}
+.pd-info-cell:nth-child(2n) {
+    border-right: none;
+}
 
+@media (max-width: 480px) {
     .pd-info-cell {
-        padding: 16px 20px;
-        border-right: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        transition: background 0.12s;
+        border-right: none;
     }
-    .pd-info-cell:hover { background: var(--surface-raised); }
-    .pd-info-cell:nth-child(2n) { border-right: none; }
+}
 
-    @media (max-width: 480px) {
-        .pd-info-cell { border-right: none; }
-    }
+.pd-info-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
 
-    .pd-info-label {
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--text-muted);
-        margin-bottom: 5px;
-    }
+.pd-info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
 
-    .pd-info-value {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
+.pd-mono {
+    font-family: "DM Mono", monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+    background: var(--accent-light);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
 
-    .pd-mono {
-        font-family: 'DM Mono', monospace;
-        font-size: 12.5px;
-        color: var(--accent);
-        background: var(--accent-light);
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-    }
+/* ── Section Header ── */
+.pd-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 16px;
+}
 
-    /* ── Section Header ── */
-    .pd-section-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 32px 0 16px;
-    }
+.pd-section-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
 
-    .pd-section-title {
-        font-size: 13.5px;
-        font-weight: 600;
-        color: var(--text-primary);
-        white-space: nowrap;
-    }
+.pd-section-count {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
 
-    .pd-section-count {
-        background: var(--accent-light);
-        color: var(--accent);
-        font-size: 11px;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 999px;
-    }
+.pd-section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
 
-    .pd-section-line {
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-    }
+/* ── Variants Table ── */
+.pd-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
 
-    /* ── Variants Table ── */
-    .pd-table-wrap {
-        overflow-x: auto;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-    }
+.pd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
 
-    .pd-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13.5px;
-    }
+.pd-table thead tr {
+    background: var(--surface-raised);
+}
 
-    .pd-table thead tr { background: var(--surface-raised); }
+.pd-table th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
 
-    .pd-table th {
-        padding: 11px 16px;
-        text-align: left;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--text-muted);
-        border-bottom: 1px solid var(--border);
-        white-space: nowrap;
-    }
+.pd-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+}
+.pd-table tbody tr:last-child {
+    border-bottom: none;
+}
+.pd-table tbody tr:hover {
+    background: #fafbff;
+}
 
-    .pd-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
-    .pd-table tbody tr:last-child { border-bottom: none; }
-    .pd-table tbody tr:hover { background: #fafbff; }
+.pd-table td {
+    padding: 14px 16px;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
 
-    .pd-table td {
-        padding: 14px 16px;
-        color: var(--text-primary);
-        vertical-align: middle;
-    }
+/* image */
+.pd-variant-img {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-xs);
+    object-fit: cover;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+    display: block;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
 
-    /* image */
-    .pd-variant-img {
-        width: 52px;
-        height: 52px;
-        border-radius: var(--radius-xs);
-        object-fit: cover;
-        border: 1px solid var(--border);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-        display: block;
-        cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
+.pd-variant-img:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
-    .pd-variant-img:hover {
-        transform: scale(1.06);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+.pd-img-thumb-wrap {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
 
-    .pd-img-thumb-wrap {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-    }
+.pd-img-thumb-wrap:hover .pd-img-zoom-icon {
+    opacity: 1;
+}
 
-    .pd-img-thumb-wrap:hover .pd-img-zoom-icon {
-        opacity: 1;
-    }
+.pd-img-zoom-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: var(--radius-xs);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
 
-    .pd-img-zoom-icon {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0,0,0,0.35);
-        border-radius: var(--radius-xs);
-        opacity: 0;
-        transition: opacity 0.15s ease;
-        pointer-events: none;
-    }
+.pd-img-zoom-icon svg {
+    width: 16px;
+    height: 16px;
+    color: #fff;
+}
 
-    .pd-img-zoom-icon svg {
-        width: 16px;
-        height: 16px;
-        color: #fff;
-    }
+.pd-img-placeholder {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-raised);
+    border: 1px dashed var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+.pd-img-placeholder svg {
+    width: 20px;
+    height: 20px;
+}
 
-    .pd-img-placeholder {
-        width: 52px;
-        height: 52px;
-        border-radius: var(--radius-xs);
-        background: var(--surface-raised);
-        border: 1px dashed var(--border-strong);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-    }
-    .pd-img-placeholder svg { width: 20px; height: 20px; }
+/* variant */
+.pd-variant-name {
+    font-weight: 500;
+}
 
-    /* variant */
-    .pd-variant-name { font-weight: 500; }
+/* attributes */
+.pd-attr-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
 
-    /* attributes */
-    .pd-attr-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.pd-attr-tag {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-mid);
+    white-space: nowrap;
+}
 
-    .pd-attr-tag {
-        background: var(--accent-light);
-        color: var(--accent);
-        font-size: 11.5px;
-        font-weight: 500;
-        padding: 3px 9px;
-        border-radius: 999px;
-        border: 1px solid var(--accent-mid);
-        white-space: nowrap;
-    }
+.pd-attr-key {
+    opacity: 0.6;
+}
 
-    .pd-attr-key { opacity: 0.6; }
+/* price */
+.pd-price {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 13px;
+}
 
-    /* price */
-    .pd-price {
-        font-family: 'DM Mono', monospace;
-        font-weight: 500;
-        font-size: 13px;
-    }
+/* stock */
+.pd-stock {
+    font-weight: 600;
+    font-size: 13px;
+}
+.pd-stock.in-stock {
+    color: var(--success);
+}
+.pd-stock.low-stock {
+    color: var(--warning);
+}
+.pd-stock.out-stock {
+    color: var(--danger);
+}
 
-    /* stock */
-    .pd-stock { font-weight: 600; font-size: 13px; }
-    .pd-stock.in-stock  { color: var(--success); }
-    .pd-stock.low-stock { color: var(--warning); }
-    .pd-stock.out-stock { color: var(--danger);  }
+/* business */
+.pd-biz {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+}
+.pd-biz::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex-shrink: 0;
+}
 
-    /* business */
-    .pd-biz {
-        font-size: 12.5px;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 1px 0;
-    }
-    .pd-biz::before {
-        content: '';
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--border-strong);
-        flex-shrink: 0;
-    }
+/* empty state */
+.pd-empty {
+    text-align: center;
+    padding: 48px 20px;
+}
 
-    /* empty state */
-    .pd-empty { text-align: center; padding: 48px 20px; }
+.pd-empty-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    color: var(--text-muted);
+}
+.pd-empty-icon svg {
+    width: 22px;
+    height: 22px;
+}
+.pd-empty-title {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.pd-empty-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
 
-    .pd-empty-icon {
-        width: 48px;
-        height: 48px;
-        background: var(--surface-raised);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 12px;
-        color: var(--text-muted);
-    }
-    .pd-empty-icon svg { width: 22px; height: 22px; }
-    .pd-empty-title { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
-    .pd-empty-sub   { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+.status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
 
-    .status-row{
-        display:flex;
-        flex-wrap:wrap;
-        gap:20px;
-    }
+.status-col {
+    flex: 1;
+    min-width: 200px;
+}
 
-    .status-col{
-        flex:1 1 calc(25% - 15px);
-        min-width:220px;
-    }
+.custom-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
 
-    .custom-label{
-        display:block;
-        font-size:14px;
-        font-weight:600;
-        color:#374151;
-        margin-bottom:8px;
-    }
+.custom-select {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
 
-    .custom-select{
-        width:100%;
-        height:44px;
-        padding:0 12px;
-        border:1px solid #d1d5db;
-        border-radius:8px;
-        background:#fff;
-        font-size:14px;
-        transition:all .3s ease;
-    }
+.custom-select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    outline: none;
+}
 
-    .custom-select:focus{
-        border-color:#4f46e5;
-        box-shadow:0 0 0 3px rgba(79,70,229,.15);
-        outline:none;
-    }
+.alert-success {
+    background-color: #d1e7dd !important;
+    border-color: #badbcc !important;
+    color: #0f5132 !important;
+    font-weight: 500;
+}
 
+.alert-danger {
+    background-color: #f8d7da !important;
+    border-color: #f5c2c7 !important;
+    color: #842029 !important;
+    font-weight: 500;
+}
 
-    .alert-success{
-        background-color: #d1e7dd !important;
-        border-color: #badbcc !important;
-        color: #0f5132 !important;
-        font-weight: 500;
-    }
+.alert {
+    border-radius: 8px;
+    padding: 14px 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-    .alert-danger{
-        background-color: #f8d7da !important;
-        border-color: #f5c2c7 !important;
-        color: #842029 !important;
-        font-weight: 500;
-    }
+/* ===============================
+   STATUS UPDATE FORM
+================================ */
 
-    .alert{
-        border-radius: 8px;
-        padding: 14px 18px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+.pd-status-update {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.pd-form-header {
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.pd-form-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.pd-form-header p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+}
+
+.custom-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+}
+
+.custom-label span {
+    color: #9ca3af;
+}
+
+.custom-input {
+    width: 100%;
+    height: 44px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+
+    padding: 0 14px;
+
+    background: #fff;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.custom-input:hover {
+    border-color: #9ca3af;
+}
+
+.custom-input:focus {
+    outline: none;
+
+    border-color: #4f46e5;
+
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper span {
+    position: absolute;
+
+    right: 14px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #6b7280;
+
+    font-weight: 600;
+}
+
+.input-wrapper input {
+    padding-right: 40px;
+}
+
+/* Footer */
+
+.form-footer {
+    margin-top: 25px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #e5e7eb;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+}
+
+.save-btn {
+    height: 42px;
+
+    padding: 0 22px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #059669;
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: #047857;
+}
+
+.cancel-btn {
+    height: 42px;
+
+    padding: 0 22px;
+
+    border-radius: 10px;
+
+    border: 1px solid #d1d5db;
+
+    display: flex;
+
+    align-items: center;
+
+    color: #374151;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    background: #fff;
+}
+
+.cancel-btn:hover {
+    background: #f9fafb;
+}
 
 </style>
 
@@ -528,80 +817,130 @@
                 </a> --}}
 
                 <div class="pd-status-update">
-
+                    <div class="pd-form-header">
+                        <div>
+                            <h3>Approval & Commission Settings</h3>
+                            <p>Update product approval status and vendor commission configuration</p>
+                        </div>
+                    </div>
+                
                     <form
                         action="{{ route('admin.product-review.update-status', [$product->business_category_id, $product->id]) }}"
                         method="POST"
-                        class="d-flex align-items-center gap-2"
                     >
-                        @csrf
-                        @method('PUT')
-
+                        @csrf @method('PUT')
+                
                         <div class="status-row">
-
+                            {{-- Status --}}
                             <div class="status-col">
-                                <label class="custom-label">Status</label>
-
-                                <select name="status" class="custom-select">
-                                    <option value="2" {{ $product->status == 2 ? 'selected' : '' }}>
-                                        Pending
-                                    </option>
-
-                                    <option value="1" {{ $product->status == 1 ? 'selected' : '' }}>
-                                        Approved
-                                    </option>
-
-                                    <option value="0" {{ $product->status == 0 ? 'selected' : '' }}>
-                                        Rejected
-                                    </option>
+                                <label class="custom-label"> Product Status </label>
+                
+                                <select name="status" class="custom-input">
+                                    <option value="2" {{ $product->status == 2 ? 'selected' : '' }}> Pending Approval</option>
+                
+                                    <option value="1" {{ $product->status == 1 ? 'selected' : '' }}> Approved</option>
+                
+                                    <option value="0" {{ $product->status == 0 ? 'selected' : '' }}> Rejected</option>
                                 </select>
                             </div>
-
-                            <div class="status-col">
-                                <label class="custom-label">Commission (%)</label>
-                                <input type="number" name="commission" class="custom-select" value="{{ $product->commission ?? 0 }}" min="0" max="100" step="0.01">
-                            </div>
-
-                            <div class="status-col">
-                                <label class="custom-label">Vendor Commission (%)</label>
-                                <input type="number" name="vendor_commission" class="custom-select" value="{{ $product->vendor_commission ?? 0 }}" min="0" max="100" step="0.01">
-                            </div>
-
+                
+                            {{-- Vendor --}}
                             <div class="status-col">
                                 <label class="custom-label">
-                                    Vendor Comm. Status
+                                    Vendor Commission
+                                    <span>(%)</span>
                                 </label>
-
-                                <select name="vendor_commission_approval_status" class="custom-select">
-
-                                    <option value="0"
-                                        {{ $product->vendor_commission_approval_status == 0 ? 'selected' : '' }}>
-                                        Waiting for Approval
+                
+                                <div class="input-wrapper">
+                                    <input
+                                        type="number"
+                                        name="vendor_commission"
+                                        class="custom-input"
+                                        value="{{ $product->vendor_commission ?? $product->commission ?? 0 }}"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                    />
+                                    <span>%</span>
+                                </div>
+                            </div>
+                
+                            {{-- Member --}}
+                            <div class="status-col">
+                                <label class="custom-label">
+                                    Member Bonus
+                                    <span>(%)</span>
+                                </label>
+                
+                                <div class="input-wrapper">
+                                    <input
+                                        type="number"
+                                        name="member_comm"
+                                        class="custom-input"
+                                        value="{{ $product->member_comm ?? 0 }}"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                    />
+                                    <span>%</span>
+                                </div>
+                            </div>
+                
+                            {{-- Sponsor --}}
+                            <div class="status-col">
+                                <label class="custom-label">
+                                    Vendor Sponsor Bonus
+                                    <span>(%)</span>
+                                </label>
+                
+                                <div class="input-wrapper">
+                                    <input
+                                        type="number"
+                                        name="sponsor_comm"
+                                        class="custom-input"
+                                        value="{{ $product->sponsor_comm ?? 0 }}"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                    />
+                                    <span>%</span>
+                                </div>
+                            </div>
+                
+                            {{-- Commission Approval --}}
+                            <div class="status-col">
+                                <label class="custom-label"> Commission Status </label>
+                
+                                <select name="vendor_commission_approval_status" class="custom-input">
+                                    <option value="0" {{ $product->
+                                        vendor_commission_approval_status == 0 ? 'selected' : '' }}> Waiting Approval
                                     </option>
-
-                                    <option value="1"
-                                        {{ $product->vendor_commission_approval_status == 1 ? 'selected' : '' }}>
-                                        Approved
+                
+                                    <option value="1" {{ $product->
+                                        vendor_commission_approval_status == 1 ? 'selected' : '' }}> Approved
                                     </option>
-
-                                    <option value="2"
-                                        {{ $product->vendor_commission_approval_status == 2 ? 'selected' : '' }}>
-                                        Rejected
+                
+                                    <option value="2" {{ $product->
+                                        vendor_commission_approval_status == 2 ? 'selected' : '' }}> Rejected
                                     </option>
-
                                 </select>
                             </div>
-
                         </div>
-
-
-                        <button type="submit" class="pd-btn pd-btn-approve mt-5">
-                            Update
-                        </button>
-
+                
+                        <div class="form-footer">
+                            <a href="{{ url()->previous() }}" class="cancel-btn"> Cancel </a>
+                
+                            <button type="submit" class="save-btn">
+                                <svg width="16" height="16" viewBox="0 0 16 16">
+                                    <path d="M13 4L6 11L3 8" fill="none" stroke="currentColor" stroke-width="2" />
+                                </svg>
+                
+                                Save Changes
+                            </button>
+                        </div>
                     </form>
-
                 </div>
+
 
 
 
