@@ -12,7 +12,7 @@ class EducationStationary extends Model
 {
     use HasFactory, SoftDeletes, HasProductType, HasPrimaryVariant;
 
-    protected $table = 'education_stationaries';
+    protected $table = 'product_education_stationaries';
     protected $fillable = [
         'business_id',
         'business_category_id',
