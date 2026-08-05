@@ -25,6 +25,8 @@ class ProductRetail extends Model
         'has_variant',
         'commission',
         'vendor_commission',
+        'member_comm',
+        'sponsor_comm',
         'vendor_commission_approval_status',
         'name',
         'status',

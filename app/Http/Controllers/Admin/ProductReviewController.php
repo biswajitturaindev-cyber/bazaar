@@ -51,6 +51,8 @@ class ProductReviewController extends Controller
                         'hsn_id',
                         'commission',
                         'vendor_commission',
+                        'member_comm',
+                        'sponsor_comm',
                         'vendor_commission_approval_status',
                         'status',
                         'created_at'
@@ -77,6 +79,7 @@ class ProductReviewController extends Controller
                                 'selling_price',
                                 'mrp',
                                 'cost_price',
+                                'pv',
                                 'is_primary',
                                 'manufacture_date',
                                 'expiry_date',
@@ -130,12 +133,7 @@ class ProductReviewController extends Controller
                 ->sortByDesc('created_at')
                 ->values();
 
-
-
-            return view(
-                'admin.product-reviews.index',
-                compact('products')
-            );
+            return view('admin.product-reviews.index', compact('products'));
 
         } catch (\Exception $e) {
 
@@ -150,7 +148,7 @@ class ProductReviewController extends Controller
 
             return back()->with(
                 'error',
-                'Something went wrong. Please try again.'
+                $e->getMessage()
             );
         }
     }

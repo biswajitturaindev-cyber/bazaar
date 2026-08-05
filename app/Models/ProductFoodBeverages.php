@@ -23,6 +23,8 @@ class ProductFoodBeverages extends Model
         'name',
         'commission',
         'vendor_commission',
+        'member_comm',
+        'sponsor_comm',
         'vendor_commission_approval_status',
         'batch_no',
         'status',

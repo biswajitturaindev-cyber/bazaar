@@ -2,11 +2,6 @@
 RewriteEngine On
 RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
-<IfModule mod_headers.c>
-    Header always set Access-Control-Allow-Origin "*"
-    Header always set Access-Control-Allow-Methods "GET, OPTIONS"
-    Header always set Access-Control-Allow-Headers "*"
-</IfModule>
 
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php82” package as the default “PHP” programming language.
