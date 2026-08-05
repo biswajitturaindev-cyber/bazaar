@@ -140,27 +140,38 @@
                                 </td>
 
                                 <td class="px-3 py-2">
-                                    <div class="space-y-1 text-xs">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600 font-medium">Vendor → Admin</span>
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-semibold">
-                                                {{ (($product->vendor_commission ?? $product->commission ?? 0) * 100) }}%
+                                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm space-y-2">
+                                
+                                        <div class="flex items-center justify-between">
+                                            <span class="flex items-center gap-2 text-xs font-bold text-gray-700">
+                                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                Vendor Commission
+                                            </span>
+                                            <span class="text-xs font-bold text-blue-600">
+                                                {{ $product->vendor_commission ?? $product->commission ?? 0 }}%
                                             </span>
                                         </div>
                                 
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600 font-medium">Member</span>
-                                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded font-semibold">
-                                                {{ (($product->member_comm ?? 0) * 100) }}%
+                                        <div class="flex items-center justify-between">
+                                            <span class="flex items-center gap-2 text-xs font-bold text-gray-700">
+                                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                                Member Bonus
+                                            </span>
+                                            <span class="text-xs font-bold text-green-600">
+                                                {{ $product->member_comm ?? 0 }}%
                                             </span>
                                         </div>
                                 
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600 font-medium">Vendor Sponsor</span>
-                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded font-semibold">
-                                                {{ (($product->sponsor_comm ?? 0) * 100) }}%
+                                        <div class="flex items-center justify-between">
+                                            <span class="flex items-center gap-2 text-xs font-bold text-gray-700">
+                                                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                                                Sponsor Bonus
+                                            </span>
+                                            <span class="text-xs font-bold text-purple-600">
+                                                {{ $product->sponsor_comm ?? 0 }}%
                                             </span>
                                         </div>
+                                
                                     </div>
                                 </td>
 

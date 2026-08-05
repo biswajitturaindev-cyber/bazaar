@@ -42,21 +42,18 @@
             </a>
         </div>
 
-        {{-- Success Message --}}
         @if(session('success'))
             <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Error Message (Exception) --}}
         @if(session('error'))
             <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
                 {{ session('error') }}
             </div>
         @endif
 
-        {{-- Validation Errors --}}
         @if ($errors->any())
             <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
                 <ul>
@@ -74,7 +71,6 @@
 
             <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- Business Category --}}
                 <div>
                     <label>Business Category</label>
                     <select name="business_category_id" id="business_category_id" class="w-full border rounded-lg px-3 py-2">
@@ -88,7 +84,6 @@
                     </select>
                 </div>
 
-                {{-- Business Sub Category --}}
                 <div>
                     <label>Business Sub Category</label>
                     <select name="business_sub_category_id" id="business_sub_category_id" class="w-full border rounded-lg px-3 py-2">
@@ -102,7 +97,6 @@
                     </select>
                 </div>
 
-                {{-- Category --}}
                 <div>
                     <label>Category</label>
                     <select name="category_id" id="category_id" class="w-full border rounded-lg px-3 py-2">
@@ -116,7 +110,6 @@
                     </select>
                 </div>
 
-                {{-- Sub Category --}}
                 <div>
                     <label>Sub Category</label>
                     <select name="sub_category_id" id="sub_category_id" class="w-full border rounded-lg px-3 py-2">
@@ -130,7 +123,6 @@
                     </select>
                 </div>
 
-                {{-- Sub Sub Category --}}
                 <div>
                     <label>Sub Sub Category</label>
                     <select name="sub_sub_category_id" id="sub_sub_category_id" class="w-full border rounded-lg px-3 py-2">
@@ -144,14 +136,12 @@
                     </select>
                 </div>
 
-                {{-- Product Name --}}
                 <div>
                     <label>Product Name</label>
                     <input type="text" name="name" value="{{ $product->name }}"
                         class="w-full border rounded-lg px-3 py-2">
                 </div>
 
-                {{-- MRP --}}
                 <div>
                     <label>MRP</label>
                     <input type="number" step="0.01" name="mrp"
@@ -159,7 +149,6 @@
                         class="w-full border rounded-lg px-3 py-2">
                 </div>
 
-                {{-- Selling Price --}}
                 <div>
                     <label>Selling Price</label>
                     <input type="number" step="0.01" name="selling_price"
@@ -167,7 +156,6 @@
                         class="w-full border rounded-lg px-3 py-2">
                 </div>
 
-                {{-- HSN --}}
                 <div>
                     <label>HSN</label>
                     <select name="hsn_id" class="w-full border rounded-lg px-3 py-2">
@@ -181,7 +169,6 @@
                     </select>
                 </div>
 
-                {{-- Image --}}
                 <div>
                     <label>Image</label>
                     <input type="file" name="image" class="w-full border rounded-lg px-3 py-2">
@@ -193,14 +180,11 @@
                     @endif
                 </div>
 
-                {{-- Description --}}
                 <div class="md:col-span-2">
                     <label>Description</label>
                     <textarea name="description" class="w-full border rounded-lg px-3 py-2">{{ $product->description }}</textarea>
                 </div>
 
-
-                {{-- Status --}}
                 <div>
                     <label>Status</label>
                     <select name="status" class="w-full border rounded-lg px-3 py-2">

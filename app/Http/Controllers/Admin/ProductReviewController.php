@@ -356,7 +356,9 @@ class ProductReviewController extends Controller
             $request->validate([
                 'status' => 'required|integer|in:0,1,2',
                 'commission' => 'nullable|numeric|min:0|max:100',
-                'vendor_commission' => 'nullable|numeric|min:0|max:100',
+                'vendor_commission' => 'required|numeric|min:0|max:100',
+                'member_comm' => 'required|numeric|min:0|max:100',
+                'sponsor_comm' => 'required|numeric|min:0|max:100',
                 'vendor_commission_approval_status' => 'required|integer|in:0,1,2',
             ]);
 
@@ -371,8 +373,9 @@ class ProductReviewController extends Controller
             // Update review product
             $product->update([
                 'status' => $request->status,
-                'commission' => $request->commission ?? 0,
                 'vendor_commission' => $request->vendor_commission ?? 0,
+                'member_comm' => $request->member_comm ?? 0,
+                'sponsor_comm' => $request->sponsor_comm ?? 0,
                 'vendor_commission_approval_status' => $request->vendor_commission_approval_status,
             ]);
 
@@ -385,7 +388,7 @@ class ProductReviewController extends Controller
                     3  => ProductHomeLiving::class,
                     4  => ProductFashionLifestyle::class,
                     5  => ProductAutomobile::class,
-                    6  => EducationStationary::class,
+                    6  => ProductEducationStationary::class,
                     7  => ProductAgriculture::class,
                     8  => ProductRetail::class,
                     9  => ProductHealth::class,
