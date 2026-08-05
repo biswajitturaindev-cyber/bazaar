@@ -27,6 +27,8 @@ class ProductResource extends JsonResource
 
             'commission' => $this->commission,
             'vendor_commission' => $this->vendor_commission,
+            'member_comm' => $this->member_comm,
+            'sponsor_comm' => $this->sponsor_comm,
             'vendor_commission_approval_status' => $this->vendor_commission_approval_status,
             'vendor_commission_approval_status_label' => $this->vendor_commission_approval_status_text,
 
