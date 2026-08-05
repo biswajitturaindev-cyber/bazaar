@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('education_stationaries', function (Blueprint $table) {
+        Schema::create('product_education_stationaries', function (Blueprint $table) {
             $table->id();
 
             // Business
@@ -79,6 +79,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('education_stationaries');
+        Schema::dropIfExists('product_education_stationaries');
     }
 };

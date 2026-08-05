@@ -212,6 +212,7 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
+
         try {
             $user = User::with('latestSubscription')->findOrFail($id);
             $packages = Package::where('status', 1)->get();
@@ -229,6 +230,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+
         DB::beginTransaction();
 
         try {
@@ -252,7 +254,7 @@ class UserController extends Controller
                 'working_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
 
                 'settlement_type' => 'nullable|array',
-                'settlement_type.*' => 'required_with:settlement_day|in:daily,weekly,monthly',
+                'settlement_type.*' => 'nullable|in:daily,weekly,monthly',
 
                 'settlement_day' => 'nullable|array',
                 'settlement_day.*' => 'nullable|integer|min:1|max:31',
