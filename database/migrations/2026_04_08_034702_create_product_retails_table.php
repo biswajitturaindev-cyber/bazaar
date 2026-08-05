@@ -55,8 +55,21 @@ return new class extends Migration
             // Basic Info
             $table->string('name');
 
-            $table->decimal('commission', 10, 2)->nullable();
-            $table->decimal('vendor_commission', 10, 2)->nullable();
+            $table->decimal('commission', 5, 2)
+                ->default(0)
+                ->comment('vendor to admin commission (%)');
+
+            $table->decimal('vendor_commission', 5, 2)
+                ->default(0)
+                ->comment('member comm (% on vendor comm)');
+
+            $table->decimal('member_comm', 5, 2)
+                ->default(0)
+                ->comment('member comm (% on vendor comm)');
+
+            $table->decimal('sponsor_comm', 5, 2)
+                ->default(0)
+                ->comment('vendor sponsor comm (% on vendor comm)');
             $table->tinyInteger('vendor_commission_approval_status')
                 ->default(0)
                 ->comment('0=Waiting for Approval, 1=Approved, 2=Rejected');
@@ -67,7 +80,7 @@ return new class extends Migration
 
 
             $table->string('batch_no')->nullable();
-            
+
             // Status
             $table->tinyInteger('status')->default(2)->comment('0=Inactive,1=Active,2=Unapproved');
 
